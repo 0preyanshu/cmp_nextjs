@@ -37,7 +37,7 @@ const columns = [
         </div>
       </Stack>
     ),
-    name: 'Category Name',
+    name: 'City Name',
     width: '250px',
   },
  
