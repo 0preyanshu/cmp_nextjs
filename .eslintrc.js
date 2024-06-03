@@ -28,6 +28,8 @@ module.exports = {
     "no-console": "off",
     "react/react-in-jsx-scope": "off",
     "unicorn/filename-case": "off",
+    "no-unsafe-optional-chaining": "off",
+    "@typescript-eslint/no-shadow": "off",
     '@typescript-eslint/no-empty-interface': [
       'error',
       {
