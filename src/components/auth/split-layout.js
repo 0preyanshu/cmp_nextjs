@@ -23,7 +23,7 @@ export function SplitLayout({ children }) {
               Lorem ipsum dolor sit amet consectetur adipisicing elit. Necessitatibus eum exercitationem incidunt possimus vero, aliquid quos dolores, odit sit delectus voluptatum! Minus deserunt, quidem ea illum alias illo error vitae!
             </Typography>
           </Stack>
-          <Stack
+          {/* <Stack
             direction="row"
             spacing={3}
             sx={{ alignItems: 'center', color: 'var(--mui-palette-neutral-500)', flexWrap: 'wrap' }}
@@ -96,7 +96,7 @@ export function SplitLayout({ children }) {
                 fillRule="evenodd"
               />
             </svg>
-          </Stack>
+          </Stack> */}
         </Stack>
       </Box>
       <Box sx={{ boxShadow: 'var(--mui-shadows-8)', display: 'flex', flexDirection: 'column' }}>

@@ -52,8 +52,11 @@ export function SideNav({ color = 'evident', items = [] }) {
     >
       <Stack spacing={2} sx={{ p: 2 }}>
         <div>
-          <Box component={RouterLink} href={paths.home} sx={{ display: 'inline-flex' }}>
-            <Logo color={logoColor} height={32} width={122} />
+          <Box component={RouterLink} href={paths.home} sx={{ display: 'inline-flex', height:"32px",width:"122px",alignItems:"center",justifyContent:"center",textDecoration:"none",color:"white"}}>
+            {/* <Logo color={logoColor} height={32} width={122} /> */}
+
+            <h3>Skill Book</h3>
+
           </Box>
         </div>
      
