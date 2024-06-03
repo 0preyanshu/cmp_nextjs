@@ -26,12 +26,12 @@ const columns = [
   {
     formatter: (row) => (
       <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-        <Avatar src={row.avatar} />{' '}
+        <Avatar src={row.categoryLogo} />{' '}
         <div>
           <Link
           
           >
-            {row.name}
+            {row.courseCategoryName}
           </Link>
       
         </div>
@@ -43,7 +43,7 @@ const columns = [
  
   {
     formatter(row) {
-      return dayjs(row.createdAt).format('MMM D, YYYY h:mm A');
+      return row.categoryShortName;
     },
     name: 'Short Name',
     width: '200px',
@@ -52,10 +52,12 @@ const columns = [
     formatter: (row) => {
       const mapping = {
         active: { label: 'Active', icon: <CheckCircleIcon color="var(--mui-palette-success-main)" weight="fill" /> },
-        blocked: { label: 'Blocked', icon: <MinusIcon color="var(--mui-palette-error-main)" /> },
-        pending: { label: 'Pending', icon: <ClockIcon color="var(--mui-palette-warning-main)" weight="fill" /> },
+        blocked: { label: 'Blocked', icon: <MinusIcon color="var(--mui-palette-error-main)" /> }
+        
       };
-      const { label, icon } = mapping[row.status] ?? { label: 'Unknown', icon: null };
+      const value=(row.status_==="ACTIVE")?'active':'blocked';
+      console.log(value);
+      const { label, icon } = mapping[value] ?? { label: 'Unknown', icon: null };
 
       return <Chip icon={icon} label={label} size="small" variant="outlined" />;
     },
@@ -69,7 +71,9 @@ const columns = [
         <PencilSimpleIcon />
       </IconButton>
       
-      <IconButton component={RouterLink} href={paths.dashboard.coursecategories.list}>
+      <IconButton onClick={()=>{
+        alert("Are you sure you want to delete this category?");
+      }}>
         <TrashSimpleIcon />
       </IconButton>
 

@@ -20,6 +20,9 @@ import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/di
 import OutlinedInput from '@mui/material/OutlinedInput';
 import { useRouter } from 'next/navigation'
 import { paths } from '@/paths';
+import { useDispatch, useSelector } from 'react-redux';
+import { CourseCategoryActions } from '@/redux/slices';
+import { all } from 'axios';
 
 
 
@@ -80,8 +83,32 @@ export default function Page({ searchParams }) {
   const { email, phone, sortDir, status } = searchParams;
 
   const sortedCustomers = applySort(customers, sortDir);
-  const filteredCustomers = applyFilters(sortedCustomers, { email, phone, status });
+  // const filteredCustomers = applyFilters(sortedCustomers, { email, phone, status });
   const router = useRouter();
+
+
+  const {
+    allCategories,
+    iserror,
+    toast,
+    loading: isLoading,
+    totalData,
+  } = useSelector((state) => state?.categories?.categories);
+  const dispatch = useDispatch();
+ 
+  const { fetchcategories, deletecategories } = CourseCategoryActions
+
+  React.useEffect(() => {
+    const data = {
+      page: 1,
+      limit: 10,
+      sort: 'asc',
+      search: '',
+    };
+    dispatch(fetchcategories(data));
+    console.log('fetchcategories',allCategories);
+  }
+  , [dispatch]);
 
   return (
     <Box
@@ -105,7 +132,7 @@ export default function Page({ searchParams }) {
             </Button>
           </Box>
         </Stack>
-        <CustomersSelectionProvider customers={filteredCustomers}>
+        <CustomersSelectionProvider customers={allCategories}>
         <Stack direction="row" spacing={2} sx={{ px: 3, py: 2 }}>
 
 <OutlinedInput
@@ -123,10 +150,10 @@ export default function Page({ searchParams }) {
 
             <Divider />
             <Box sx={{ overflowX: 'auto' }}>
-              <CustomersTable rows={filteredCustomers} />
+              <CustomersTable rows={allCategories} />
             </Box>
             <Divider />
-            <CustomersPagination count={filteredCustomers.length + 100} page={0} />
+            <CustomersPagination count={allCategories.length} page={0} />
           </Card>
         </CustomersSelectionProvider>
       </Stack>

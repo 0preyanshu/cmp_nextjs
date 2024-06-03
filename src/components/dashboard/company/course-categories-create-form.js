@@ -25,6 +25,11 @@ import { z as zod } from 'zod';
 import { paths } from '@/paths';
 import { logger } from '@/lib/default-logger';
 import { toast } from '@/components/core/toaster';
+import { useDispatch } from 'react-redux';
+import { CompanyActions } from '../../../redux/slices';
+
+import { LoadingButton } from '@mui/lab';
+
 
 function fileToBase64(file) {
   return new Promise((resolve, reject) => {
@@ -48,35 +53,75 @@ const schema = zod.object({
   companywebsite: zod.string().min(1, 'Website is required').max(255),
 });
 
-const defaultValues = {
-  avatar: '',
-  companyname: '',
-  companyemail: '',
-  companyphone: '',
-  companyadd: '',
-  companywebsite: '',
-};
-
-export function CustomerCreateForm() {
+export function CustomerCreateForm({ currentCompany }) {
   const router = useRouter();
+  const dispatch = useDispatch();
+
+  const { deletecompanies, fetchCompanies,updatecompanies } = CompanyActions;
+
+
+  const defaultValues = React.useMemo(() => {
+    return {
+      avatar: currentCompany?.logoUrl || '',
+      companyname: currentCompany?.companyName || '',
+      companyemail: currentCompany?.companyEmail || '',
+      companyphone: currentCompany?.companyPhoneNumber || '',
+      companyadd: currentCompany?.companyAddress || '',
+      companywebsite: currentCompany?.companyUrl || '',
+    };
+  }, [currentCompany]);
 
   const {
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { isSubmitting, errors },
     setValue,
     watch,
+    reset,
   } = useForm({ defaultValues, resolver: zodResolver(schema) });
+
+  // Reset form values when currentCompany changes
+  React.useEffect(() => {
+    reset(defaultValues);
+  }, [currentCompany, reset, defaultValues]);
 
   const onSubmit = React.useCallback(
     async (data) => {
       try {
-        // Make API request
-        toast.success('Customer updated');
-        router.push(paths.dashboard.coursecategories.list);
+
+//         avatar
+// : 
+// ""
+// companyadd
+// : 
+// "123 Updated St, Updated City, Country"
+// companyemail
+// : 
+// "updated@example.com"
+// companyname
+// : 
+// "Update2345"
+// companyphone
+// : 
+// "456"
+// companywebsite
+// : 
+// "https:/"
+
+await dispatch(updatecompanies(data)).then((res) => {
+  console.log(res,"reso");
+  if (res?.payload?.data?.data) {
+    console.log(data,"data");
+        toast.success('Details updated');
+        router.push(paths.dashboard.companies.list);
+  } else {
+    toast.error(res?.payload?.message || 'Internal Server Error');
+  }
+})
+        
       } catch (err) {
         logger.error(err);
-        toast.error('Something went wrong!');
+        
       }
     },
     [router]
@@ -115,7 +160,7 @@ export function CustomerCreateForm() {
                       }}
                     >
                       <Avatar
-                        src="https://s.yimg.com/fz/api/res/1.2/UNFEB7JcR670u5K5_GwShA--~C/YXBwaWQ9c3JjaGRkO2ZpPWZpdDtoPTI0MDtxPTgwO3c9MjQw/https://s.yimg.com/zb/imgv1/668bcde9-2e90-37fc-a539-84e96867c9bc/t_500x300"
+                        src={avatar || "https://s.yimg.com/fz/api/res/1.2/UNFEB7JcR670u5K5_GwShA--~C/YXBwaWQ9c3JjaGRkO2ZpPWZpdDtoPTI0MDtxPTgwO3c9MjQw/https://s.yimg.com/zb/imgv1/668bcde9-2e90-37fc-a539-84e96867c9bc/t_500x300"}
                         sx={{
                           '--Avatar-size': '100px',
                           '--Icon-fontSize': 'var(--icon-fontSize-lg)',
@@ -214,9 +259,14 @@ export function CustomerCreateForm() {
           </Stack>
         </CardContent>
         <CardActions sx={{ justifyContent: 'flex-end' }}>
-          <Button type="submit" variant="contained">
-            Save Changes
-          </Button>
+              <LoadingButton
+                type="submit"
+                variant="contained"
+                style={{ textTransform: 'capitalize' }}
+                loading={isSubmitting}
+              >
+                Save Changes
+              </LoadingButton>
         </CardActions>
       </Card>
     </form>

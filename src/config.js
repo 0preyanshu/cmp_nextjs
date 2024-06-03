@@ -2,6 +2,11 @@ import { AuthStrategy } from '@/lib/auth/strategy';
 import { getSiteURL } from '@/lib/get-site-url';
 import { LogLevel } from '@/lib/logger';
 
+
+
+
+export const HOST_API = process.env.REACT_APP_HOST_API_KEY || 'https://api.cmp.skillac.com';
+
 export const config = {
   site: {
     name: 'Devias Kit Pro',
