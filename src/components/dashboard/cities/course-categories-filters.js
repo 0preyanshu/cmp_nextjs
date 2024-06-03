@@ -122,6 +122,18 @@ export function CustomersFilters({ filters = {}, sortDir = 'desc' }) {
             </Button>
           </Stack>
         ) : null}
+
+<Select  sx={{ maxWidth: '100%', width: '165px' }} defaultValue="desc">
+          <Option value="desc">Select Country</Option>
+          <Option value="asc">A</Option>
+          <Option value="asc">B</Option>
+        </Select>
+<Select  sx={{ maxWidth: '100%', width: '165px' }} defaultValue="desc">
+          <Option value="desc">Select State</Option>
+          <Option value="asc">A</Option>
+          <Option value="asc">B</Option>
+        </Select>
+
         <Select name="sort" onChange={handleSortChange} sx={{ maxWidth: '100%', width: '120px' }} value={sortDir}>
           <Option value="desc">Newest</Option>
           <Option value="asc">Oldest</Option>
