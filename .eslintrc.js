@@ -25,6 +25,9 @@ module.exports = {
     '@typescript-eslint/no-unused-vars': ['warn', { 'argsIgnorePattern': '^_' }],
     'no-unused-vars': 'off',
     'react/no-unused-vars': 'off',
+    "no-console": "off",
+    "react/react-in-jsx-scope": "off",
+    "unicorn/filename-case": "off",
     '@typescript-eslint/no-empty-interface': [
       'error',
       {
