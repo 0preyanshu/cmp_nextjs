@@ -51,8 +51,12 @@ export function DataTable({
         </TableRow>
       </TableHead>
       <TableBody>
+        { console.log(rows,"rows10")}
+
+       
         {rows.map((row, index) => {
-          const rowId = row.id ? row.id : uniqueRowId?.(row);
+      
+          const rowId = row?.id ? row.id : uniqueRowId?.(row);
           const rowSelected = rowId ? selected?.has(rowId) : false;
 
           return (

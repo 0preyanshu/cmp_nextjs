@@ -25,7 +25,7 @@ import { useCustomersSelection } from './course-categories-selection-context';
 // The tabs should be generated using API data.
 const tabs = [];
 
-export function CustomersFilters({ filters = {}, sortDir = 'desc' }) {
+export function CustomersFilters({ filters = {}, sortDir = 'desc', Categories=[]}) {
   const { email, phone, status } = filters;
 
   const router = useRouter();
@@ -127,9 +127,11 @@ export function CustomersFilters({ filters = {}, sortDir = 'desc' }) {
           <MenuItem value="">
             <>Select Category</>
           </MenuItem>
-          <MenuItem value="category1">Category 1</MenuItem>
-          <MenuItem value="category2">Category 2</MenuItem>
-          <MenuItem value="category3">Category 3</MenuItem>
+          {
+            Categories.map((category) => (
+              <MenuItem key={category.id} value={category.id}>{category.courseCategoryName}</MenuItem>
+            ))
+          }
         </Select>
 
         <Select name="sort" onChange={handleSortChange} sx={{ maxWidth: '100%', width: '120px' }} value={sortDir}>

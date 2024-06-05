@@ -43,12 +43,18 @@ function createExtraActions() {
 function createCourses() {
   return createAsyncThunk(`${name}/createCourses`, async (obj) => {
 
+    // avatar: "courseLogo",
+    // coursename: "courseName",
+    // courseshortname: "courseShortName",
+    // category: "courseCategoryID",
+    // courseurl: "courseUrl",
+
     const newobj={
-      "courseName" : obj.courseName,
-      "courseCategoryID" : obj.categoryId,
-      "courseLogo" : obj.courseLogo,
-      "courseShortName" : obj.shortName,
-      "courseUrl": obj.courseUrl,
+      "courseName" : obj.coursename,
+      "courseCategoryID" : obj.category,
+      "courseLogo" : obj.avatar || "image.com",
+      "courseShortName" : obj.courseshortname,
+      "courseUrl": obj.courseurl,
   }  
     try {
       const response = await axios.post(HOST_API.concat(`/course`), newobj, {
@@ -65,7 +71,7 @@ function fetchCourses() {
     try {
       const response = await axios.get(
         HOST_API.concat(
-          `/course?page=${data.page}&limit=${data.limit}&search=${data.name}&courseCategoryID=${
+          `/course?page=${data.page}&limit=${data.limit}&search=${data?.name||""}&courseCategoryID=${
             data?.categoryId || ''
           } `
         ),
@@ -109,14 +115,14 @@ function updateCourses() {
   return createAsyncThunk(`${name}/updateCourses`, async (data) => {
     // change the body
     try {
-      const newobj={
-        "courseName" : data.values.courseName,
-        "courseCategoryID" : data.values.categoryId,
-        "courseLogo" : data.values.courseLogo,
-        "courseShortName" :data.values.shortName,
-        "courseUrl": data.values.courseUrl,
-    } 
-      const response = await axios.put(HOST_API.concat(`/course/${data.id}`), newobj, {
+    //   const newobj={
+    //     "courseName" : data.values.courseName,
+    //     "courseCategoryID" : data.values.categoryId,
+    //     "courseLogo" : data.values.courseLogo,
+    //     "courseShortName" :data.values.shortName,
+    //     "courseUrl": data.values.courseUrl,
+    // } 
+      const response = await axios.put(HOST_API.concat(`/course/${data.id}`), data, {
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
       });
       return response;
@@ -146,12 +152,11 @@ function createExtraReducers() {
       },
       [fulfilled]: (state, action) => {
         state.courses = {
-          allCourses: [...state.courses.allCourses, action?.payload?.data?.courseDTO],
           loading: false,
           totalData: state.courses.totalData + 1,
           toast: { message: 'courses Added Successfully', variant: 'success' },
-        };
-        state.allCoursesData = [...state.allCoursesData, action?.payload?.data?.courseDTO];
+        }
+                                    
       },
       [rejected]: (state, action) => {
         state.courses = {
@@ -210,9 +215,7 @@ function createExtraReducers() {
       },
       [fulfilled]: (state, action) => {
         const deletedId = action?.meta?.arg;
-        state.courses = {
-
-        };
+        
      
       },
       [rejected]: (state, action) => {

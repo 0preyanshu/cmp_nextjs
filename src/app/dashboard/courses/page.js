@@ -20,6 +20,10 @@ import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/di
 import OutlinedInput from '@mui/material/OutlinedInput';
 import { useRouter } from 'next/navigation'
 import { paths } from '@/paths';
+import { useDispatch, useSelector } from 'react-redux';
+import { CourseCategoryActions } from '@/redux/slices';
+import { CoursesActions } from '@/redux/slices';
+
 
 
 
@@ -80,8 +84,36 @@ export default function Page({ searchParams }) {
   const { email, phone, sortDir, status } = searchParams;
 
   const sortedCustomers = applySort(customers, sortDir);
-  const filteredCustomers = applyFilters(sortedCustomers, { email, phone, status });
+
   const router = useRouter();
+
+  const {
+    allCategories,
+    iserror,
+    toast
+   
+   
+  } = useSelector((state) => state?.categories?.categories);
+  const { allCourses, loading: isLoading, totalData } = useSelector((state) => state?.courses?.courses);
+  const dispatch = useDispatch();
+  const { fetchCourses } = CoursesActions;
+  const { fetchcategories } = CourseCategoryActions;
+
+
+
+  React.useEffect(() => {
+    const data = {
+      page: 1,
+      limit: 10,
+      sort: 'asc',
+      search: '',
+    };
+    dispatch(fetchcategories(data));
+    dispatch(fetchCourses(data));
+    console.log('fetchcategories',allCategories);
+    console.log('fetchCourses',allCourses);
+  }
+  , [dispatch]);
 
   return (
     <Box
@@ -105,7 +137,7 @@ export default function Page({ searchParams }) {
             </Button>
           </Box>
         </Stack>
-        <CustomersSelectionProvider customers={filteredCustomers}>
+    
         <Stack direction="row" spacing={2} sx={{ px: 3, py: 2 }}>
 
 <OutlinedInput
@@ -119,16 +151,17 @@ export default function Page({ searchParams }) {
     />
 
   </Stack>
+  {console.log('allCategoriesfinal',allCategories)}
           <Card>
-            <CustomersFilters filters={{ email, phone, status }} sortDir={sortDir} />
+            <CustomersFilters filters={{ email, phone, status }} sortDir={sortDir} Categories={allCategories}/>
             <Divider />
             <Box sx={{ overflowX: 'auto' }}>
-              <CustomersTable rows={filteredCustomers} />
+              <CustomersTable rows={allCourses} />
             </Box>
             <Divider />
-            <CustomersPagination count={filteredCustomers.length + 100} page={0} />
+            <CustomersPagination count={allCourses.length} page={1} />
           </Card>
-        </CustomersSelectionProvider>
+  
       </Stack>
     </Box>
   );
