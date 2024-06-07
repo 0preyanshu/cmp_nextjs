@@ -133,7 +133,7 @@ export function CustomerCreateForm() {
         }
       } catch (err) {
         logger.error(err);
-        toast.error('Something went wrong!');
+       
       }
     },
     [isEdit, currentCategory.id, dispatch, router, fetchcategories, updatecategories, createCategories]

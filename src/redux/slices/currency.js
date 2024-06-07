@@ -40,12 +40,11 @@ function createCurrency() {
   return createAsyncThunk(`${name}/createCurrency`, async (data) => {
   
     const newobj={
-    "currencyName": data.currencyType,
+    "currencyName": data.currencyName,
     "currencySymbol": data.symbol,
-    "currencyShortName": data.shortName,
-    "countryID": data.countryId,
-    "countryName": data.currencyType,
-    "countryShortName": data.currencyType
+    "currencyShortName": data.symbol,
+    "countryID": data.countryID,
+   
     }
     try {
       const response = await axios.post(HOST_API.concat(`/currency`), newobj, {
@@ -61,7 +60,7 @@ function fetchCurrency() {
   return createAsyncThunk(`${name}/fetchCurrency`, async (data) => {
     try {
       const response = await axios.get(
-        HOST_API.concat(`/currency?page=${data.page}&limit=${data.limit}&search=${data.name}`),
+        HOST_API.concat(`/currency?page=${data.page}&limit=${data.limit}&search=${data.name||""}`),
         {
           headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
         }
@@ -105,17 +104,17 @@ function updateCurrency() {
   return createAsyncThunk(`${name}/updateCurrency`, async (data) => {
     try {
 
-console.log(data,"dataupdate")
+// console.log(data,"dataupdate")
 
-const newobj={
-"currencyName": data.currencyType,
-"currencySymbol": data.symbol,
-"currencyShortName": data.shortName,
-"countryID": data.countryId,
-"countryName": data.currencyType,
-"countryShortName": data.currencyType
-}
-      const response = await axios.put(HOST_API.concat(`/currency/${data.id}/`), newobj, {
+// const newobj={
+// "currencyName": data.currencyType,
+// "currencySymbol": data.symbol,
+// "currencyShortName": data.shortName,
+// "countryID": data.countryId,
+// "countryName": data.currencyType,
+// "countryShortName": data.currencyType
+// }
+      const response = await axios.put(HOST_API.concat(`/currency/${data.id}/`), data, {
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
       });
       return response;
@@ -144,13 +143,7 @@ function createExtraReducers() {
         };
       },
       [fulfilled]: (state, action) => {
-        state.currency = {
-          loading: false,
-          allCurrency: [...state.currency.allCurrency, action.payload?.data?.currency],
-          totalData: state?.currency?.totalData + 1,
-          toast: { message: 'Currency Added Successfully', variant: 'success' },
-        };
-        state.allCurrencyData = [...state?.allCurrencyData, action.payload?.data?.data?.data];
+        
       },
       [rejected]: (state, action) => {
         state.currency = {
@@ -242,15 +235,8 @@ function createExtraReducers() {
         };
       },
       [fulfilled]: (state, action) => {
-        state.currency = {
-          allCurrency: state?.currency?.allCurrency?.map((item) =>
-            item.id === action.payload.data?.data?.id ? action.payload.data?.data : item
-          ),
-          loading: false,
-          totalData: state?.currency?.totalData,
-          toast: { message: 'User Updated Successfully', variant: 'success' },
-        };
-        fetchCurrency();
+       
+    
       },
       [rejected]: (state, action) => {
         state.currency = {

@@ -41,8 +41,8 @@ function createTimezones() {
      console.log(data,"d")
     try {
       const newobj ={
-        timezoneName:data.timeZoneName,
-        timezoneShortName:data.timeZoneShortName,
+        timezoneName:data.timezoneName,
+        timezoneShortName:data.timezoneShortName,
         gmtOffset:data.gmtOffset,
       }
       const response = await axios.post(HOST_API.concat(`/timezone`), newobj, {
@@ -59,7 +59,7 @@ function fetchTimezones() {
   return createAsyncThunk(`${name}/fetchTimezones`, async (data) => {
     try {
       const response = await axios.get(
-        HOST_API.concat(`/timezone?page=${data.page}&limit=${data.limit}&search=${data.name}`),
+        HOST_API.concat(`/timezone?page=${data.page}&limit=${data.limit}&search=${data.name || ""}`),
         {
           headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
         }
@@ -98,11 +98,7 @@ function deleteTimezones() {
 function updateTimezones() {
   return createAsyncThunk(`${name}/updateTimezones`, async (data) => {
 
-    const newobj ={
-      timezoneName:data.timeZoneName,
-      slug:data.timeZoneShortName,
-      gmtOffset:data.gmtOffset,
-    }
+  
       
     try {
       const response = await axios.put(HOST_API.concat(`/timezone/${data.id}/`), data, {
@@ -134,13 +130,7 @@ function createExtraReducers() {
         };
       },
       [fulfilled]: (state, action) => {
-        state.timezones = {
-          allTimezones: [...state.timezones.allTimezones, action.payload?.data?.timeZoneDTO],
-          totalData: state.timezones.totalData + 1,
-          loading: false,
-          toast: { message: 'Timezones Added Successfully', variant: 'success' },
-        };
-        state.allTimezonesData = [...state?.allTimezonesData, action.payload?.data?.timeZoneDTO];
+      
       },
       [rejected]: (state, action) => {
         state.timezones = {
@@ -214,7 +204,7 @@ function createExtraReducers() {
         //   state?.allTimezonesData?.map((item) => (item.id === deletedId ? { ...item, valid: !item.valid } : item)) ||
         //   [];
 
-        fetchTimezones();
+      
       },
       [rejected]: (state, action) => {
         state.timezones = {
@@ -238,18 +228,7 @@ function createExtraReducers() {
         };
       },
       [fulfilled]: (state, action) => {
-        state.timezones = {
-          allTimezones: state?.timezones?.allTimezones?.map((item) =>
-            item?.id === action.payload?.timezoneDTO?.id ? action.payload?.timezoneDTO?.timezone : item
-          ),
-          loading: false,
-          totalData: state.timezones.totalData,
-          toast: { message: 'User Updated Successfully', variant: 'success' },
-        };
-        state.allTimezonesData = [
-          ...state?.allTimezonesData?.filter((item) => item?.id !== action.payload?.timezoneDTO?.id),
-          action.payload?.timezoneDTO?.timezone,
-        ];
+      
       },
       [rejected]: (state, action) => {
         state.timezones = {

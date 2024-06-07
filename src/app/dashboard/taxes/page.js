@@ -11,77 +11,76 @@ import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 import { config } from '@/config';
 import { dayjs } from '@/lib/dayjs';
 import { CustomersFilters } from '@/components/dashboard/taxes/course-categories-filters';
-import { CustomersPagination } from '@/components/dashboard/taxes/course-categories-pagination';
+import { CustomersPagination } from '@/components/dashboard/courses/course-categories-pagination';
 import { CustomersSelectionProvider } from '@/components/dashboard/taxes/course-categories-selection-context';
 import { CustomersTable } from '@/components/dashboard/taxes/course-categories-table';
 
 import InputAdornment from '@mui/material/InputAdornment';
 import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass';
 import OutlinedInput from '@mui/material/OutlinedInput';
-import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation';
 import { paths } from '@/paths';
-
-
-
-const customers = [
-  {
-    id: 'USR-005',
-    name: 'Fran Perez',
-    avatar: '/assets/avatar-5.png',
-    email: 'fran.perez@domain.com',
-    phone: '(815) 704-0045',
-    quota: 50,
-    status: 'active',
-    createdAt: dayjs().subtract(1, 'hour').toDate(),
-  },
-  {
-    id: 'USR-004',
-    name: 'Penjani Inyene',
-    avatar: '/assets/avatar-4.png',
-    email: 'penjani.inyene@domain.com',
-    phone: '(803) 937-8925',
-    quota: 100,
-    status: 'active',
-    createdAt: dayjs().subtract(3, 'hour').toDate(),
-  },
-  {
-    id: 'USR-003',
-    name: 'Carson Darrin',
-    avatar: '/assets/avatar-3.png',
-    email: 'carson.darrin@domain.com',
-    phone: '(715) 278-5041',
-    quota: 10,
-    status: 'blocked',
-    createdAt: dayjs().subtract(1, 'hour').subtract(1, 'day').toDate(),
-  },
-  {
-    id: 'USR-002',
-    name: 'Siegbert Gottfried',
-    avatar: '/assets/avatar-2.png',
-    email: 'siegbert.gottfried@domain.com',
-    phone: '(603) 766-0431',
-    quota: 0,
-    status: 'pending',
-    createdAt: dayjs().subtract(7, 'hour').subtract(1, 'day').toDate(),
-  },
-  {
-    id: 'USR-001',
-    name: 'Miron Vitold',
-    avatar: '/assets/avatar-1.png',
-    email: 'miron.vitold@domain.com',
-    phone: '(425) 434-5535',
-    quota: 50,
-    status: 'active',
-    createdAt: dayjs().subtract(2, 'hour').subtract(2, 'day').toDate(),
-  },
-];
+import { useDispatch, useSelector } from 'react-redux';
+import { TaxActions } from '@/redux/slices';
+import TableSkeleton from '@/components/core/Skeletion';
 
 export default function Page({ searchParams }) {
-  const { email, phone, sortDir, status } = searchParams;
+  const { email, phone, sortDir, status, searchTerm, page = 1, limit = 10 } = searchParams;
 
-  const sortedCustomers = applySort(customers, sortDir);
-  const filteredCustomers = applyFilters(sortedCustomers, { email, phone, status });
+  const [currentPage, setCurrentPage] = React.useState(parseInt(page));
+  const [rowsPerPage, setRowsPerPage] = React.useState(parseInt(limit));
+  const [searchInput, setSearchInput] = React.useState(searchTerm || '');
+
   const router = useRouter();
+
+  const { allTaxes, iserror, toast, loading: isLoading, totalData } = useSelector((state) => state?.taxes?.taxes);
+  const dispatch = useDispatch();
+  const { fetchTaxes } = TaxActions;
+
+  React.useEffect(() => {
+    const data = {
+      page: currentPage,
+      limit: rowsPerPage,
+      sort: 'asc',
+      name: searchTerm || '',
+    };
+    dispatch(fetchTaxes(data));
+    console.log('fetching taxes', allTaxes);
+  }, [dispatch, searchTerm, currentPage, rowsPerPage]);
+
+  const handleSearchChange = (event) => {
+    setSearchInput(event.target.value);
+    updateSearchParams({ ...searchParams, searchTerm: event.target.value, page: 1 }); // Reset to page 1 on search
+  };
+
+  const handlePageChange = (event, newPage) => {
+    setCurrentPage(newPage);
+    updateSearchParams({ ...searchParams, page: newPage });
+  };
+
+  const handleRowsPerPageChange = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setCurrentPage(1); // Reset to page 1 on rows per page change
+    updateSearchParams({ ...searchParams, limit: parseInt(event.target.value, 10), page: 1 });
+  };
+
+  const updateSearchParams = (newFilters) => {
+    const searchParams = new URLSearchParams();
+
+    if (newFilters.searchTerm) {
+      searchParams.set('searchTerm', newFilters.searchTerm);
+    }
+
+    if (newFilters.page) {
+      searchParams.set('page', newFilters.page);
+    }
+
+    if (newFilters.limit) {
+      searchParams.set('limit', newFilters.limit);
+    }
+
+    router.push(`${paths.dashboard.taxes.list}?${searchParams.toString()}`);
+  };
 
   return (
     <Box
@@ -98,37 +97,45 @@ export default function Page({ searchParams }) {
             <Typography variant="h4">Tax</Typography>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Button startIcon={<PlusIcon />} variant="contained" onClick={()=>{
-             router.push(paths.dashboard.taxes.create);
+            <Button startIcon={<PlusIcon />} variant="contained" onClick={() => {
+              router.push(paths.dashboard.taxes.create);
             }}>
               Add
             </Button>
           </Box>
         </Stack>
-        <CustomersSelectionProvider customers={filteredCustomers}>
         <Stack direction="row" spacing={2} sx={{ px: 3, py: 2 }}>
-
-<OutlinedInput
-      placeholder="Search thread"
-      startAdornment={
-        <InputAdornment position="start">
-          <MagnifyingGlassIcon fontSize="var(--icon-fontSize-md)" />
-        </InputAdornment>
-      }
-      sx={{ width: '100%' }}
-    />
-
-  </Stack>
-          <Card>
-            <CustomersFilters filters={{ email, phone, status }} sortDir={sortDir} />
-            <Divider />
-            <Box sx={{ overflowX: 'auto' }}>
-              <CustomersTable rows={filteredCustomers} />
-            </Box>
-            <Divider />
-            <CustomersPagination count={filteredCustomers.length + 100} page={0} />
-          </Card>
-        </CustomersSelectionProvider>
+          <OutlinedInput
+            placeholder="Search thread"
+            startAdornment={
+              <InputAdornment position="start">
+                <MagnifyingGlassIcon fontSize="var(--icon-fontSize-md)" />
+              </InputAdornment>
+            }
+            sx={{ width: '100%' }}
+            value={searchInput}
+            onChange={handleSearchChange}
+          />
+        </Stack>
+        <Card>
+          <Divider />
+          <Box sx={{ overflowX: 'auto' }}>
+            {isLoading && <>
+              <TableSkeleton />
+            </>}
+            {!isLoading && <>
+              <CustomersTable rows={allTaxes} />
+            </>}
+          </Box>
+          <Divider />
+          <CustomersPagination
+            count={totalData || 0}
+            page={currentPage}
+            rowsPerPage={rowsPerPage}
+            onPageChange={handlePageChange}
+            onRowsPerPageChange={handleRowsPerPageChange}
+          />
+        </Card>
       </Stack>
     </Box>
   );
@@ -141,7 +148,6 @@ function applySort(row, sortDir) {
     if (sortDir === 'asc') {
       return a.createdAt.getTime() - b.createdAt.getTime();
     }
-
     return b.createdAt.getTime() - a.createdAt.getTime();
   });
 }
@@ -153,19 +159,16 @@ function applyFilters(row, { email, phone, status }) {
         return false;
       }
     }
-
     if (phone) {
       if (!item.phone?.toLowerCase().includes(phone.toLowerCase())) {
         return false;
       }
     }
-
     if (status) {
       if (item.status !== status) {
         return false;
       }
     }
-
     return true;
   });
 }

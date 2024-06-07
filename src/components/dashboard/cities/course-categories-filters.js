@@ -21,11 +21,8 @@ import { Option } from '@/components/core/option';
 
 import { useCustomersSelection } from './course-categories-selection-context';
 
-// The tabs should be generated using API data.
-const tabs = [];
-
-export function CustomersFilters({ filters = {}, sortDir = 'desc' }) {
-  const { email, phone, status } = filters;
+export function CustomersFilters({ filters = {}, sortDir = 'desc', Countries, States }) {
+  const { email, phone, status, countryID, stateID, limit, page } = filters;
 
   const router = useRouter();
 
@@ -35,50 +32,54 @@ export function CustomersFilters({ filters = {}, sortDir = 'desc' }) {
     (newFilters, newSortDir) => {
       const searchParams = new URLSearchParams();
 
-      if (newSortDir === 'asc') {
+      // Preserve existing filters
+      Object.entries({ ...filters, ...newFilters }).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== '') {
+          searchParams.set(key, value);
+        }
+      });
+
+      // Set sort direction if provided
+      if (newSortDir === 'asc' || newSortDir === 'desc') {
         searchParams.set('sortDir', newSortDir);
-      }
-
-      if (newFilters.status) {
-        searchParams.set('status', newFilters.status);
-      }
-
-      if (newFilters.email) {
-        searchParams.set('email', newFilters.email);
-      }
-
-      if (newFilters.phone) {
-        searchParams.set('phone', newFilters.phone);
       }
 
       router.push(`${paths.dashboard.cities.list}?${searchParams.toString()}`);
     },
-    [router]
+    [router, filters]
   );
 
   const handleClearFilters = React.useCallback(() => {
-    updateSearchParams({}, sortDir);
+    updateSearchParams({
+      email: '',
+      phone: '',
+      status: '',
+      countryID: '',
+      stateID: '',
+      limit: 10,
+      page: 1,
+    }, sortDir);
   }, [updateSearchParams, sortDir]);
 
   const handleStatusChange = React.useCallback(
     (_, value) => {
-      updateSearchParams({ ...filters, status: value }, sortDir);
+      updateSearchParams({ status: value }, sortDir);
     },
-    [updateSearchParams, filters, sortDir]
+    [updateSearchParams, sortDir]
   );
 
   const handleEmailChange = React.useCallback(
     (value) => {
-      updateSearchParams({ ...filters, email: value }, sortDir);
+      updateSearchParams({ email: value }, sortDir);
     },
-    [updateSearchParams, filters, sortDir]
+    [updateSearchParams, sortDir]
   );
 
   const handlePhoneChange = React.useCallback(
     (value) => {
-      updateSearchParams({ ...filters, phone: value }, sortDir);
+      updateSearchParams({ phone: value }, sortDir);
     },
-    [updateSearchParams, filters, sortDir]
+    [updateSearchParams, sortDir]
   );
 
   const handleSortChange = React.useCallback(
@@ -88,28 +89,29 @@ export function CustomersFilters({ filters = {}, sortDir = 'desc' }) {
     [updateSearchParams, filters]
   );
 
-  const hasFilters = status || email || phone;
+  const handleCountryChange = React.useCallback(
+    (event) => {
+      updateSearchParams({ countryID: event.target.value, stateID: '' }, sortDir); // Reset stateID when country changes
+    },
+    [updateSearchParams, sortDir]
+  );
+
+  const handleStateChange = React.useCallback(
+    (event) => {
+      updateSearchParams({ stateID: event.target.value }, sortDir);
+    },
+    [updateSearchParams, sortDir]
+  );
+
+  const filteredStates = countryID ? States.filter(state => state.countryID === countryID) : [];
+
+  const hasFilters = status || email || phone || countryID || stateID;
 
   return (
     <div>
-      {/* <Stack direction="row" spacing={2} sx={{ px: 3, py: 2 }}>
-
-      <OutlinedInput
-            placeholder="Search thread"
-            startAdornment={
-              <InputAdornment position="start">
-                <MagnifyingGlassIcon fontSize="var(--icon-fontSize-md)" />
-              </InputAdornment>
-            }
-            sx={{ width: '100%' }}
-          />
-
-        </Stack> */}
-        
       <Divider />
       <Stack direction="row" spacing={2} sx={{ alignItems: 'center', flexWrap: 'wrap', px: 3, py: 2 }}>
         <Stack direction="row" spacing={2} sx={{ alignItems: 'center', flex: '1 1 auto', flexWrap: 'wrap' }}>
-     
           {hasFilters ? <Button onClick={handleClearFilters}>Clear filters</Button> : null}
         </Stack>
         {selection.selectedAny ? (
@@ -123,20 +125,33 @@ export function CustomersFilters({ filters = {}, sortDir = 'desc' }) {
           </Stack>
         ) : null}
 
-<Select  sx={{ maxWidth: '100%', width: '165px' }} defaultValue="desc">
-          <Option value="desc">Select Country</Option>
-          <Option value="asc">A</Option>
-          <Option value="asc">B</Option>
-        </Select>
-<Select  sx={{ maxWidth: '100%', width: '165px' }} defaultValue="desc">
-          <Option value="desc">Select State</Option>
-          <Option value="asc">A</Option>
-          <Option value="asc">B</Option>
+        <Select
+          sx={{ maxWidth: '100%', width: '165px' }}
+          defaultValue=""
+          value={countryID || ''}
+          onChange={handleCountryChange}
+        >
+          <Option value="">Select Country</Option>
+          {Countries.map((country) => (
+            <Option key={country.id} value={country.id}>
+              {country.countryName}
+            </Option>
+          ))}
         </Select>
 
-        <Select name="sort" onChange={handleSortChange} sx={{ maxWidth: '100%', width: '120px' }} value={sortDir}>
-          <Option value="desc">Newest</Option>
-          <Option value="asc">Oldest</Option>
+        <Select
+          sx={{ maxWidth: '100%', width: '165px' }}
+          defaultValue=""
+          value={stateID || ''}
+          onChange={handleStateChange}
+          disabled={!countryID}
+        >
+          <Option value="">Select State</Option>
+          {filteredStates.map((state) => (
+            <Option key={state.id} value={state.id}>
+              {state.stateName}
+            </Option>
+          ))}
         </Select>
       </Stack>
     </div>

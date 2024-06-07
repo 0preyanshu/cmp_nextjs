@@ -159,7 +159,7 @@ export function CustomerCreateForm() {
         }
       } catch (err) {
         logger.error(err);
-        toast.error('Something went wrong!');
+       
       }
     },
     [isEdit, currentCourse.id, dispatch, router,fetchCourses,createCourses,updateCourses]
@@ -298,9 +298,14 @@ export function CustomerCreateForm() {
           <Button color="secondary" component={RouterLink} href={paths.dashboard.courses.list}>
             Cancel
           </Button>
-          <Button type="submit" variant="contained">
-            Save Course
-          </Button>
+        <LoadingButton
+          color="primary"
+          loading={isSubmitting}
+          type="submit"
+          variant="contained"
+        >
+          {isEdit ? 'Update' : 'Create'}
+        </LoadingButton>
         </CardActions>
       </Card>
     </form>

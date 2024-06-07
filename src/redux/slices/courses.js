@@ -72,7 +72,7 @@ function fetchCourses() {
       const response = await axios.get(
         HOST_API.concat(
           `/course?page=${data.page}&limit=${data.limit}&search=${data?.name||""}&courseCategoryID=${
-            data?.categoryId || ''
+            data?.category || ''
           } `
         ),
         {
@@ -151,11 +151,7 @@ function createExtraReducers() {
         };
       },
       [fulfilled]: (state, action) => {
-        state.courses = {
-          loading: false,
-          totalData: state.courses.totalData + 1,
-          toast: { message: 'courses Added Successfully', variant: 'success' },
-        }
+      
                                     
       },
       [rejected]: (state, action) => {

@@ -41,8 +41,8 @@ function createTax() {
 
 
     const newobj={
-      "taxName" : data.taxType,
-      "taxPercentage" : Number(data.percentage),
+      "taxName" : data.taxname,
+      "taxPercentage" : Number(data.taxpercentage),
     }
    
     try {
@@ -60,7 +60,7 @@ function fetchTaxes() {
   return createAsyncThunk(`${name}/fetchTaxes`, async (data) => {
     try {
       const response = await axios.get(
-        HOST_API.concat(`/tax?page=${data.page}&limit=${data.limit}&search=${data.name}`),
+        HOST_API.concat(`/tax?page=${data.page}&limit=${data.limit}&search=${data.name || ""}`),
         {
           headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
         }
@@ -100,11 +100,8 @@ function updateTax() {
    
     try {
       
-    const newobj={
-      "taxName" : data.taxType,
-      "taxPercentage" : Number(data.percentage),
-    }
-      const response = await axios.put(HOST_API.concat(`/tax/${data.id}`), newobj, {
+  
+      const response = await axios.put(HOST_API.concat(`/tax/${data.id}`), data , {
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
       });
       return response;
@@ -129,13 +126,8 @@ function createExtraReducers() {
         state.taxes = { loading: true, allTaxes: state.taxes.allTaxes || [], totalData: state.taxes.totalData };
       },
       [fulfilled]: (state, action) => {
-        state.taxes = {
-          allTaxes: [...state.taxes.allTaxes, action.payload?.data?.taxDTO],
-          totalData: state.taxes.totalData + 1,
-          loading: false,
-          toast: { message: 'Tax Added Successfully', variant: 'success' },
-        };
-       fetchTaxes()
+       
+     
       },
       [rejected]: (state, action) => {
         state.taxes = {
@@ -185,16 +177,7 @@ function createExtraReducers() {
         state.taxes = { loading: true, allTaxes: state.taxes.allTaxes, totalData: state.taxes.totalData };
       },
       [fulfilled]: (state, action) => {
-        const deletedId = action?.meta?.arg;
-
-        state.taxes = {
-          allTaxes:
-            state.taxes.allTaxes.map((item) => (item.id === deletedId ? { ...item, valid: !item.valid } : item)) || [],
-          loading: false,
-          totalData: state.taxes.totalData,
-          toast: { message: 'Tax Deleted Successfully', variant: 'success' },
-        };
-        fetchTaxes();
+      
       },
       [rejected]: (state, action) => {
         state.taxes = {
@@ -214,15 +197,7 @@ function createExtraReducers() {
         state.taxes = { loading: true, allTaxes: state.taxes.allTaxes || [], totalData: state.taxes.totalData };
       },
       [fulfilled]: (state, action) => {
-        state.taxes = {
-          allTaxes: state?.taxes?.allTaxes?.map((item) =>
-            item?.id === action.payload?.taxDTO?.id ? action.payload?.taxDTO?.tax : item
-          ),
-          loading: false,
-          totalData: state.taxes.totalData,
-          toast: { message: 'User Updated Successfully', variant: 'success' },
-        };
-        fetchTaxes();
+      
       },
       [rejected]: (state, action) => {
         state.taxes = {

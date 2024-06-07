@@ -2,118 +2,145 @@
 
 import * as React from 'react';
 import RouterLink from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams, usePathname } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import Avatar from '@mui/material/Avatar';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
-import Card from '@mui/material/Card';
-import CardActions from '@mui/material/CardActions';
-import CardContent from '@mui/material/CardContent';
-import Checkbox from '@mui/material/Checkbox';
-import Divider from '@mui/material/Divider';
-import FormControl from '@mui/material/FormControl';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import FormHelperText from '@mui/material/FormHelperText';
-import InputLabel from '@mui/material/InputLabel';
-import OutlinedInput from '@mui/material/OutlinedInput';
-import Select from '@mui/material/Select';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
-import Grid from '@mui/material/Unstable_Grid2';
-import { Camera as CameraIcon } from '@phosphor-icons/react/dist/ssr/Camera';
+import {
+  Box, Button, Card, CardActions, CardContent, Divider, FormControl,
+  FormHelperText, InputLabel, OutlinedInput, Select, Stack, Grid, MenuItem
+} from '@mui/material';
 import { Controller, useForm } from 'react-hook-form';
 import { z as zod } from 'zod';
-
 import { paths } from '@/paths';
 import { logger } from '@/lib/default-logger';
-import { Option } from '@/components/core/option';
 import { toast } from '@/components/core/toaster';
-
-function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      resolve(reader.result);
-    };
-    reader.onerror = () => {
-      reject(new Error('Error converting file to base64'));
-    };
-  });
-}
+import { useDispatch, useSelector } from 'react-redux';
+import { cityActions, countryActions, StateActions } from '@/redux/slices';
+import { LoadingButton } from '@mui/lab';
 
 const schema = zod.object({
-  avatar: zod.string().optional(),
-  name: zod.string().min(1, 'Name is required').max(255),
-  email: zod.string().email('Must be a valid email').min(1, 'Email is required').max(255),
-  phone: zod.string().min(1, 'Phone is required').max(15),
-  company: zod.string().max(255),
-  billingAddress: zod.object({
-    country: zod.string().min(1, 'Country is required').max(255),
-    state: zod.string().min(1, 'State is required').max(255),
-    city: zod.string().min(1, 'City is required').max(255),
-    zipCode: zod.string().min(1, 'Zip code is required').max(255),
-    line1: zod.string().min(1, 'Street line 1 is required').max(255),
-    line2: zod.string().max(255).optional(),
-  }),
-  taxId: zod.string().max(255).optional(),
-  timezone: zod.string().min(1, 'Timezone is required').max(255),
-  language: zod.string().min(1, 'Language is required').max(255),
-  currency: zod.string().min(1, 'Currency is required').max(255),
+  cityName: zod.string().min(1, 'Name is required').max(255),
+  cityShortName: zod.string().min(1, 'ShortName is required').max(255),
+  countryID: zod.string().min(1, 'Country is required').max(255),
+  stateID: zod.string().min(1, 'State is required').max(255)
 });
 
-const defaultValues = {
-  avatar: '',
-  name: '',
-  email: '',
-  phone: '',
-  company: '',
-  billingAddress: { country: '', state: '', city: '', zipCode: '', line1: '', line2: '' },
-  taxId: '',
-  timezone: 'new_york',
-  language: 'en',
-  currency: 'USD',
-};
-
 export function CustomerCreateForm() {
+  const [currentCity, setCurrentCity] = React.useState({});
+  const [filteredStates, setFilteredStates] = React.useState([]);
+
+  const { id } = useParams();
+  const pathname = usePathname();
+  const dispatch = useDispatch();
   const router = useRouter();
+
+  const { allCountries } = useSelector((state) => state?.countries?.country);
+  const { allState } = useSelector((state) => state?.states?.state);
+  const { allCities, isLoading, totalData } = useSelector((state) => state?.cities?.city);
+
+  const { fetchState } = StateActions;
+  const { fetchCountries } = countryActions;
+  const { fetchCities, createCity, updateCity } = cityActions;
+
+  const isEdit = pathname.includes('edit');
+
+  const defaultValues = React.useMemo(() => ({
+    cityName: currentCity?.cityName || "",
+    cityShortName: currentCity?.cityShortName || "",
+    countryID: currentCity?.countryID || "",
+    stateID: currentCity?.stateID || ""
+  }), [currentCity]);
 
   const {
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     setValue,
     watch,
+    reset,
   } = useForm({ defaultValues, resolver: zodResolver(schema) });
 
+  React.useEffect(() => {
+    reset(defaultValues);
+  }, [currentCity, reset, defaultValues]);
+
+  React.useEffect(() => {
+    const data = { page: "", limit: "25" };
+    dispatch(fetchCities(data));
+    dispatch(fetchState(data));
+    dispatch(fetchCountries(data));
+  }, [dispatch]);
+
+  React.useEffect(() => {
+    if (allCities?.length && id) {
+      const data = allCities.find((city) => String(city?.id) === String(id));
+      setCurrentCity(data);
+    }
+  }, [allCities, id]);
+
+  // Filter active countries
+  const activeCountries = React.useMemo(() => allCountries?.filter(country => country.status_ === "ACTIVE"), [allCountries]);
+
+  // Filter active states
+  const activeStates = React.useMemo(() => allState?.filter(state => state.status_ === "ACTIVE"), [allState]);
+
+  // Update filtered states based on selected country
+  const selectedCountryID = watch('countryID');
+  React.useEffect(() => {
+    const states = activeStates?.filter(state => state.countryID === selectedCountryID);
+    setFilteredStates(states);
+  }, [selectedCountryID, activeStates]);
+
+  const fieldMapping = {
+    cityName: "cityName",
+    cityShortName: "cityShortName",
+    countryID: "countryID",
+    stateID: "stateID"
+  };
+
+  const getChangedFields = (data) => {
+    const changedFields = {};
+    for (const key in data) {
+      const mappedKey = fieldMapping[key];
+      if (data[key] !== currentCity[mappedKey]) {
+        changedFields[mappedKey] = data[key];
+      }
+    }
+    // Add the id to the changed fields
+    changedFields.id = currentCity.id;
+    return changedFields;
+  };
+
   const onSubmit = React.useCallback(
-    async (_) => {
+    async (data) => {
       try {
-        // Make API request
-        toast.success('Customer updated');
-        router.push(paths.dashboard.cities.list);
+        const changedData = getChangedFields(data);
+
+        if (isEdit) {
+          await dispatch(updateCity(changedData)).then((res) => {
+            if (res?.payload?.data?.data) {
+              toast.success('Update success!');
+              router.push(paths.dashboard.cities.list);
+              dispatch(fetchCities({ page: "", limit: "25" }));
+            } else {
+              toast.error(res?.payload?.data?.error?.message || 'Internal Server Error');
+            }
+          });
+        } else {
+          await dispatch(createCity(data)).then((res) => {
+            if (res?.payload?.data?.data) {
+              toast.success('Create success!');
+              router.push(paths.dashboard.cities.list);
+              dispatch(fetchCities({ page: "", limit: "25" }));
+            } else {
+              toast.error(res?.payload?.data?.error?.message || 'Internal Server Error');
+            }
+          });
+        }
       } catch (err) {
         logger.error(err);
-        toast.error('Something went wrong!');
       }
     },
-    [router]
-  );
-
-  const avatarInputRef = React.useRef(null);
-  const avatar = watch('avatar');
-
-  const handleAvatarChange = React.useCallback(
-    async (event) => {
-      const file = event.target.files?.[0];
-
-      if (file) {
-        const url = await fileToBase64(file);
-        setValue('avatar', url);
-      }
-    },
-    [setValue]
+    [isEdit, currentCity.id, dispatch, router, fetchCities, updateCity, createCity]
   );
 
   return (
@@ -122,76 +149,94 @@ export function CustomerCreateForm() {
         <CardContent>
           <Stack divider={<Divider />} spacing={4}>
             <Stack spacing={3}>
-            
               <Grid container spacing={3}>
-                <Grid xs={12}>
-               
-                </Grid>
-                <Grid md={6} xs={12}>
+                <Grid xs={12}></Grid>
+                <Grid item md={5} xs={12}>
                   <Controller
                     control={control}
-                    name="name"
+                    name="cityName"
                     render={({ field }) => (
-                      <FormControl error={Boolean(errors.name)} fullWidth>
+                      <FormControl error={Boolean(errors.cityName)} fullWidth sx={{ mx: 2, mt: 3 }}>
                         <InputLabel required>City Name</InputLabel>
                         <OutlinedInput {...field} />
-                        {errors.name ? <FormHelperText>{errors.name.message}</FormHelperText> : null}
+                        {errors.cityName ? <FormHelperText>{errors.cityName.message}</FormHelperText> : null}
                       </FormControl>
                     )}
                   />
                 </Grid>
-                <Grid md={6} xs={12}>
+                <Grid item md={5} xs={12}>
                   <Controller
                     control={control}
-                    name="email"
+                    name="cityShortName"
                     render={({ field }) => (
-                      <FormControl error={Boolean(errors.email)} fullWidth>
+                      <FormControl error={Boolean(errors.cityShortName)} fullWidth sx={{ mx: 2, mt: 3 }}>
                         <InputLabel required>City ShortName</InputLabel>
-                        <OutlinedInput {...field} type="email" />
-                        {errors.email ? <FormHelperText>{errors.email.message}</FormHelperText> : null}
+                        <OutlinedInput {...field} />
+                        {errors.cityShortName ? <FormHelperText>{errors.cityShortName.message}</FormHelperText> : null}
                       </FormControl>
                     )}
                   />
                 </Grid>
-                <Grid md={6} xs={12}>
+                <Grid item md={5} xs={12}>
                   <Controller
                     control={control}
-                    name="phone"
+                    name="countryID"
                     render={({ field }) => (
-                      <FormControl error={Boolean(errors.phone)} fullWidth>
+                      <FormControl error={Boolean(errors.countryID)} fullWidth sx={{ mx: 2, mt: 3 }}>
                         <InputLabel required>Country</InputLabel>
-                        <OutlinedInput {...field} />
-                        {errors.phone ? <FormHelperText>{errors.phone.message}</FormHelperText> : null}
+                        <Select {...field}>
+                          <MenuItem value="">
+                            <>Select Country</>
+                          </MenuItem>
+                          {activeCountries?.map((country) => (
+                            <MenuItem key={country.id} value={country.id}>
+                              {country.countryName}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                        {errors.countryID ? <FormHelperText>{errors.countryID.message}</FormHelperText> : null}
                       </FormControl>
                     )}
                   />
                 </Grid>
-                <Grid md={6} xs={12}>
+                <Grid item md={5} xs={12}>
                   <Controller
                     control={control}
-                    name="company"
+                    name="stateID"
                     render={({ field }) => (
-                      <FormControl error={Boolean(errors.company)} fullWidth>
-                        <InputLabel>State</InputLabel>
-                        <OutlinedInput {...field} />
-                        {errors.company ? <FormHelperText>{errors.company.message}</FormHelperText> : null}
+                      <FormControl error={Boolean(errors.stateID)} fullWidth sx={{ mx: 2, mt: 3 }}>
+                        <InputLabel required>State</InputLabel>
+                        <Select {...field} disabled={filteredStates.length === 0}>
+                          <MenuItem value="">
+                            <>Select State</>
+                          </MenuItem>
+                          {filteredStates?.map((state) => (
+                            <MenuItem key={state.id} value={state.id}>
+                              {state.stateName}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                        {errors.stateID ? <FormHelperText>{errors.stateID.message}</FormHelperText> : null}
                       </FormControl>
                     )}
                   />
                 </Grid>
               </Grid>
             </Stack>
-
-    
           </Stack>
         </CardContent>
         <CardActions sx={{ justifyContent: 'flex-end' }}>
           <Button color="secondary" component={RouterLink} href={paths.dashboard.cities.list}>
             Cancel
           </Button>
-          <Button type="submit" variant="contained">
-            Save Changes
-          </Button>
+          <LoadingButton
+            type="submit"
+            variant="contained"
+            style={{ textTransform: 'capitalize' }}
+            loading={isSubmitting}
+          >
+            {!isEdit ? 'Create City' : 'Save Changes'}
+          </LoadingButton>
         </CardActions>
       </Card>
     </form>

@@ -30,91 +30,136 @@ import { logger } from '@/lib/default-logger';
 import { Option } from '@/components/core/option';
 import { toast } from '@/components/core/toaster';
 
-function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      resolve(reader.result);
-    };
-    reader.onerror = () => {
-      reject(new Error('Error converting file to base64'));
-    };
-  });
-}
+import { useDispatch, useSelector } from 'react-redux';
+import { StateActions } from '@/redux/slices';
+import { countryActions } from '@/redux/slices';
+
+import { LoadingButton } from '@mui/lab';
+import { MenuItem } from '@mui/material';
+import { useParams, usePathname } from 'next/navigation';
+
+
+
+
 
 const schema = zod.object({
-  avatar: zod.string().optional(),
-  name: zod.string().min(1, 'Name is required').max(255),
-  email: zod.string().email('Must be a valid email').min(1, 'Email is required').max(255),
-  phone: zod.string().min(1, 'Phone is required').max(15),
-  company: zod.string().max(255),
-  billingAddress: zod.object({
-    country: zod.string().min(1, 'Country is required').max(255),
-    state: zod.string().min(1, 'State is required').max(255),
-    city: zod.string().min(1, 'City is required').max(255),
-    zipCode: zod.string().min(1, 'Zip code is required').max(255),
-    line1: zod.string().min(1, 'Street line 1 is required').max(255),
-    line2: zod.string().max(255).optional(),
-  }),
-  taxId: zod.string().max(255).optional(),
-  timezone: zod.string().min(1, 'Timezone is required').max(255),
-  language: zod.string().min(1, 'Language is required').max(255),
-  currency: zod.string().min(1, 'Currency is required').max(255),
+  
+  stateName: zod.string().min(1, 'Name is required').max(255),
+  stateShortName: zod.string().min(1, 'Short Name is required').max(255),
+  countryID: zod.string().min(1, 'Country is required').max(255)
+
+
+
 });
 
-const defaultValues = {
-  avatar: '',
-  name: '',
-  email: '',
-  phone: '',
-  company: '',
-  billingAddress: { country: '', state: '', city: '', zipCode: '', line1: '', line2: '' },
-  taxId: '',
-  timezone: 'new_york',
-  language: 'en',
-  currency: 'USD',
-};
-
 export function CustomerCreateForm() {
+  const [currentState, setcurrentState] = React.useState({});
+  const { allCountries } = useSelector((state) => state?.countries.country);
+  const { allState, loading: isLoading, totalData } = useSelector((state) => state?.states?.state);
+
+  const { id } = useParams();
+  const pathname = usePathname();
+  const dispatch = useDispatch();
   const router = useRouter();
+  const {fetchCountries } = countryActions;
+
+  const { deletestate, fetchState,updatestate,createstate } = StateActions;
+
+  const isEdit = pathname.includes('edit');
+
+  const defaultValues = React.useMemo(() => ({
+    stateName : currentState?.stateName || '',
+    stateShortName : currentState?.stateShortName || '',
+    countryID : currentState?.countryID || ''
+  }), [currentState]);
 
   const {
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     setValue,
     watch,
+    reset,
   } = useForm({ defaultValues, resolver: zodResolver(schema) });
 
+  React.useEffect(() => {
+    reset(defaultValues);
+  }, [currentState, reset, defaultValues]);
+
+  React.useEffect(() => {
+    const data = { page: "", limit: "25" };
+    dispatch(fetchCountries(data));
+    dispatch(fetchState(data));
+  }, [dispatch]);
+
+  React.useEffect(() => {
+    console.log("allState",allState);
+    console.log("id",id);
+    if (allState?.length && id) {
+      const data = allState.find((allState) => String(allState?.id) === String(id));
+      setcurrentState(data);
+      console.log("currentState",data);
+    }
+  }, [allState, id]);
+
+  const fieldMapping = {
+    stateName: 'stateName',
+    stateShortName: 'stateShortName',
+    countryID: 'countryID'
+  
+  };
+
+  const getChangedFields = (data) => {
+    const changedFields = {};
+    for (const key in data) {
+      const mappedKey = fieldMapping[key];
+      if (data[key] !== currentState[mappedKey]) {
+        changedFields[mappedKey] = data[key];
+      }
+    }
+    // Add the id to the changed fields
+    changedFields.id = currentState.id;
+    return changedFields;
+  };
+
   const onSubmit = React.useCallback(
-    async (_) => {
+    async (data) => {
       try {
-        // Make API request
-        toast.success('Customer updated');
-        router.push(paths.dashboard.states.list);
+        const changedData = getChangedFields(data);
+        console.log(data);
+        console.log(changedData);
+
+        if (isEdit) {
+          await dispatch(updatestate(changedData)).then((res) => {
+            if (res?.payload?.data?.data) {
+              toast.success('Update success!');
+              router.push(paths.dashboard.states.list);
+              dispatch(fetchState({ page: "", limit: "25" }));
+            } else {
+              toast.error(res?.payload?.data?.error?.message  || 'Internal Server Error');
+            }
+          });
+        } else {
+          await dispatch(createstate(data)).then((res) => {
+            if (res?.payload?.data?.data) {
+              toast.success('Create success!');
+              router.push(paths.dashboard.states.list);
+              dispatch(fetchState({ page: "", limit: "25" }));
+              console.log("allState",allState); 
+            } else {
+              toast.error(res?.payload?.data?.error?.message || 'Internal Server Error');
+            }
+          });
+        }
       } catch (err) {
         logger.error(err);
-        toast.error('Something went wrong!');
+       
       }
     },
-    [router]
+    [isEdit, currentState.id, dispatch, router, fetchState, updatestate,createstate]
   );
 
-  const avatarInputRef = React.useRef(null);
-  const avatar = watch('avatar');
 
-  const handleAvatarChange = React.useCallback(
-    async (event) => {
-      const file = event.target.files?.[0];
-
-      if (file) {
-        const url = await fileToBase64(file);
-        setValue('avatar', url);
-      }
-    },
-    [setValue]
-  );
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -130,12 +175,12 @@ export function CustomerCreateForm() {
                 <Grid md={6} xs={12}>
                   <Controller
                     control={control}
-                    name="name"
+                    name="stateName"
                     render={({ field }) => (
-                      <FormControl error={Boolean(errors.name)} fullWidth>
+                      <FormControl error={Boolean(errors.stateName)} fullWidth>
                         <InputLabel required>State Name</InputLabel>
                         <OutlinedInput {...field} />
-                        {errors.name ? <FormHelperText>{errors.name.message}</FormHelperText> : null}
+                        {errors.stateName ? <FormHelperText>{errors.stateName.message}</FormHelperText> : null}
                       </FormControl>
                     )}
                   />
@@ -143,25 +188,36 @@ export function CustomerCreateForm() {
                 <Grid md={6} xs={12}>
                   <Controller
                     control={control}
-                    name="email"
+                    name="stateShortName"
                     render={({ field }) => (
-                      <FormControl error={Boolean(errors.email)} fullWidth>
+                      <FormControl error={Boolean(errors.stateShortName)} fullWidth>
                         <InputLabel required>State ShortName</InputLabel>
-                        <OutlinedInput {...field} type="email" />
-                        {errors.email ? <FormHelperText>{errors.email.message}</FormHelperText> : null}
+                        <OutlinedInput {...field} type="stateShortName" />
+                        {errors.stateShortName ? <FormHelperText>{errors.stateShortName.message}</FormHelperText> : null}
                       </FormControl>
                     )}
                   />
                 </Grid>
                 <Grid md={6} xs={12}>
-                  <Controller
+                <Controller
                     control={control}
-                    name="phone"
+                    name="countryID"
                     render={({ field }) => (
-                      <FormControl error={Boolean(errors.phone)} fullWidth>
-                        <InputLabel required>Country</InputLabel>
-                        <OutlinedInput {...field} />
-                        {errors.phone ? <FormHelperText>{errors.phone.message}</FormHelperText> : null}
+                      <FormControl error={Boolean(errors.countryID)} fullWidth>
+                        <InputLabel required>country</InputLabel>
+                        <Select {...field}>
+                          <MenuItem value="">
+                            <>Select country</>
+                          </MenuItem>
+                          {
+                           allCountries?.map((country) => (
+                              <MenuItem key={country.id} value={country.id}>
+                                {country.countryName}
+                              </MenuItem>
+                            ))
+                          }
+                        </Select>
+                        {errors.countryID ? <FormHelperText>{errors.countryID.message}</FormHelperText> : null}
                       </FormControl>
                     )}
                   />
@@ -177,9 +233,14 @@ export function CustomerCreateForm() {
           <Button color="secondary" component={RouterLink} href={paths.dashboard.states.list}>
             Cancel
           </Button>
-          <Button type="submit" variant="contained">
-            Save Changes
-          </Button>
+          <LoadingButton
+            type="submit"
+            variant="contained"
+            style={{ textTransform: 'capitalize' }}
+            loading={isSubmitting}
+          >
+            {!isEdit ? 'Create Currency' : 'Save Changes'}
+          </LoadingButton>
         </CardActions>
       </Card>
     </form>

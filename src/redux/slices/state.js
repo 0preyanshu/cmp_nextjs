@@ -52,7 +52,7 @@ function fetchState() {
     try {
       const response = await axios.get(
         HOST_API.concat(
-          `/state?page=${data.page}&limit=${data.limit}&search=${data.name}&countryID=${data.countryId?data.countryId:""}`
+          `/state?page=${data.page}&limit=${data.limit}&search=${data.name || ""}&countryID=${data.countryId?data.countryId:""}`
         ),
         {
           headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
@@ -115,7 +115,7 @@ function createstate() {
 
       const newobj = {
         "stateName" : data.stateName,
-        "countryID" : data.countryId,
+        "countryID" : data.countryID,
         "countryName": "NA",
         "stateShortName" : data.stateShortName
       }
@@ -154,18 +154,13 @@ function updatestate() {
   return createAsyncThunk(`${name}/updatestate`, async (data) => {
     try {
 
-      const newobj = {
-        "stateName" : data.stateName,
-        "countryID" : data.countryId,
-        "countryName": "NA",
-        "stateShortName" : data.stateShortName
-      }
+
 
       const response = await axios.put(
         HOST_API.concat(
           `/state/${data.id}`
         ),
-        newobj,
+        data,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
         }
@@ -270,7 +265,7 @@ function createExtraReducers() {
         //   toast: { message: 'state Added Successfully', variant: 'success' },
         // };
         // state.allStateData = [...state?.allStateData, action.payload?.data?.data];
-        console.log("fetching");
+    
      
       },
       [rejected]: (state, action) => {
@@ -295,15 +290,7 @@ function createExtraReducers() {
         };
       },
       [fulfilled]: (state, action) => {
-        const deletedDeviceId = action?.meta?.arg;
-        state.state = {
-          allState:
-            state?.state?.allState?.map((item) =>
-              item.id === deletedDeviceId ? { ...item, valid: !item.valid } : item
-            ) || [],
-          totalData: state.state.totalData || 0,
-          toast: { message: 'state deletion successful', variant: 'success' },
-        };
+      
       
       },
       [rejected]: (state, action) => {
@@ -329,15 +316,7 @@ function createExtraReducers() {
         };
       },
       [fulfilled]: (state, action) => {
-        state.state = {
-          allState: state?.state?.allState.map((device) =>
-            device.id === action.payload.data.state?.id ? action.payload.data.state : device
-          ),
-          totalData: state?.state?.totalData || 0,
-          iserror: false,
-          loading: false,
-          toast: { message: 'Device Updated successfull', variant: 'success' },
-        };
+       
        
       },
       [rejected]: (state, action) => {

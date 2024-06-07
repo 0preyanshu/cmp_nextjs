@@ -1,25 +1,26 @@
 'use client';
 
 import * as React from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import TablePagination from '@mui/material/TablePagination';
 
-function noop() {
-  return undefined;
-}
+export function CustomersPagination({ count, rowsPerPage, onPageChange, onRowsPerPageChange,page }) {
 
-export function CustomersPagination({ count, page }) {
-  // You should implement the pagination using a similar logic as the filters.
-  // Note that when page change, you should keep the filter search params.
+
+  const labelDisplayedRows = ({ from, to, count }) => {
+    return `Page ${page+1} `;
+  };
 
   return (
     <TablePagination
       component="div"
-      count={count}
-      onPageChange={noop}
-      onRowsPerPageChange={noop}
-      page={page}
-      rowsPerPage={5}
+      count={100000000000}
+      page={page} // MUI TablePagination uses zero-based index for page
+      rowsPerPage={rowsPerPage}
+      onPageChange={(event, newPage) => onPageChange(event, newPage+1)} // Adjusting to one-based index for page
+      onRowsPerPageChange={onRowsPerPageChange}
       rowsPerPageOptions={[5, 10, 25]}
+      labelDisplayedRows={labelDisplayedRows}
     />
   );
 }
