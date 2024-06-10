@@ -52,7 +52,7 @@ function fetchCities() {
     try {
       const response = await customAxios.get(
         HOST_API.concat(
-          `/city?page=${data.page}&limit=${data.limit}&search=${data.name}&stateID=${data.stateId}&countryID=${data.countryId}`
+          `/city?page=${data.page}&limit=${data.limit}&search=${data.name || ""}&stateID=${data.stateId|| ""}&countryID=${data.countryId|| ""}`
         )
       );
       console.log (response.data, 'response');
@@ -110,9 +110,9 @@ function createCity() {
 
       const newobj={
       "cityName" : data.cityName,
-      "cityShortName" : data.shortName,
-      "stateID" : data.stateId,
-      "countryID" : data.countryId
+      "cityShortName" : data.cityShortName,
+      "stateID" : data.stateID,
+      "countryID" : data.countryID
     }
       const response = await customAxios.post(HOST_API.concat(`/city`), newobj, {
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
@@ -140,14 +140,9 @@ function deleteCities() {
 }
 function updateCity() {
   return createAsyncThunk(`${name}/updateCity`, async (data) => {
-    const newobj={
-      "cityName" : data.cityName,
-      "cityShortName" : data.shortName,
-      "stateID" : data.stateId,
-      "countryID" : data.countryId
-    }
+   
     try {
-      const response = await customAxios.put(HOST_API.concat(`/city/${data?.id}`), newobj, {
+      const response = await customAxios.put(HOST_API.concat(`/city/${data?.id}`), data, {
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
       });
       return response;
@@ -245,13 +240,8 @@ function createExtraReducers() {
       },
       [fulfilled]: (state, action) => {
         // console.log(action);
-        state.city = {
-          allCities: [...state.city.allCities, action.payload.data?.cityDTO],
-          iserror: false,
-          totalData: state.city.totalData + 1,
-          toast: { message: 'Country Added Successfully', variant: 'success' },
-        };
-        state.allCitesData = [...state?.allCitesData, action.payload.data?.cityDTO];
+     
+      
       },
       [rejected]: (state, action) => {
         // console.log(action);
@@ -275,15 +265,7 @@ function createExtraReducers() {
         };
       },
       [fulfilled]: (state, action) => {
-        const deletedDeviceId = action?.meta?.arg;
-        state.city = {
-          totalData: state.city.totalData - 1,
-          allCities:
-            state?.city?.allCities?.map((item) =>
-              item.id === deletedDeviceId ? { ...item, valid: !item.valid } : item
-            ) || [],
-          toast: { message: 'City deletion successful', variant: 'success' },
-        };
+     
       
       },
       [rejected]: (state, action) => {
@@ -309,14 +291,8 @@ function createExtraReducers() {
         };
       },
       [fulfilled]: (state, action) => {
-        state.city = {
-          allCities: state?.city?.allCities.map((device) =>
-            device.id === action.payload.data?.cityDTO?.id ? action.payload.data?.cityDTO : device
-          ),
-          totalData: state.city.totalData,
-          iserror: false,
-          toast: { message: 'Device Updated successfull', variant: 'success' },
-        };
+      
+        
        
       },
       [rejected]: (state, action) => {

@@ -34,7 +34,7 @@ const slice = createSlice({
 function getSmtpDetails() {
   return createAsyncThunk(`${name}/getSmtpData`, async () => {
     try {
-      const response = await axios.get(HOST_API.concat(`/credentials/01HYPYKBVF70K4YKJ9H38PR1EV`), {
+      const response = await axios.get(HOST_API.concat(`/credentials/01HZZ3TZQQP5Q337WHXY4WHHAT`), {
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
       });
       console.log(response);
@@ -49,11 +49,9 @@ function getSmtpDetails() {
 function updateSmtpDetails() {
   return createAsyncThunk(`${name}/updateSmtpData`, async (updatedSmtpData) => {
     console.log(updatedSmtpData,"updatedSmtpData");
-    const newobj ={
-      "variables" : updatedSmtpData
-  }
+
     try {
-      const response = await axios.put(HOST_API.concat('/credentials/01HYPYKBVF70K4YKJ9H38PR1EV'),newobj);
+      const response = await axios.put(HOST_API.concat('/credentials/01HZZ3TZQQP5Q337WHXY4WHHAT'),updatedSmtpData);
       return response;
     } catch (err) {
       return err.response.data;

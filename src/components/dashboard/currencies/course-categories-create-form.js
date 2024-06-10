@@ -22,98 +22,155 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Unstable_Grid2';
 import { Camera as CameraIcon } from '@phosphor-icons/react/dist/ssr/Camera';
-import { Controller, useForm } from 'react-hook-form';
-import { z as zod } from 'zod';
+import { Controller, useForm, useWatch } from 'react-hook-form';
+import { timeZoneData } from '@/utils/timezoneData';
 
 import { paths } from '@/paths';
 import { logger } from '@/lib/default-logger';
 import { Option } from '@/components/core/option';
 import { toast } from '@/components/core/toaster';
+import { useDispatch, useSelector } from 'react-redux';
 
-function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      resolve(reader.result);
-    };
-    reader.onerror = () => {
-      reject(new Error('Error converting file to base64'));
-    };
-  });
-}
+import { useParams, usePathname } from 'next/navigation';
+import { z } from 'zod';
+import { MenuItem } from '@mui/material';
+import { currencies } from '../../../utils/currencyData';
+import { CurrencyAction } from '@/redux/slices';
+import { countryActions } from '@/redux/slices/countries';
+import { LoadingButton } from '@mui/lab';
 
-const schema = zod.object({
-  avatar: zod.string().optional(),
-  name: zod.string().min(1, 'Name is required').max(255),
-  email: zod.string().email('Must be a valid email').min(1, 'Email is required').max(255),
-  phone: zod.string().min(1, 'Phone is required').max(15),
-  company: zod.string().max(255),
-  billingAddress: zod.object({
-    country: zod.string().min(1, 'Country is required').max(255),
-    state: zod.string().min(1, 'State is required').max(255),
-    city: zod.string().min(1, 'City is required').max(255),
-    zipCode: zod.string().min(1, 'Zip code is required').max(255),
-    line1: zod.string().min(1, 'Street line 1 is required').max(255),
-    line2: zod.string().max(255).optional(),
-  }),
-  taxId: zod.string().max(255).optional(),
-  timezone: zod.string().min(1, 'Timezone is required').max(255),
-  language: zod.string().min(1, 'Language is required').max(255),
-  currency: zod.string().min(1, 'Currency is required').max(255),
+
+const schema = z.object({
+  currencyName: z.string().min(1, 'Currency Name is required').max(255, 'Currency Name must be at most 255 characters'),
+  symbol: z.string().min(1, 'Symbol is required').max(255, 'Symbol must be at most 255 characters'),
+  countryID: z.string().min(1, 'Country ID is required'),
 });
 
-const defaultValues = {
-  avatar: '',
-  name: '',
-  email: '',
-  phone: '',
-  company: '',
-  billingAddress: { country: '', state: '', city: '', zipCode: '', line1: '', line2: '' },
-  taxId: '',
-  timezone: 'new_york',
-  language: 'en',
-  currency: 'USD',
-};
 
 export function CustomerCreateForm() {
+  const [currentCurrency, setcurrentCurrency] = React.useState({});
+
+  const { allCurrency, loading: isLoading, totalData } = useSelector((state) => state?.currency?.currency);
+
+  const { id } = useParams();
+  const pathname = usePathname();
+  const dispatch = useDispatch();
   const router = useRouter();
+
+  const { fetchCurrency, deleteCurrency,createCurrency,updateCurrency } = CurrencyAction;
+  const { deleteCountry, fetchCountries } = countryActions;
+
+  const { allCountries} = useSelector((state) => state?.countries?.country);
+
+  const isEdit = pathname.includes('edit');
+
+  const defaultValues = React.useMemo(
+    () => ({
+      currencyName: currentCurrency?.currencyName || '',
+      symbol: currentCurrency?.currencySymbol || '',
+      countryID: currentCurrency?.countryID || '',
+    }),
+    [currentCurrency]
+  );
 
   const {
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     setValue,
     watch,
+    reset,
   } = useForm({ defaultValues, resolver: zodResolver(schema) });
 
+  const watchedCurrencyName = useWatch({
+    control,
+    name: 'currencyName',
+  });
+
+  React.useEffect(() => {
+    reset(defaultValues);
+  }, [currentCurrency, reset, defaultValues]);
+
+  React.useEffect(() => {
+    const data = { page: '', limit: '25' };
+    dispatch(fetchCurrency(data));
+    dispatch(fetchCountries(data));
+  }, [dispatch]);
+
+  React.useEffect(() => {
+    console.log('id', id);
+    console.log('allCurrency', allCurrency);
+    if (allCurrency?.length && id) {
+      const data = allCurrency.find((allCurrency) => String(allCurrency?.id) === String(id));
+      setcurrentCurrency(data);
+      console.log('currentCurrency', data);
+    }
+  }, [allCurrency, id]);
+
+  React.useEffect(() => {
+    if (watchedCurrencyName) {
+      const selectedCurrency = currencies.find((c) => c.currencyType === watchedCurrencyName);
+      if (selectedCurrency) {
+        setValue('symbol', selectedCurrency.symbol);
+      }
+    }
+  }, [watchedCurrencyName, setValue]);
+
+  const fieldMapping = {
+    currencyName: 'currencyName',
+    symbol: 'currencySymbol',
+    countryID: 'countryID',
+  };
+
+  const getChangedFields = (data) => {
+    const changedFields = {};
+    for (const key in data) {
+      const mappedKey = fieldMapping[key];
+      if (String(data[key]) !== String(currentCurrency[mappedKey])) {
+        changedFields[mappedKey] = data[key];
+      }
+    }
+    // Add the id to the changed fields
+    changedFields.id = currentCurrency.id;
+    return changedFields;
+  };
+
   const onSubmit = React.useCallback(
-    async (_) => {
+    async (data) => {
       try {
-        // Make API request
-        toast.success('Customer updated');
-        router.push(paths.dashboard.currencies.list);
+        const changedData = getChangedFields(data);
+        console.log(data, 'data');
+        console.log(changedData, 'changed data');
+
+        if (isEdit) {
+          await dispatch(updateCurrency(changedData)).then((res) => {
+            console.log(res?.payload, 'restax');
+            toast.success('Update success!');
+            if (res?.payload?.data?.data) {
+              toast.success('Update success!');
+              router.push(paths.dashboard.currencies.list);
+              dispatch(fetchCurrency({ page: '', limit: '25' }));
+            } else {
+              toast.error(res?.payload?.data?.error?.message || 'Internal Server Error');
+            }
+          });
+        } else {
+          await dispatch(createCurrency(data)).then((res) => {
+            console.log(res?.payload, 'restax');
+            if (res?.payload?.data?.data) {
+              toast.success('Create success!');
+              router.push(paths.dashboard.currencies.list);
+              dispatch(fetchCurrency({ page: '', limit: '25' }));
+            } else {
+              toast.error(res?.payload?.data?.error?.message || 'Internal Server Error');
+            }
+          });
+        }
       } catch (err) {
         logger.error(err);
-        toast.error('Something went wrong!');
       }
     },
-    [router]
-  );
-
-  const avatarInputRef = React.useRef(null);
-  const avatar = watch('avatar');
-
-  const handleAvatarChange = React.useCallback(
-    async (event) => {
-      const file = event.target.files?.[0];
-
-      if (file) {
-        const url = await fileToBase64(file);
-        setValue('avatar', url);
-      }
-    },
-    [setValue]
+    [isEdit, currentCurrency.id, dispatch, router, fetchCurrency, updateCurrency, createCurrency]
   );
 
   return (
@@ -122,20 +179,43 @@ export function CustomerCreateForm() {
         <CardContent>
           <Stack divider={<Divider />} spacing={4}>
             <Stack spacing={3}>
-            
               <Grid container spacing={3}>
-                <Grid xs={12}>
-               
+                <Grid xs={12}></Grid>
+                <Grid md={6} xs={12}>
+                  <Controller
+                    control={control}
+                    name="currencyName"
+                    render={({ field }) => (
+                      <FormControl error={Boolean(errors.currencyName)} fullWidth>
+                        <InputLabel required>Currency</InputLabel>
+                        <Select {...field}>
+                          <MenuItem value="">
+                            <>Select Currency</>
+                          </MenuItem>
+                          {currencies?.map((c) => (
+                            <MenuItem key={c.currencyType} value={c.currencyType}>
+                              {c.currencyType + `(${c.symbol})`}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                        {errors.currencyName ? (
+                          <FormHelperText>{errors.currencyName.message}</FormHelperText>
+                        ) : null}
+                      </FormControl>
+                    )}
+                  />
                 </Grid>
                 <Grid md={6} xs={12}>
                   <Controller
                     control={control}
-                    name="name"
+                    name="symbol"
                     render={({ field }) => (
-                      <FormControl error={Boolean(errors.name)} fullWidth>
-                        <InputLabel required>Currency Name</InputLabel>
+                      <FormControl error={Boolean(errors.symbol)} fullWidth>
+                        <InputLabel required>Currency Symbol</InputLabel>
                         <OutlinedInput {...field} />
-                        {errors.name ? <FormHelperText>{errors.name.message}</FormHelperText> : null}
+                        {errors.symbol ? (
+                          <FormHelperText>{errors.symbol.message}</FormHelperText>
+                        ) : null}
                       </FormControl>
                     )}
                   />
@@ -143,43 +223,43 @@ export function CustomerCreateForm() {
                 <Grid md={6} xs={12}>
                   <Controller
                     control={control}
-                    name="email"
+                    name="countryID"
                     render={({ field }) => (
-                      <FormControl error={Boolean(errors.email)} fullWidth>
-                        <InputLabel required>Symbol</InputLabel>
-                        <OutlinedInput {...field} type="" />
-                        {errors.email ? <FormHelperText>{errors.email.message}</FormHelperText> : null}
-                      </FormControl>
-                    )}
-                  />
-                </Grid>
-                <Grid md={6} xs={12}>
-                  <Controller
-                    control={control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormControl error={Boolean(errors.phone)} fullWidth>
+                      <FormControl error={Boolean(errors.countryID)} fullWidth>
                         <InputLabel required>Country</InputLabel>
-                        <OutlinedInput {...field} />
-                        {errors.phone ? <FormHelperText>{errors.phone.message}</FormHelperText> : null}
+                        <Select {...field}>
+                          <MenuItem value="">
+                            <>Select Country</>
+                          </MenuItem>
+                          {allCountries?.map((c) => (
+                            <MenuItem key={c.id} value={c.id}>
+                              {c.countryName}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                        {errors.countryID ? (
+                          <FormHelperText>{errors.countryID.message}</FormHelperText>
+                        ) : null}
                       </FormControl>
                     )}
                   />
                 </Grid>
-            
               </Grid>
             </Stack>
-
-    
           </Stack>
         </CardContent>
         <CardActions sx={{ justifyContent: 'flex-end' }}>
           <Button color="secondary" component={RouterLink} href={paths.dashboard.currencies.list}>
             Cancel
           </Button>
-          <Button type="submit" variant="contained">
-            Save Changes
-          </Button>
+          <LoadingButton
+            type="submit"
+            variant="contained"
+            style={{ textTransform: 'capitalize' }}
+            loading={isSubmitting}
+          >
+            {!isEdit ? 'Create Currency' : 'Save Changes'}
+          </LoadingButton>
         </CardActions>
       </Card>
     </form>

@@ -15,7 +15,7 @@ const createInitialState = () => ({
 function getSendgridDetails() {
   return createAsyncThunk(`${name}/getSendgridDetails`, async () => {
     try {
-      const response = await axios.get(HOST_API.concat(`/credentials/01HYQ0CX106EM3YGJCVHGDEZ29`), {
+      const response = await axios.get(HOST_API.concat(`/credentials/01HZZ55YB88N00Q456S48XXNPS`), {
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
       });
       return response?.data;
@@ -28,10 +28,8 @@ function getSendgridDetails() {
 function updateSendGridDetails() {
   return createAsyncThunk(`${name}/updateSendgridData`, async (updatedSendgridData) => {
     try {
-      const newobj ={
-        "variables" : updatedSendgridData
-    }
-      const response = await axios.put(HOST_API.concat('/credentials/01HYQ0CX106EM3YGJCVHGDEZ29'), newobj, {
+       console.log(updatedSendgridData,"updatedSendgridData");  
+      const response = await axios.put(HOST_API.concat('/credentials/01HZZ55YB88N00Q456S48XXNPS'),updatedSendgridData , {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
         },

@@ -29,6 +29,16 @@ import { paths } from '@/paths';
 import { logger } from '@/lib/default-logger';
 import { Option } from '@/components/core/option';
 import { toast } from '@/components/core/toaster';
+// import { themeStretch } from '@/lib/theme';
+import {  Container, Tab } from '@mui/material';
+import { useState } from 'react';
+
+import { TabContext, TabList, TabPanel } from '@mui/lab';
+import Image from './Image';
+import { SmtpForm } from './SmtpForm';
+import { SendGrid } from './SendGrid';
+
+
 
 function fileToBase64(file) {
   return new Promise((resolve, reject) => {
@@ -63,6 +73,8 @@ const schema = zod.object({
   currency: zod.string().min(1, 'Currency is required').max(255),
 });
 
+
+
 const defaultValues = {
   avatar: '',
   name: '',
@@ -78,6 +90,11 @@ const defaultValues = {
 
 export function CustomerCreateForm() {
   const router = useRouter();
+  const [value, setValue2] = useState('1');
+
+const handleChange = (event, newValue) => {
+  setValue2(newValue);
+};
 
   const {
     control,
@@ -118,120 +135,71 @@ export function CustomerCreateForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <Card>
-        <CardContent>
-          <Stack divider={<Divider />} spacing={4}>
-            <Stack spacing={3}>
-            
-              <Grid container spacing={3}>
-                <Grid xs={12}>
-                  <Stack direction="row" spacing={3} sx={{ alignItems: 'center' }}>
-                    <Box
-                      sx={{
-                        border: '1px dashed var(--mui-palette-divider)',
-                        borderRadius: '50%',
-                        display: 'inline-flex',
-                        p: '4px',
-                      }}
-                    >
-                      <Avatar
-                        src={avatar}
-                        sx={{
-                          '--Avatar-size': '100px',
-                          '--Icon-fontSize': 'var(--icon-fontSize-lg)',
-                          alignItems: 'center',
-                          bgcolor: 'var(--mui-palette-background-level1)',
-                          color: 'var(--mui-palette-text-primary)',
-                          display: 'flex',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        <CameraIcon fontSize="var(--Icon-fontSize)" />
-                      </Avatar>
-                    </Box>
-                    <Stack spacing={1} sx={{ alignItems: 'flex-start' }}>
-                      <Typography variant="subtitle1">Avatar</Typography>
-                      <Typography variant="caption">Min 400x400px, PNG or JPEG</Typography>
-                      <Button
-                        color="secondary"
-                        onClick={() => {
-                          avatarInputRef.current?.click();
-                        }}
-                        variant="outlined"
-                      >
-                        Select
-                      </Button>
-                      <input hidden onChange={handleAvatarChange} ref={avatarInputRef} type="file" />
-                    </Stack>
-                  </Stack>
-                </Grid>
-                <Grid md={6} xs={12}>
-                  <Controller
-                    control={control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormControl error={Boolean(errors.name)} fullWidth>
-                        <InputLabel required>Name</InputLabel>
-                        <OutlinedInput {...field} />
-                        {errors.name ? <FormHelperText>{errors.name.message}</FormHelperText> : null}
-                      </FormControl>
-                    )}
-                  />
-                </Grid>
-                <Grid md={6} xs={12}>
-                  <Controller
-                    control={control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormControl error={Boolean(errors.email)} fullWidth>
-                        <InputLabel required>Email address</InputLabel>
-                        <OutlinedInput {...field} type="email" />
-                        {errors.email ? <FormHelperText>{errors.email.message}</FormHelperText> : null}
-                      </FormControl>
-                    )}
-                  />
-                </Grid>
-                <Grid md={6} xs={12}>
-                  <Controller
-                    control={control}
-                    name="phone"
-                    render={({ field }) => (
-                      <FormControl error={Boolean(errors.phone)} fullWidth>
-                        <InputLabel required>Phone number</InputLabel>
-                        <OutlinedInput {...field} />
-                        {errors.phone ? <FormHelperText>{errors.phone.message}</FormHelperText> : null}
-                      </FormControl>
-                    )}
-                  />
-                </Grid>
-                <Grid md={6} xs={12}>
-                  <Controller
-                    control={control}
-                    name="company"
-                    render={({ field }) => (
-                      <FormControl error={Boolean(errors.company)} fullWidth>
-                        <InputLabel>Company</InputLabel>
-                        <OutlinedInput {...field} />
-                        {errors.company ? <FormHelperText>{errors.company.message}</FormHelperText> : null}
-                      </FormControl>
-                    )}
-                  />
-                </Grid>
-              </Grid>
-            </Stack>
-
-    
-          </Stack>
-        </CardContent>
-        <CardActions sx={{ justifyContent: 'flex-end' }}>
-          <Button color="secondary" component={RouterLink} href={paths.dashboard.coursecategories.list}>
-            Cancel
-          </Button>
-          <Button type="submit" variant="contained">
-            Create customer
-          </Button>
-        </CardActions>
-      </Card>
+      <Container >
+               <TabContext value={value}>
+            <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+              <TabList onChange={handleChange} aria-label="lab API tabs example">
+                <Tab label="SMTP" value="1" />
+                <Tab label="SendGrid" value="2" />
+                {/* <Tab label="Item Three" value="3" /> */}
+              </TabList>
+            </Box>
+            <TabPanel value="1">
+              <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'column', md: 'row' } }}>
+                <Box sx={{ mt: 2, width: { sm: '100%', md: '60%' } }}>
+                  {/* Send values recieved from store through props */}
+                  <SmtpForm />
+                </Box>
+                <Box sx={{ width: { sm: '100%', md: '40%' }, my: 2, pl: { xs: 2 } }}>
+                  <Typography variant="h6" sx={{ my: 1 }}>
+                    How to Setup 'From Name' and 'From Email'?
+                  </Typography>
+                  <ol>
+                    <li>How to Setup 'From Name' and 'From Email'?</li>
+                    <li>Click on '+ Add New' button to add new 'From Name' and 'From Email' for notification email.</li>
+                    <li>
+                      Click on 'Pencil icon' button to edit existing 'From Name' and 'From Email' for notification
+                      email.
+                    </li>
+                  </ol>
+                  <Typography variant="h6" sx={{ my: 1 }}>
+                    How to Enable 'Less secure apps' within GMAIL?
+                  </Typography>
+                  <ol>
+                    <li>Log into your GMAIL account.</li>
+                    <li>Navigate to the 'Less secure apps' page.</li>
+                    <Image src="/assets/lesssecureapps.png" sx={{ width: 400, height: 300 }} />
+                    <li>Toggle to turn this feature 'ON'.</li>
+                    <li>Wait at least 1 hour for Google to update this setting.</li>
+                    <li>Test your mail application again. It should now send correctly via SMTP.</li>
+                  </ol>
+                </Box>
+              </Box>
+            </TabPanel>
+            <TabPanel value="2">
+              <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'column', md: 'row' } }}>
+                <Box sx={{ mt: 2, width: { sm: '100%', md: '60%' } }}>
+                  {/* Send values recieved from store through props */}
+                  <SendGrid></SendGrid>
+                </Box>
+                <Box sx={{ width: { sm: '100%', md: '40%' }, my: 2, pl: { xs: 2 } }}>
+                  <Typography variant="h6" sx={{ my: 1 }}>
+                    How to Setup 'From Name' and 'From Email'?
+                  </Typography>
+                  <ol>
+                    <li>Navigate to the 'Email Senders' page.</li>
+                    <li>Click on '+ Add New' button to add new 'From Name' and 'From Email' for notification email.</li>
+                    <li>
+                      Click on 'Pencil icon' button to edit existing 'From Name' and 'From Email' for notification
+                      email.
+                    </li>
+                  </ol>
+                </Box>
+              </Box>
+            </TabPanel>
+            <TabPanel value="3">Item Three</TabPanel>
+          </TabContext>
+      </Container>
     </form>
   );
 }

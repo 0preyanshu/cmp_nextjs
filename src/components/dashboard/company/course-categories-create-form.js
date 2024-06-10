@@ -25,7 +25,7 @@ import { z as zod } from 'zod';
 import { paths } from '@/paths';
 import { logger } from '@/lib/default-logger';
 import { toast } from '@/components/core/toaster';
-import { useDispatch } from 'react-redux';
+import { useDispatch,useSelector } from 'react-redux';
 import { CompanyActions } from '../../../redux/slices';
 
 import { LoadingButton } from '@mui/lab';
@@ -56,8 +56,11 @@ const schema = zod.object({
 export function CustomerCreateForm({ currentCompany }) {
   const router = useRouter();
   const dispatch = useDispatch();
+  const [currentCategory, setCurrentCategory] = React.useState({});
 
   const { deletecompanies, fetchCompanies,updatecompanies } = CompanyActions;
+
+
 
 
   const defaultValues = React.useMemo(() => {

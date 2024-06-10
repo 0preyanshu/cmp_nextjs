@@ -6,7 +6,19 @@ export const layoutConfig = {
     {
       key: 'general',
       title: 'General',
-      items: [
+      items: [,
+        {
+          key: 'Operations',
+          title: 'Operations',
+          icon: 'chart-pie',
+          items: [
+            { key: 'Instructors', title: 'Instructors', href: paths.dashboard.instructors.list }
+            
+
+          
+     
+          ]
+        },
         {
           key: 'settings',
           title: 'Settings',
@@ -21,7 +33,8 @@ export const layoutConfig = {
             { key: 'tax', title: 'Tax', href: paths.dashboard.taxes.list  },
             { key: 'currency', title: 'Currency', href: paths.dashboard.currencies.list  },
             { key: 'timezone', title: 'Time Zone', href: paths.dashboard.timezones.list  },
-            // { key: 'emailapi', title: 'Email API', href: paths.dashboard.emailapi.list  },
+            { key: 'emailapi', title: 'Email API', href: paths.dashboard.emailapi.list  },
+            { key: 'paymentapi', title: 'Payment API', href: paths.dashboard.paymentapi.list  },
 
           
      

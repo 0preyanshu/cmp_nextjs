@@ -52,7 +52,7 @@ function fetchCountries() {
     try {
       const response = await axios.get(
         HOST_API.concat(
-          `/country/?page=${data.page}&limit=${data.limit}&search=${data.name}&state_id=${data?.stateId}`
+          `/country/?page=${data.page}&limit=${data.limit}&search=${data.name||""}&state_id=${data?.stateId || ""}`
         ),
         {
           headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
@@ -114,8 +114,8 @@ function createCountry() {
       console.log(data, 'data');  
       // {countryName: 'S', shortName: 'S'}
       const newobj={
-        countryName: data.countryName,
-        countryShortName: data.shortName
+        countryName: data.countryname,
+        countryShortName: data.countryshortname
       }
       const response = await axios.post(
         HOST_API.concat(`/country`),
@@ -146,16 +146,13 @@ function deleteCountry() {
 }
 function updateCountry() {
   return createAsyncThunk(`${name}/updateCountry`, async (data) => {
-    const newobj={
-      countryName: data.countryName,
-      countryShortName: data.shortName
-    }
+
     try {
       const response = await axios.put(
         HOST_API.concat(
           `/country/${data.id}`
         ),
-        {},
+        data,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
         }
@@ -256,12 +253,12 @@ function createExtraReducers() {
       [fulfilled]: (state, action) => {
         // console.log(action.payload?.data?.countryDTO);
         state.country = {
-          allCountries: [...state?.country?.allCountries, action.payload?.data?.countryDTO],
+          allCountries: state.country.allCountries,
           totalData: state.country.totalData + 1,
           iserror: false,
           toast: { message: 'Country Added Successfully', variant: 'success' },
         };
-        state.allCountriesData = [...state?.allCountriesData, action.payload?.data?.countryDTO];
+      ;
       },
       [rejected]: (state, action) => {
         // console.log(action);
@@ -286,14 +283,7 @@ function createExtraReducers() {
       },
       [fulfilled]: (state, action) => {
         const deletedId = action?.meta?.arg;
-        state.country = {
-          allCountries:
-            state?.country?.allCountries?.map((item) =>
-              item.id === deletedId ? { ...item, valid: !item.valid } : item
-            ) || [],
-          totalData: state?.country?.totalData || 0,
-          toast: { message: 'Country deletion successful', variant: 'success' },
-        };
+
        
       },
       [rejected]: (state, action) => {
@@ -319,19 +309,7 @@ function createExtraReducers() {
         };
       },
       [fulfilled]: (state, action) => {
-        state.country = {
-          allCountries: state?.country?.allCountries.map((device) =>
-            device.id === action.payload.data.countryDTO?.id ? action.payload.data.countryDTOS : device
-          ),
-          totalData: state?.country?.totalData || 0,
-          iserror: false,
-          loading: false,
-          toast: { message: 'Device Updated successfull', variant: 'success' },
-        };
-        state.allCountriesData = [
-          ...state?.allCountriesData?.filter((device) => device.id !== action.payload.data.countryDTO?.id),
-          action.payload.data.countryDTOS,
-        ];
+      
       },
       [rejected]: (state, action) => {
         state.country = {

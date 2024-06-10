@@ -23,97 +23,131 @@ import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Unstable_Grid2';
 import { Camera as CameraIcon } from '@phosphor-icons/react/dist/ssr/Camera';
 import { Controller, useForm } from 'react-hook-form';
-import { z as zod } from 'zod';
+import { timeZoneData } from '@/utils/timezoneData';
 
 import { paths } from '@/paths';
 import { logger } from '@/lib/default-logger';
 import { Option } from '@/components/core/option';
 import { toast } from '@/components/core/toaster';
+import { useDispatch, useSelector } from 'react-redux';
+import { TimezoneAction } from '@/redux/slices';
+import { useParams, usePathname } from 'next/navigation';
+import { z } from 'zod';
+import { MenuItem } from '@mui/material';
+import { LoadingButton } from '@mui/lab';
 
-function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      resolve(reader.result);
-    };
-    reader.onerror = () => {
-      reject(new Error('Error converting file to base64'));
-    };
-  });
-}
-
-const schema = zod.object({
-  avatar: zod.string().optional(),
-  name: zod.string().min(1, 'Name is required').max(255),
-  email: zod.string().email('Must be a valid email').min(1, 'Email is required').max(255),
-  phone: zod.string().min(1, 'Phone is required').max(15),
-  company: zod.string().max(255),
-  billingAddress: zod.object({
-    country: zod.string().min(1, 'Country is required').max(255),
-    state: zod.string().min(1, 'State is required').max(255),
-    city: zod.string().min(1, 'City is required').max(255),
-    zipCode: zod.string().min(1, 'Zip code is required').max(255),
-    line1: zod.string().min(1, 'Street line 1 is required').max(255),
-    line2: zod.string().max(255).optional(),
-  }),
-  taxId: zod.string().max(255).optional(),
-  timezone: zod.string().min(1, 'Timezone is required').max(255),
-  language: zod.string().min(1, 'Language is required').max(255),
-  currency: zod.string().min(1, 'Currency is required').max(255),
+const schema = z.object({
+  timezoneName: z.string().nonempty('Timezone Name is required').max(255, 'Timezone Name must be at most 255 characters'),
+  timezoneShortName: z.string().nonempty('ShortName is required').max(255, 'ShortName Name must be at most 255 characters'),
+  gmtOffset: z.string().nonempty('GMT Offset is required'),
 });
 
-const defaultValues = {
-  avatar: '',
-  name: '',
-  email: '',
-  phone: '',
-  company: '',
-  billingAddress: { country: '', state: '', city: '', zipCode: '', line1: '', line2: '' },
-  taxId: '',
-  timezone: 'new_york',
-  language: 'en',
-  currency: 'USD',
-};
-
 export function CustomerCreateForm() {
+  const [currentTimezone, setcurrentTimezone] = React.useState({});
+
+  const { allTimezones, totalData } = useSelector((state) => state?.timezone?.timezones);
+
+  const { id } = useParams();
+  const pathname = usePathname();
+  const dispatch = useDispatch();
   const router = useRouter();
+
+  const { fetchTimezones, deleteTimezones, createTimezones, updateTimezones } = TimezoneAction;
+
+  const isEdit = pathname.includes('edit');
+
+  const defaultValues = React.useMemo(
+    () => ({
+      timezoneName: currentTimezone?.timezoneName || '',
+      timezoneShortName: currentTimezone?.timezoneShortName || '',
+      gmtOffset: currentTimezone?.gmtOffset || '',
+    }),
+    [currentTimezone]
+  );
 
   const {
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     setValue,
     watch,
+    reset,
   } = useForm({ defaultValues, resolver: zodResolver(schema) });
 
+  React.useEffect(() => {
+    reset(defaultValues);
+  }, [currentTimezone, reset, defaultValues]);
+
+  React.useEffect(() => {
+    const data = { page: '', limit: '25' };
+    dispatch(fetchTimezones(data));
+  }, [dispatch]);
+
+  React.useEffect(() => {
+    console.log('id', id);
+    console.log('allTimezones', allTimezones);
+    if (allTimezones?.length && id) {
+      const data = allTimezones.find((allTimezones) => String(allTimezones?.id) === String(id));
+      setcurrentTimezone(data);
+      console.log('currentTimezone', data);
+    }
+  }, [allTimezones, id]);
+
+  const fieldMapping = {
+    timezoneName: 'timezoneName',
+    timezoneShortName: 'timezoneShortName',
+    gmtOffset: 'gmtOffset',
+  };
+
+  const getChangedFields = (data) => {
+    const changedFields = {};
+    for (const key in data) {
+      const mappedKey = fieldMapping[key];
+      if (String(data[key]) !== String(currentTimezone[mappedKey])) {
+        changedFields[mappedKey] = data[key];
+      }
+    }
+    // Add the id to the changed fields
+    changedFields.id = currentTimezone.id;
+    return changedFields;
+  };
+
   const onSubmit = React.useCallback(
-    async (_) => {
+    async (data) => {
       try {
-        // Make API request
-        toast.success('Customer updated');
-        router.push(paths.dashboard.timezones.list);
+        const changedData = getChangedFields(data);
+        console.log(data, 'data');
+        console.log(changedData, 'changed data');
+
+        if (isEdit) {
+          await dispatch(updateTimezones(changedData)).then((res) => {
+            console.log(res?.payload, 'restax');
+            toast.success('Update success!');
+            if (res?.payload?.data) {
+              toast.success('Update success!');
+              router.push(paths.dashboard.timezones.list);
+              dispatch(fetchTimezones({ page: '', limit: '25' }));
+            } else {
+              toast.error(res?.payload?.error?.message || 'Internal Server Error');
+            }
+          });
+        } else {
+          await dispatch(createTimezones(data)).then((res) => {
+            console.log(res?.payload, 'restax');
+            if (res?.payload?.data) {
+              toast.success('Create success!');
+              router.push(paths.dashboard.timezones.list);
+              dispatch(fetchTimezones({ page: '', limit: '25' }));
+            } else {
+              toast.error(res?.payload?.error?.message || 'Internal Server Error');
+            }
+          });
+        }
       } catch (err) {
         logger.error(err);
-        toast.error('Something went wrong!');
       }
     },
-    [router]
-  );
-
-  const avatarInputRef = React.useRef(null);
-  const avatar = watch('avatar');
-
-  const handleAvatarChange = React.useCallback(
-    async (event) => {
-      const file = event.target.files?.[0];
-
-      if (file) {
-        const url = await fileToBase64(file);
-        setValue('avatar', url);
-      }
-    },
-    [setValue]
+    [isEdit, currentTimezone.id, dispatch, router, fetchTimezones, updateTimezones, createTimezones]
   );
 
   return (
@@ -122,52 +156,72 @@ export function CustomerCreateForm() {
         <CardContent>
           <Stack divider={<Divider />} spacing={4}>
             <Stack spacing={3}>
-            
               <Grid container spacing={3}>
-                <Grid xs={12}>
-                
+                <Grid xs={12}></Grid>
+                <Grid md={6} xs={12}>
+                  <Controller
+                    control={control}
+                    name="timezoneName"
+                    render={({ field }) => (
+                      <FormControl error={Boolean(errors.timezoneName)} fullWidth>
+                        <InputLabel required>Timezone Name</InputLabel>
+                        <Select
+                          {...field}
+                          onChange={(e) => {
+                            const selectedZone = timeZoneData.find(
+                              (zone) => zone.timeZoneName === e.target.value
+                            );
+                            setValue('timezoneName', selectedZone.timeZoneName);
+                            setValue('gmtOffset', selectedZone.gmtOffset);
+                          }}
+                        >
+                          <MenuItem value="">
+                            <>Select Timezone</>
+                          </MenuItem>
+                          {timeZoneData?.map((zone) => (
+                            <MenuItem key={zone.timeZoneName} value={zone.timeZoneName}>
+                              {zone.timeZoneName + '      ' + zone.gmtOffset}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                        {errors.timezoneName ? (
+                          <FormHelperText>{errors.timezoneName.message}</FormHelperText>
+                        ) : null}
+                      </FormControl>
+                    )}
+                  />
                 </Grid>
                 <Grid md={6} xs={12}>
                   <Controller
                     control={control}
-                    name="name"
+                    name="timezoneShortName"
                     render={({ field }) => (
-                      <FormControl error={Boolean(errors.name)} fullWidth>
-                        <InputLabel required>TimeZone</InputLabel>
+                      <FormControl error={Boolean(errors.timezoneShortName)} fullWidth>
+                        <InputLabel required>Timezone Short Name</InputLabel>
                         <OutlinedInput {...field} />
-                        {errors.name ? <FormHelperText>{errors.name.message}</FormHelperText> : null}
+                        {errors.timezoneShortName ? (
+                          <FormHelperText>{errors.timezoneShortName.message}</FormHelperText>
+                        ) : null}
                       </FormControl>
                     )}
                   />
                 </Grid>
-                <Grid md={6} xs={12}>
-                  <Controller
-                    control={control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormControl error={Boolean(errors.email)} fullWidth>
-                        <InputLabel required>TimeZone ShortName</InputLabel>
-                        <OutlinedInput {...field} type="email" />
-                        {errors.email ? <FormHelperText>{errors.email.message}</FormHelperText> : null}
-                      </FormControl>
-                    )}
-                  />
-                </Grid>
-            
-             
               </Grid>
             </Stack>
-
-    
           </Stack>
         </CardContent>
         <CardActions sx={{ justifyContent: 'flex-end' }}>
           <Button color="secondary" component={RouterLink} href={paths.dashboard.timezones.list}>
             Cancel
           </Button>
-          <Button type="submit" variant="contained">
-            Save Changes
-          </Button>
+          <LoadingButton
+            type="submit"
+            variant="contained"
+            style={{ textTransform: 'capitalize' }}
+            loading={isSubmitting}
+          >
+            {!isEdit ? 'Create Currency' : 'Save Changes'}
+          </LoadingButton>
         </CardActions>
       </Card>
     </form>

@@ -21,73 +21,118 @@ import { dayjs } from '@/lib/dayjs';
 import { DataTable } from '@/components/core/data-table';
 
 import { useCustomersSelection } from './course-categories-selection-context';
+import { useDispatch } from 'react-redux';
+import { CourseCategoryActions } from '@/redux/slices';
+import { toast } from '@/components/core/toaster';
+import { useRouter } from 'next/navigation';
 
-const columns = [
-  {
-    formatter: (row) => (
-      <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-        <Avatar src={row.categoryLogo} />{' '}
-        <div>
-          <Link
-          
-          >
-            {row.courseCategoryName}
-          </Link>
-      
-        </div>
-      </Stack>
-    ),
-    name: 'Category Name',
-    width: '250px',
-  },
- 
-  {
-    formatter(row) {
-      return row.categoryShortName;
-    },
-    name: 'Short Name',
-    width: '200px',
-  },
-  {
-    formatter: (row) => {
-      const mapping = {
-        active: { label: 'Active', icon: <CheckCircleIcon color="var(--mui-palette-success-main)" weight="fill" /> },
-        blocked: { label: 'Blocked', icon: <MinusIcon color="var(--mui-palette-error-main)" /> }
-        
-      };
-      const value=(row.status_==="ACTIVE")?'active':'blocked';
-      console.log(value);
-      const { label, icon } = mapping[value] ?? { label: 'Unknown', icon: null };
 
-      return <Chip icon={icon} label={label} size="small" variant="outlined" />;
-    },
-    name: 'Status',
-    width: '150px',
-  },
-  {
-    formatter: () => (<div style={{display:"flex"}}>
+// import RouterLink from 'next/link';
 
-    <IconButton component={RouterLink} href={paths.dashboard.coursecategories.edit("1")}>
-        <PencilSimpleIcon />
-      </IconButton>
-      
-      <IconButton onClick={()=>{
-        alert("Are you sure you want to delete this category?");
-      }}>
-        <TrashSimpleIcon />
-      </IconButton>
 
-      
-      </div>),
-    name: 'Actions',
 
-    width: '100px',
-    
-  },
-];
+
+
+
+
+
+
+
 
 export function CustomersTable({ rows }) {
   const { deselectAll, deselectOne, selectAll, selectOne, selected } = useCustomersSelection();
+  const dispatch = useDispatch();
+  const router = useRouter();
+
+  const { fetchcategories, deletecategories,updatecategories } = CourseCategoryActions;
+
+
+  const columns = [
+    {
+      formatter: (row) => (
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+          <Avatar src={row.categoryLogo} />{' '}
+          <div>
+            <Link
+            
+            >
+              {row.courseCategoryName}
+            </Link>
+        
+          </div>
+        </Stack>
+      ),
+      name: 'Category Name',
+      width: '250px',
+    },
+   
+    {
+      formatter(row) {
+        return row.categoryShortName;
+      },
+      name: 'Short Name',
+      width: '200px',
+    },
+    {
+      formatter: (row) => {
+        const mapping = {
+          active: { label: 'Active', icon: <CheckCircleIcon color="var(--mui-palette-success-main)" weight="fill" /> },
+          blocked: { label: 'Blocked', icon: <MinusIcon color="var(--mui-palette-error-main)" /> }
+          
+        };
+        const value=(row.status_==="ACTIVE")?'active':'blocked';
+        console.log(value);
+        const { label, icon } = mapping[value] ?? { label: 'Unknown', icon: null };
+  
+        return <Chip icon={icon} label={label} size="small" variant="outlined" />;
+      },
+      name: 'Status',
+      width: '150px',
+    },
+    {
+      formatter: (row) => (<div style={{display:"flex"}}>
+  
+      <IconButton component={RouterLink} href={paths.dashboard.coursecategories.edit(row.id)}>
+          <PencilSimpleIcon />
+        </IconButton>
+        
+        <IconButton onClick={async ()=>{
+           const {status_} = row;
+           const data ={
+             status_ :status_==="ACTIVE"?"INACTIVE":"ACTIVE",
+             id : row.id
+           }
+
+          await dispatch(updatecategories(data)).then((res) => {
+            console.log(res,"reso");
+            if (res?.payload?.data?.data) {
+              // console.log(data,"data");
+                  toast.success('Details updated');
+                  router.push(paths.dashboard.coursecategories.list);
+                  const data = {
+                    page: 1,
+                    limit: 10,
+                    sort: 'asc',
+                    search: '',
+                  };
+                  dispatch(fetchcategories(data));
+            } else {
+              toast.error(res?.payload?.data?.error?.message || 'Internal Server Error');
+            }
+          })
+  
+        }}>
+          <TrashSimpleIcon />
+        </IconButton>
+  
+        
+        </div>),
+      name: 'Actions',
+  
+      width: '100px',
+      
+    },
+  ];
 
   return (
     <React.Fragment>
@@ -102,6 +147,7 @@ export function CustomersTable({ rows }) {
           selectOne(row.id);
         }}
         rows={rows}
+      
         selectable
         selected={selected}
       />

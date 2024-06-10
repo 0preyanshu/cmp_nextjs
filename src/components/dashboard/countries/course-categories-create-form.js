@@ -29,19 +29,14 @@ import { paths } from '@/paths';
 import { logger } from '@/lib/default-logger';
 import { Option } from '@/components/core/option';
 import { toast } from '@/components/core/toaster';
+import { all } from 'axios';
 
-function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      resolve(reader.result);
-    };
-    reader.onerror = () => {
-      reject(new Error('Error converting file to base64'));
-    };
-  });
-}
+import { useDispatch, useSelector } from 'react-redux';
+import { countryActions } from '@/redux/slices';
+import { useParams, usePathname } from 'next/navigation';
+import { LoadingButton } from '@mui/lab';
+
+
 
 const schema = zod.object({
 
@@ -50,51 +45,115 @@ const schema = zod.object({
  
 });
 
-const defaultValues = {
-  countryname: "",
-  countryshortname: "",
-
-};
-
 export function CustomerCreateForm() {
+  const [currentCountry, setcurrentCountry] = React.useState({});
+
+  const { allCountries, loading: isLoading, totalData } = useSelector((state) => state?.countries?.country);
+
+  const { id } = useParams();
+  const pathname = usePathname();
+  const dispatch = useDispatch();
   const router = useRouter();
+
+  const { createCountry, updateCountry ,fetchCountries } = countryActions;
+
+
+  const isEdit = pathname.includes('edit');
+
+  const defaultValues = React.useMemo(() => ({
+    countryname: currentCountry?. countryName ||"",
+    countryshortname: currentCountry?.countryShortName ||"",
+
+  }), [currentCountry]);
 
   const {
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitting },
     setValue,
     watch,
+    reset,
   } = useForm({ defaultValues, resolver: zodResolver(schema) });
 
+  React.useEffect(() => {
+    reset(defaultValues);
+  }, [currentCountry, reset, defaultValues]);
+
+  React.useEffect(() => {
+    const data = { page: "", limit: "25" };
+    dispatch(fetchCountries(data));
+
+  }, [dispatch]);
+
+  React.useEffect(() => {
+
+    console.log("id",id);
+    console.log("allCountries",allCountries);
+    if (allCountries?.length && id) {
+      const data = allCountries.find((allCountries) => String(allCountries?.id) === String(id));
+      setcurrentCountry(data);
+      console.log("currentCountry",data);
+    }
+  }, [allCountries, id]);
+
+  const fieldMapping = {
+   
+    countryname: "countryName",
+    countryshortname: "countryShortName",
+
+  };
+
+  const getChangedFields = (data) => {
+    const changedFields = {};
+    for (const key in data) {
+      const mappedKey = fieldMapping[key];
+      if (data[key] !== currentCountry[mappedKey]) {
+        changedFields[mappedKey] = data[key];
+      }
+    }
+    // Add the id to the changed fields
+    changedFields.id = currentCountry.id;
+    return changedFields;
+  };
+
   const onSubmit = React.useCallback(
-    async (_) => {
+    async (data) => {
       try {
-        // Make API request
-        toast.success('Customer updated');
-        router.push(paths.dashboard.countries.list);
+        const changedData = getChangedFields(data);
+        console.log(data);
+        console.log(changedData);
+
+        if (isEdit) {
+          await dispatch(updateCountry(changedData)).then((res) => {
+            if (res?.payload?.data?.data) {
+              toast.success('Update success!');
+              router.push(paths.dashboard.countries.list);
+              dispatch(fetchCountries({ page: "", limit: "25" }));
+            } else {
+              toast.error(res?.payload?.message || 'Internal Server Error');
+            }
+          });
+        } else {
+          await dispatch(createCountry(data)).then((res) => {
+            if (res?.payload?.data?.data) {
+              toast.success('Create success!');
+              router.push(paths.dashboard.countries.list);
+              dispatch(fetchCountries({ page: "", limit: "25" }));
+   
+            } else {
+              toast.error(res?.payload?.message || 'Internal Server Error');
+            }
+          });
+        }
       } catch (err) {
         logger.error(err);
-        toast.error('Something went wrong!');
+
       }
     },
-    [router]
+    [isEdit, currentCountry.id, dispatch, router,fetchCountries, updateCountry, createCountry]
   );
 
-  const avatarInputRef = React.useRef(null);
-  const avatar = watch('avatar');
 
-  const handleAvatarChange = React.useCallback(
-    async (event) => {
-      const file = event.target.files?.[0];
-
-      if (file) {
-        const url = await fileToBase64(file);
-        setValue('avatar', url);
-      }
-    },
-    [setValue]
-  );
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -185,9 +244,14 @@ export function CustomerCreateForm() {
           <Button color="secondary" component={RouterLink} href={paths.dashboard.countries.list}>
             Cancel
           </Button>
-          <Button type="submit" variant="contained">
-            Save Changes
-          </Button>
+          <LoadingButton
+            type="submit"
+            variant="contained"
+            style={{ textTransform: 'capitalize' }}
+            loading={isSubmitting}
+          >
+            {!isEdit ? 'Create Country' : 'Save Changes'}
+          </LoadingButton>
         </CardActions>
       </Card>
     </form>

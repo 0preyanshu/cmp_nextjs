@@ -1,7 +1,9 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import { HOST_API } from '../../config';
+// import { HOST_API } from '../../config';
 import axios from 'axios';
+import { createDeflateRaw } from 'zlib';
 
+const HOST_API = 'https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg';
 const name = 'company-payment';
 
 const createInitialState = () => ({
@@ -36,10 +38,10 @@ const createInitialState = () => ({
 function getCompanyPaymentDetails() {
   return createAsyncThunk(`${name}/getCompanyPaymentDetails`, async () => {
     try {
-      const response = await axios.get(HOST_API.concat(`/companyPaymentDetails/get`), {
+      const response = await axios.get(HOST_API.concat(`/credentials/01J00AT4C1V8YCD9HGVE9935JH`), {
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
       });
-      return response;
+      return response.data;
     } catch (error) {
       return error.response.data;
     }
@@ -51,7 +53,7 @@ function updateStripeCompanyPaymentDetails() {
     try {
       //   For Stripe Payment
       const response = await axios.put(
-        HOST_API.concat('/companyPaymentDetails/update/19'),
+        HOST_API.concat('/credentials/01J00AT4C1V8YCD9HGVE9935JH'),
         updatedStripeCompanyPaymentDetail,
         {
           headers: {
@@ -59,7 +61,7 @@ function updateStripeCompanyPaymentDetails() {
           },
         }
       );
-      return response;
+      return response.data;
     } catch (err) {
       return err.response.data;
     }
@@ -71,7 +73,7 @@ function updatePaypalCompanyPaymentDetails() {
     try {
       // For Paypal Data
       const response = await axios.put(
-        HOST_API.concat('/companyPaymentDetails/update/18'),
+        HOST_API.concat('/credentials/01J00AT4C1V8YCD9HGVE9935JH'),
         updatedPaypalCompanyPaymentDetail,
         {
           headers: {
@@ -104,8 +106,9 @@ function createExtraReducers() {
         state.isLoading = true;
       },
       [fulfilled]: (state, action) => {
-        state.paypalData = action?.payload?.data?.find((ele) => ele.paymentMethodName === 'PAYPAL');
-        state.stripeData = action?.payload?.data?.find((ele) => ele.paymentMethodName === 'STRIPE');
+        console.log("action?.payload?.data", action?.payload?.data)
+        state.paypalData = action?.payload?.data?.credentials?.variables?.paypal 
+        state.stripeData = action?.payload?.data?.credentials?.variables?.stripe 
         state.isLoading = false;
       },
       [rejected]: (state, action) => {
@@ -121,8 +124,7 @@ function createExtraReducers() {
         state.isLoading = true;
       },
       [fulfilled]: (state, action) => {
-        state.isLoading = false;
-        state.stripeData = action?.payload?.data || state.stripeData;
+
       },
       [rejected]: (state, action) => {
         state.isLoading = false;
@@ -137,8 +139,7 @@ function createExtraReducers() {
         state.isLoading = true;
       },
       [fulfilled]: (state, action) => {
-        state.isLoading = false;
-        state.paypalData = action?.payload?.data || state.paypalData;
+
       },
       [rejected]: (state, action) => {
         state.isLoading = false;

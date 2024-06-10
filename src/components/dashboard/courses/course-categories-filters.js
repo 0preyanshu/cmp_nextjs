@@ -1,34 +1,29 @@
 'use client';
 
 import * as React from 'react';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Button from '@mui/material/Button';
-import Chip from '@mui/material/Chip';
 import Divider from '@mui/material/Divider';
 import FormControl from '@mui/material/FormControl';
 import OutlinedInput from '@mui/material/OutlinedInput';
 import Select from '@mui/material/Select';
 import Stack from '@mui/material/Stack';
-import Tab from '@mui/material/Tab';
-import Tabs from '@mui/material/Tabs';
 import Typography from '@mui/material/Typography';
-import InputAdornment from '@mui/material/InputAdornment';
 import MenuItem from '@mui/material/MenuItem';
-import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass';
 
 import { paths } from '@/paths';
-import { FilterButton, FilterPopover, useFilterContext } from '@/components/core/filter-button';
-import { Option } from '@/components/core/option';
+import { FilterPopover, useFilterContext } from '@/components/core/filter-button';
 
 import { useCustomersSelection } from './course-categories-selection-context';
 
 // The tabs should be generated using API data.
 const tabs = [];
 
-export function CustomersFilters({ filters = {}, sortDir = 'desc' }) {
-  const { email, phone, status } = filters;
+export function CustomersFilters({ filters = {}, sortDir = 'desc', Categories = [] }) {
+  const { email, phone, status, courseCategory } = filters;
 
   const router = useRouter();
+  
 
   const selection = useCustomersSelection();
 
@@ -50,6 +45,10 @@ export function CustomersFilters({ filters = {}, sortDir = 'desc' }) {
 
       if (newFilters.phone) {
         searchParams.set('phone', newFilters.phone);
+      }
+
+      if (newFilters.courseCategory) {
+        searchParams.set('courseCategory', newFilters.courseCategory);
       }
 
       router.push(`${paths.dashboard.courses.list}?${searchParams.toString()}`);
@@ -91,14 +90,13 @@ export function CustomersFilters({ filters = {}, sortDir = 'desc' }) {
 
   const handleCategoryChange = React.useCallback(
     (event) => {
-      // Handle category change here
       const category = event.target.value;
-      updateSearchParams({ ...filters, category }, sortDir);
+      updateSearchParams({ ...filters, courseCategory: category }, sortDir);
     },
     [updateSearchParams, filters, sortDir]
   );
 
-  const hasFilters = status || email || phone;
+  const hasFilters = status || email || phone || courseCategory;
 
   return (
     <div>
@@ -123,18 +121,16 @@ export function CustomersFilters({ filters = {}, sortDir = 'desc' }) {
           onChange={handleCategoryChange}
           sx={{ maxWidth: '100%', width: '200px' }}
           defaultValue=""
+          value={courseCategory || ''}
         >
           <MenuItem value="">
             <>Select Category</>
           </MenuItem>
-          <MenuItem value="category1">Category 1</MenuItem>
-          <MenuItem value="category2">Category 2</MenuItem>
-          <MenuItem value="category3">Category 3</MenuItem>
-        </Select>
-
-        <Select name="sort" onChange={handleSortChange} sx={{ maxWidth: '100%', width: '120px' }} value={sortDir}>
-          <Option value="desc">Newest</Option>
-          <Option value="asc">Oldest</Option>
+          {Categories.map((category) => (
+            <MenuItem key={category.id} value={category.id}>
+              {category.courseCategoryName}
+            </MenuItem>
+          ))}
         </Select>
       </Stack>
     </div>

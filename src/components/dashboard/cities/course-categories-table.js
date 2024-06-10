@@ -21,70 +21,113 @@ import { dayjs } from '@/lib/dayjs';
 import { DataTable } from '@/components/core/data-table';
 
 import { useCustomersSelection } from './course-categories-selection-context';
+import { useDispatch } from 'react-redux';
+import { cityActions } from '@/redux/slices';
+import { toast } from '@/components/core/toaster';
+import { useRouter } from 'next/navigation';
 
-const columns = [
-  {
-    formatter: (row) => (
-      <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-        <Avatar src={row.avatar} />{' '}
-        <div>
-          <Link
-          
-          >
-            {row.name}
-          </Link>
-      
-        </div>
-      </Stack>
-    ),
-    name: 'City Name',
-    width: '250px',
-  },
- 
-  {
-    formatter(row) {
-      return dayjs(row.createdAt).format('MMM D, YYYY h:mm A');
-    },
-    name: 'Short Name',
-    width: '200px',
-  },
-  {
-    formatter: (row) => {
-      const mapping = {
-        active: { label: 'Active', icon: <CheckCircleIcon color="var(--mui-palette-success-main)" weight="fill" /> },
-        blocked: { label: 'Blocked', icon: <MinusIcon color="var(--mui-palette-error-main)" /> },
-        pending: { label: 'Pending', icon: <ClockIcon color="var(--mui-palette-warning-main)" weight="fill" /> },
-      };
-      const { label, icon } = mapping[row.status] ?? { label: 'Unknown', icon: null };
 
-      return <Chip icon={icon} label={label} size="small" variant="outlined" />;
-    },
-    name: 'Status',
-    width: '150px',
-  },
-  {
-    formatter: () => (<div style={{display:"flex"}}>
 
-    <IconButton component={RouterLink} href={paths.dashboard.cities.edit("1")}>
-        <PencilSimpleIcon />
-      </IconButton>
-      
-      <IconButton component={RouterLink} href={paths.dashboard.cities.list}>
-        <TrashSimpleIcon />
-      </IconButton>
 
-      
-      </div>),
-    name: 'Actions',
 
-    width: '100px',
-    
-  },
-];
 
 export function CustomersTable({ rows }) {
   const { deselectAll, deselectOne, selectAll, selectOne, selected } = useCustomersSelection();
+  const dispatch = useDispatch();
+  const router = useRouter();
 
+  const { deleteCities, fetchCities,createCity, updateCity } = cityActions;
+
+  const columns = [
+    {
+      formatter: (row) => (
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+         {' '}
+          <div>
+            <Link
+            
+            >
+              {row.cityName}
+            </Link>
+        
+          </div>
+        </Stack>
+      ),
+      name: 'City Name',
+      width: '250px',
+    },
+   
+    {
+      formatter(row) {
+        return row.cityShortName;
+      },
+      name: 'Short Name',
+      width: '200px',
+    },
+  
+    
+    {
+      formatter: (row) => {
+        const mapping = {
+          active: { label: 'Active', icon: <CheckCircleIcon color="var(--mui-palette-success-main)" weight="fill" /> },
+          blocked: { label: 'Blocked', icon: <MinusIcon color="var(--mui-palette-error-main)" /> }
+          
+        };
+        const value=(row.status_==="ACTIVE")?'active':'blocked';
+        console.log(value);
+        const { label, icon } = mapping[value] ?? { label: 'Unknown', icon: null };
+  
+        return <Chip icon={icon} label={label} size="small" variant="outlined" />;
+      },
+      name: 'Status',
+      width: '150px',
+    },
+    {
+      formatter: (row) => (<div style={{display:"flex"}}>
+  
+      <IconButton component={RouterLink} href={paths.dashboard.cities.edit(row.id)}>
+          <PencilSimpleIcon />
+        </IconButton>
+        
+        <IconButton onClick={async ()=>{
+          const {status_} = row;
+          const data ={
+            status_ :status_==="ACTIVE"?"INACTIVE":"ACTIVE",
+            id : row.id
+          }
+          await dispatch(updateCity(data)).then((res) => {
+            console.log(res,"reso");
+            if (res?.payload?.data) {
+              // console.log(data,"data");
+                  toast.success('Details updated');
+                  router.push(paths.dashboard.cities.list);
+                  const data = {
+                    page: 1,
+                    limit: 10,
+                    sort: 'asc',
+                    search: '',
+                  };
+                  dispatch(fetchCities(data));
+            } else {
+              toast.error(res?.payload?.message || 'Internal Server Error');
+            }
+          })
+  
+        }}>
+          <TrashSimpleIcon />
+        </IconButton>
+  
+        
+        </div>),
+      name: 'Actions',
+  
+      width: '100px',
+      
+    },
+  ];
+
+
+  console.log(rows,"rows"); 
   return (
     <React.Fragment>
       <DataTable

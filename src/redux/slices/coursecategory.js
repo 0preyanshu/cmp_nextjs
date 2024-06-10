@@ -64,10 +64,11 @@ function createCategories() {
 // valid
 // : 
 // false
+
 const newobj={
-  "courseCategoryName" : data.categoryName,
-  "categoryShortName" :  data.shortName,
-  "categoryLogo" : data.categoryLogo,
+  "courseCategoryName" : data.categoryname,
+  "categoryShortName" :  data.categoryshortname,
+  "categoryLogo" : data.avatar || "  ",
 }   
     try {
       const response = await axios.post(HOST_API.concat(`/course-category`),newobj);
@@ -118,13 +119,15 @@ function updatecategories() {
   // change the body 
   return createAsyncThunk(`${name}/updatecategories`, async (data) => {
 
-    const newobj={
-      "courseCategoryName" : data.values.categoryName,
-      "categoryShortName" :  data.values.shortName,
-      "categoryLogo" : data.values.categoryLogo,
-    }  
+    console.log(data,"dataskli"); 
+
+    // const newobj={
+    //   "courseCategoryName" : data.categoryname,
+    //   "categoryShortName" :  data.categoryshortname,
+    //   "categoryLogo" : data.avatar,
+    // }   
     try {
-      const response = await axios.put(HOST_API.concat(`/course-category/${data.id}`), newobj, {
+      const response = await axios.put(HOST_API.concat(`/course-category/${data.id}`), data, {
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
       });
       return response;

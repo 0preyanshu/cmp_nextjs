@@ -13,6 +13,7 @@ import { CustomerCreateForm } from '@/components/dashboard/course-categories/cou
 export const metadata = { title: `Create | Customers | Dashboard | ${config.site.name}` };
 
 export default function Page() {
+
   return (
     <Box
       sx={{
