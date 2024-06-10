@@ -6,7 +6,19 @@ export const layoutConfig = {
     {
       key: 'general',
       title: 'General',
-      items: [
+      items: [,
+        {
+          key: 'Operations',
+          title: 'Operations',
+          icon: 'chart-pie',
+          items: [
+            { key: 'Instructors', title: 'Instructors', href: paths.dashboard.instructors.list }
+            
+
+          
+     
+          ]
+        },
         {
           key: 'settings',
           title: 'Settings',

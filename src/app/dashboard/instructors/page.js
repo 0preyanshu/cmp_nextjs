@@ -10,7 +10,7 @@ import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 
 import { dayjs } from '@/lib/dayjs';
 import { CustomersFilters } from '@/components/dashboard/instructors/course-categories-filters';
-import { CustomersPagination } from '@/components/dashboard/instructors/course-categories-pagination';
+import { CustomersPagination } from '@/components/dashboard/courses/course-categories-pagination';
 import { CustomersTable } from '@/components/dashboard/instructors/course-categories-table';
 
 import InputAdornment from '@mui/material/InputAdornment';
