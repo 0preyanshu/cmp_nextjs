@@ -174,6 +174,11 @@ export const paths = {
     create: '/dashboard/paymentapi/create',
     edit : (timezoneId) => `/dashboard/paymentapi/edit/${timezoneId}`,
   },
+  instructors: {
+    list: '/dashboard/instructors',
+    create: '/dashboard/instructors/create',
+    edit : (timezoneId) => `/dashboard/instructors/edit/${timezoneId}`,
+  },
 
 
 

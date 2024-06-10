@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-import { HOST_API } from '../../config';
+
+
+const HOST_API = 'https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg';
 
 // const initialState = [];
 
@@ -40,8 +42,14 @@ function createExtraActions() {
 // create api
 function createInstructor() {
     return createAsyncThunk(`${name}/createInstructor`, async (obj) => {
+        const newobj={
+            photo : obj.avatar || "image",
+            firstname:obj.firstname,
+            lastname:obj.lastname,
+            email:obj.email,
+        }
         try {
-            const response = await axios.post(HOST_API.concat(`/instructor/create`), obj, {
+            const response = await axios.post(HOST_API.concat(`/instructor`), newobj, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
             });
             return response;
@@ -53,7 +61,7 @@ function createInstructor() {
 function fetchInstructor() {
     return createAsyncThunk(`${name}/fetchInstructor`, async (data) => {
         try {
-            const response = await axios.get(HOST_API.concat(`/instructor/instructors?page=${data.page}&limit=${data.limit}&search=${data.name}`), {
+            const response = await axios.get(HOST_API.concat(`/instructor?page=${data.page}&limit=${data.limit}&search=${data.name || " "}`), {
                 headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
             });
             return response.data;
@@ -66,7 +74,7 @@ function fetchInstructor() {
 function deleteinstructor() {
     return createAsyncThunk(`${name}/deleteinstructor`, async (id) => {
         try {
-            const response = await axios.delete(HOST_API.concat(`/instructor/delete/${id}`), {
+            const response = await axios.delete(HOST_API.concat(`/instructor/${id}`), {
                 headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
             });
             return response.data;
@@ -78,7 +86,7 @@ function deleteinstructor() {
 function updateinstructor() {
     return createAsyncThunk(`${name}/updateinstructor`, async (data) => {
         try {
-            const response = await axios.put(HOST_API.concat(`/instructor/update/${data.id}`), data, {
+            const response = await axios.put(HOST_API.concat(`/instructor/${data.id}`), data, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
             });
             return response;
@@ -105,12 +113,7 @@ function createExtraReducers() {
                 state.instructors = { loading: true, allInstructors: state?.instructors?.allInstructors || [], totalData: state?.instructors?.totalData, };
             },
             [fulfilled]: (state, action) => {
-                state.instructors = {
-                    allInstructors: [...state?.instructors?.allInstructors, action?.payload?.data?.instructors],
-                    loading: false,
-                    totalData: state?.instructors?.totalData + 1,
-                    toast: { message: 'instructors Added Successfully', variant: 'success' },
-                };
+                
             },
             [rejected]: (state, action) => {
                 state.instructors = {
@@ -134,13 +137,15 @@ function createExtraReducers() {
             [fulfilled]: (state, action) => {
                 const { isIndex } = action.meta.arg;
 
+                console.log(action?.payload, 'action?.payload?.instructors');
+
                 state.instructors = {
-                    allInstructors: action?.payload?.instructors,
+                    allInstructors: action?.payload?.data?.data || [],
                     loading: false,
                     totalData: action?.payload?.totalElements,
                     toast: { message: 'instructors Added Successfully', variant: 'success', },
                 };
-                state.allInstructorsData = isIndex ? action?.payload?.instructors : state.allInstructorsData
+                state.allInstructorsData = isIndex ? action?.payload?.data?.data || [] : state.allInstructorsData
 
             },
             [rejected]: (state, action) => {
@@ -163,14 +168,7 @@ function createExtraReducers() {
                 state.instructors = { loading: true, allInstructors: state.instructors.allInstructors || [], totalData: state.instructors.totalData, };
             },
             [fulfilled]: (state, action) => {
-                const deletedId = action?.meta?.arg;
-                state.instructors = {
-                    allInstructors: state?.instructors?.allInstructors?.map((item) => item.id === deletedId ? { ...item, valid: !item.valid } : item) || [],
-                    loading: false,
-                    totalData: state.instructors.totalData,
-                    toast: { message: 'instructors Added Successfully', variant: 'success', },
-                };
-                state.allInstructorsData = state?.allInstructorsData?.map((item) => item.id === deletedId ? { ...item, valid: !item.valid } : item);
+             
             },
             [rejected]: (state, action) => {
                 state.instructors = {
@@ -191,12 +189,6 @@ function createExtraReducers() {
             },
             [fulfilled]: (state, action) => {
 
-                state.instructors = {
-                    allInstructors: state?.instructors?.allInstructors?.map((item) => item.id === action?.payload?.data?.instructor?.id ? action?.payload?.data?.instructor : item),
-                    loading: false,
-                    totalData: state?.instructors?.totalData,
-                    toast: { message: 'instructors Updated Successfully', variant: 'success', },
-                };
             },
             [rejected]: (state, action) => {
                 state.instructors = {
