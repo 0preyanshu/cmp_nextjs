@@ -128,7 +128,7 @@ export default function Page({ searchParams }) {
           <Divider />
           <CustomersPagination
             count={totalData || 0}
-            page={currentPage}
+            page={currentPage-1}
             rowsPerPage={rowsPerPage}
             onPageChange={handlePageChange}
             onRowsPerPageChange={handleRowsPerPageChange}

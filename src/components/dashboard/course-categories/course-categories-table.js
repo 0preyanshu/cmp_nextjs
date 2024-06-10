@@ -44,7 +44,7 @@ export function CustomersTable({ rows }) {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const { fetchcategories, deletecategories } = CourseCategoryActions;
+  const { fetchcategories, deletecategories,updatecategories } = CourseCategoryActions;
 
 
   const columns = [
@@ -97,9 +97,15 @@ export function CustomersTable({ rows }) {
         </IconButton>
         
         <IconButton onClick={async ()=>{
-          await dispatch(deletecategories(row.id)).then((res) => {
+           const {status_} = row;
+           const data ={
+             status_ :status_==="ACTIVE"?"INACTIVE":"ACTIVE",
+             id : row.id
+           }
+
+          await dispatch(updatecategories(data)).then((res) => {
             console.log(res,"reso");
-            if (res?.payload?.data) {
+            if (res?.payload?.data?.data) {
               // console.log(data,"data");
                   toast.success('Details updated');
                   router.push(paths.dashboard.coursecategories.list);
@@ -111,7 +117,7 @@ export function CustomersTable({ rows }) {
                   };
                   dispatch(fetchcategories(data));
             } else {
-              toast.error(res?.payload?.message || 'Internal Server Error');
+              toast.error(res?.payload?.data?.error?.message || 'Internal Server Error');
             }
           })
   

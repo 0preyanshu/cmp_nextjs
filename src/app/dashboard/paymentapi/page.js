@@ -8,7 +8,7 @@ import { ArrowLeft as ArrowLeftIcon } from '@phosphor-icons/react/dist/ssr/Arrow
 
 import { config } from '@/config';
 import { paths } from '@/paths';
-import { CustomerCreateForm } from '@/components/dashboard/course-categories/course-categories-create-form';
+import { CustomerCreateForm } from '@/components/dashboard/paymentapi/course-categories-create-form';
 
 export const metadata = { title: `Create | Customers | Dashboard | ${config.site.name}` };
 
@@ -25,19 +25,10 @@ export default function Page() {
       <Stack spacing={4}>
         <Stack spacing={3}>
           <div>
-            <Link
-              color="text.primary"
-              component={RouterLink}
-              href={paths.dashboard.coursecategories.list}
-              sx={{ alignItems: 'center', display: 'inline-flex', gap: 1 }}
-              variant="subtitle2"
-            >
-              <ArrowLeftIcon fontSize="var(--icon-fontSize-md)" />
-              Customers
-            </Link>
+           
           </div>
           <div>
-            <Typography variant="h4">Create Course Category</Typography>
+            <Typography variant="h4">Payment API</Typography>
           </div>
         </Stack>
         <CustomerCreateForm />

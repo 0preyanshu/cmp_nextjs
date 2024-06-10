@@ -70,7 +70,7 @@ function createCompanies() {
 function fetchCompanies() {
   return createAsyncThunk(`${name}/fetchCompanies`, async (data) => {
     try {
-      const response = await axios.get("https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg/credentials/01HYR2X83JKFNJMTK0XFHSRRKJ");
+      const response = await axios.get("https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg/credentials/01J00KX8W7YP5PR7C9P1ZTKHXD");
 
     //   {
         
@@ -147,7 +147,7 @@ const newobj={"variables": {
 
 
     try {
-      const response = await axios.put("https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg/credentials/01HYR2X83JKFNJMTK0XFHSRRKJ", newobj);
+      const response = await axios.put("https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg/credentials/01J00KX8W7YP5PR7C9P1ZTKHXD", newobj);
 
       return response;
    

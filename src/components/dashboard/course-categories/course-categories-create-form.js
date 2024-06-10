@@ -117,17 +117,18 @@ export function CustomerCreateForm() {
               router.push(paths.dashboard.coursecategories.list);
               dispatch(fetchcategories({ page: "", limit: "25" }));
             } else {
-              toast.error(res?.payload?.message || 'Internal Server Error');
+              toast.error(res?.payload?.data?.error?.message || 'Internal Server Error');
             }
           });
         } else {
           await dispatch(createCategories(data)).then((res) => {
+            console.log(res?.payload?.data);
             if (res?.payload?.data?.data) {
               toast.success('Create success!');
               router.push(paths.dashboard.coursecategories.list);
               dispatch(fetchcategories({ page: "", limit: "25" }));
             } else {
-              toast.error(res?.payload?.message || 'Internal Server Error');
+              toast.error(res?.payload?.data?.error?.message || 'Internal Server Error');
             }
           });
         }
