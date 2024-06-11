@@ -17,7 +17,7 @@ const customAxios = axios.create();
 
 // Add a request interceptor
 customAxios.interceptors.request.use((config) => {
-  // Check if it's a preflight request (OPTIONS) and remove the Authorization header
+
   if (config.method === 'options') {
     delete config.headers.Authorization;
   }
@@ -258,13 +258,16 @@ function createExtraReducers() {
         console.log(state.state);
       },
       [fulfilled]: (state, action) => {
-        // state.state = {
-        //   allState: [...state?.state?.allState, action.payload?.data?.data],
-        //   totalData: state.state.totalData + 1,
-        //   iserror: false,
-        //   toast: { message: 'state Added Successfully', variant: 'success' },
-        // };
-        // state.allStateData = [...state?.allStateData, action.payload?.data?.data];
+        console.log( action.payload?.data, "state");
+        if( action.payload?.data?.data?.state){
+          state.state = {
+            allState: [...state?.state?.allState,  action.payload?.data?.data?.state],
+            totalData: state.state.totalData + 1,
+            iserror: false,
+            toast: { message: 'state Added Successfully', variant: 'success' },
+          };
+          state.allStateData = [...state?.allStateData, action.payload?.data?.data?.state];
+        }
     
      
       },
@@ -290,6 +293,14 @@ function createExtraReducers() {
         };
       },
       [fulfilled]: (state, action) => {
+        if(action?.payload?.data?.data?.data){
+          state.state = {
+            allState: state?.state?.allState.filter((state) => state.id !== action.payload?.data?.data?.data),
+            totalData: state.state.totalData - 1,
+            toast: { message: 'state Deleted Successfully', variant: 'success' },
+          };
+          state.allStateData = state.allStateData.filter((state) => state.id !== action.payload?.data?.data?.data);
+        }
       
       
       },
@@ -316,6 +327,19 @@ function createExtraReducers() {
         };
       },
       [fulfilled]: (state, action) => {
+        if(action.payload?.data?.data?.data){
+          state.state = {
+            allState: state?.state?.allState.map((state) =>
+              state.id === action.payload?.data?.data?.data.id ? action.payload?.data?.data?.data : state
+            ),
+            totalData: state.state.totalData,
+            iserror: false,
+            toast: { message: 'state Updated Successfully', variant: 'success' },
+          };
+          state.allStateData = state.allStateData.map((state) =>
+            state.id === action.payload?.data?.data?.data.id ? action.payload?.data?.data?.data : state
+          );
+        }
        
        
       },

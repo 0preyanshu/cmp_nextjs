@@ -86,15 +86,9 @@ export function CustomerCreateForm() {
     reset(defaultValues);
   }, [currentState, reset, defaultValues]);
 
-  React.useEffect(() => {
-    const data = { page: "", limit: "25" };
-    dispatch(fetchCountries(data));
-    dispatch(fetchState(data));
-  }, [dispatch]);
 
   React.useEffect(() => {
-    console.log("allState",allState);
-    console.log("id",id);
+
     if (allState?.length && id) {
       const data = allState.find((allState) => String(allState?.id) === String(id));
       setcurrentState(data);
@@ -134,7 +128,7 @@ export function CustomerCreateForm() {
             if (res?.payload?.data?.data) {
               toast.success('Update success!');
               router.push(paths.dashboard.states.list);
-              dispatch(fetchState({ page: "", limit: "25" }));
+        
             } else {
               toast.error(res?.payload?.data?.error?.message  || 'Internal Server Error');
             }
@@ -144,8 +138,8 @@ export function CustomerCreateForm() {
             if (res?.payload?.data?.data) {
               toast.success('Create success!');
               router.push(paths.dashboard.states.list);
-              dispatch(fetchState({ page: "", limit: "25" }));
-              console.log("allState",allState); 
+          
+             
             } else {
               toast.error(res?.payload?.data?.error?.message || 'Internal Server Error');
             }

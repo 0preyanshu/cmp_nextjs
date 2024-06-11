@@ -32,7 +32,7 @@ export function CustomersTable({ rows }) {
   const dispatch = useDispatch();
   const router = useRouter();
 
- const { createTimezones, updateTimezones,fetchTimezones } = TimezoneAction;
+ const {  updateTimezones} = TimezoneAction;
 
 
   const columns = [
@@ -105,13 +105,6 @@ export function CustomersTable({ rows }) {
                         // console.log(data,"data");
                             toast.success('Details updated');
                             router.push(paths.dashboard.timezones.list);
-                            const data = {
-                              page: 1,
-                              limit: 10,
-                              sort: 'asc',
-                              search: '',
-                            };
-                            dispatch(fetchTimezones(data));
                       } else {
                         toast.error(res?.payload?.error?.message|| 'Internal Server Error');
                       }

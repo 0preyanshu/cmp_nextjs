@@ -1,3 +1,5 @@
+"use client";
+
 import { combineReducers } from 'redux';
 import { persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
@@ -42,12 +44,6 @@ const rootPersistConfig = {
   whitelist: [],
 };
 
-const productPersistConfig = {
-  key: 'product',
-  storage,
-  keyPrefix: 'redux-',
-  whitelist: ['sortBy', 'checkout'],
-};
 
 const rootReducer = combineReducers({
   companyPaymentDetails,
@@ -57,7 +53,7 @@ const rootReducer = combineReducers({
   chat: chatReducer,
   calendar: calendarReducer,
   kanban: kanbanReducer,
-  product: persistReducer(productPersistConfig, productReducer),
+  product: productReducer,
   countries,
   states,
   cities,
@@ -83,4 +79,4 @@ const rootReducer = combineReducers({
   analytics,
 });
 
-export { rootPersistConfig, rootReducer };
+export { rootReducer };

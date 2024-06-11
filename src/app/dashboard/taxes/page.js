@@ -8,11 +8,8 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 
-import { config } from '@/config';
-import { dayjs } from '@/lib/dayjs';
-import { CustomersFilters } from '@/components/dashboard/taxes/course-categories-filters';
+
 import { CustomersPagination } from '@/components/dashboard/courses/course-categories-pagination';
-import { CustomersSelectionProvider } from '@/components/dashboard/taxes/course-categories-selection-context';
 import { CustomersTable } from '@/components/dashboard/taxes/course-categories-table';
 
 import InputAdornment from '@mui/material/InputAdornment';
@@ -25,7 +22,7 @@ import { TaxActions } from '@/redux/slices';
 import TableSkeleton from '@/components/core/Skeletion';
 
 export default function Page({ searchParams }) {
-  const { email, phone, sortDir, status, searchTerm, page = 1, limit = 10 } = searchParams;
+  const {  searchTerm, page = 1, limit = 10 } = searchParams;
 
   const [currentPage, setCurrentPage] = React.useState(parseInt(page));
   const [rowsPerPage, setRowsPerPage] = React.useState(parseInt(limit));
@@ -33,24 +30,30 @@ export default function Page({ searchParams }) {
 
   const router = useRouter();
 
-  const { allTaxes, iserror, toast, loading: isLoading, totalData } = useSelector((state) => state?.taxes?.taxes);
+  const { allTaxes,  loading: isLoading, totalData } = useSelector((state) => state?.taxes?.taxes);
   const dispatch = useDispatch();
   const { fetchTaxes } = TaxActions;
+  const isInitialMount = React.useRef(true);
 
   React.useEffect(() => {
-    const data = {
-      page: currentPage,
-      limit: rowsPerPage,
-      sort: 'asc',
-      name: searchTerm || '',
-    };
-    dispatch(fetchTaxes(data));
-    console.log('fetching taxes', allTaxes);
-  }, [dispatch, searchTerm, currentPage, rowsPerPage]);
+   
+      const data = {
+        page: currentPage,
+        limit: rowsPerPage,
+        name: searchInput || ''
+      };
+      if(allTaxes.length === 0 ||!isInitialMount.current) dispatch(fetchTaxes(data));
+      updateSearchParams({ searchTerm: searchInput, page: currentPage, limit: rowsPerPage });
+    if(isInitialMount.current){
+      isInitialMount.current = false;
+
+    }
+    
+  }, [ searchInput, currentPage, rowsPerPage]);
 
   const handleSearchChange = (event) => {
     setSearchInput(event.target.value);
-    updateSearchParams({ ...searchParams, searchTerm: event.target.value, page: 1 }); // Reset to page 1 on search
+    updateSearchParams({ ...searchParams, searchTerm: event.target.value, page: 1 }); 
   };
 
   const handlePageChange = (event, newPage) => {
@@ -60,7 +63,7 @@ export default function Page({ searchParams }) {
 
   const handleRowsPerPageChange = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-    setCurrentPage(1); // Reset to page 1 on rows per page change
+    setCurrentPage(1); 
     updateSearchParams({ ...searchParams, limit: parseInt(event.target.value, 10), page: 1 });
   };
 
@@ -141,34 +144,3 @@ export default function Page({ searchParams }) {
   );
 }
 
-// Sorting and filtering has to be done on the server.
-
-function applySort(row, sortDir) {
-  return row.sort((a, b) => {
-    if (sortDir === 'asc') {
-      return a.createdAt.getTime() - b.createdAt.getTime();
-    }
-    return b.createdAt.getTime() - a.createdAt.getTime();
-  });
-}
-
-function applyFilters(row, { email, phone, status }) {
-  return row.filter((item) => {
-    if (email) {
-      if (!item.email?.toLowerCase().includes(email.toLowerCase())) {
-        return false;
-      }
-    }
-    if (phone) {
-      if (!item.phone?.toLowerCase().includes(phone.toLowerCase())) {
-        return false;
-      }
-    }
-    if (status) {
-      if (item.status !== status) {
-        return false;
-      }
-    }
-    return true;
-  });
-}

@@ -35,18 +35,6 @@ export function CustomersFilters({ filters = {}, sortDir = 'desc', Categories = 
         searchParams.set('sortDir', newSortDir);
       }
 
-      if (newFilters.status) {
-        searchParams.set('status', newFilters.status);
-      }
-
-      if (newFilters.email) {
-        searchParams.set('email', newFilters.email);
-      }
-
-      if (newFilters.phone) {
-        searchParams.set('phone', newFilters.phone);
-      }
-
       if (newFilters.courseCategory) {
         searchParams.set('courseCategory', newFilters.courseCategory);
       }
@@ -60,43 +48,7 @@ export function CustomersFilters({ filters = {}, sortDir = 'desc', Categories = 
     updateSearchParams({}, sortDir);
   }, [updateSearchParams, sortDir]);
 
-  const handleStatusChange = React.useCallback(
-    (_, value) => {
-      updateSearchParams({ ...filters, status: value }, sortDir);
-    },
-    [updateSearchParams, filters, sortDir]
-  );
-
-  const handleEmailChange = React.useCallback(
-    (value) => {
-      updateSearchParams({ ...filters, email: value }, sortDir);
-    },
-    [updateSearchParams, filters, sortDir]
-  );
-
-  const handlePhoneChange = React.useCallback(
-    (value) => {
-      updateSearchParams({ ...filters, phone: value }, sortDir);
-    },
-    [updateSearchParams, filters, sortDir]
-  );
-
-  const handleSortChange = React.useCallback(
-    (event) => {
-      updateSearchParams(filters, event.target.value);
-    },
-    [updateSearchParams, filters]
-  );
-
-  const handleCategoryChange = React.useCallback(
-    (event) => {
-      const category = event.target.value;
-      updateSearchParams({ ...filters, courseCategory: category }, sortDir);
-    },
-    [updateSearchParams, filters, sortDir]
-  );
-
-  const hasFilters = status || email || phone || courseCategory;
+  const hasFilters =  courseCategory;
 
   return (
     <div>

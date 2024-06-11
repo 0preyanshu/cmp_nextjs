@@ -239,7 +239,15 @@ function createExtraReducers() {
         };
       },
       [fulfilled]: (state, action) => {
-        // console.log(action);
+        if(action.payload.data?.data?.city){
+          state.city = {
+            allCities: [...state.city.allCities, action.payload.data?.data?.city],
+            iserror: false,
+            totalData: state.city.totalData + 1,
+            toast: { message: 'Country Added Successfully', variant: 'success' },
+          };
+          state.allCitesData = [...state?.allCitesData, action.payload.data?.data?.city];
+        }
      
       
       },
@@ -265,6 +273,18 @@ function createExtraReducers() {
         };
       },
       [fulfilled]: (state, action) => {
+        const deletedDeviceId = action?.meta?.arg;
+        state.city = {
+          totalData: state.city.totalData - 1,
+          allCities:
+            state?.city?.allCities?.map((item) =>
+              item.id === deletedDeviceId ? { ...item, valid: !item.valid } : item
+            ) || [],
+          toast: { message: 'City deletion successful', variant: 'success' },
+        };
+        state.allCitesData =
+          state?.allCitesData?.map((item) => (item.id === deletedDeviceId ? { ...item, valid: !item.valid } : item)) ||
+          [];
      
       
       },
@@ -291,6 +311,21 @@ function createExtraReducers() {
         };
       },
       [fulfilled]: (state, action) => {
+        if(action.payload.data?.data?.data){
+          state.city = {
+            allCities: state?.city?.allCities.map((device) =>
+              device.id === action.payload.data?.data?.data?.id ? action.payload.data?.data?.data : device
+            ),
+            totalData: state.city.totalData,
+            iserror: false,
+            toast: { message: 'Device Updated successfull', variant: 'success' },
+          };
+          state.allCitesData = [
+            ...state?.allCitesData?.filter((device) => device.id !== action.payload.data?.data?.data?.id),
+            action.payload.data?.data?.data,
+          ];
+
+        }
       
         
        

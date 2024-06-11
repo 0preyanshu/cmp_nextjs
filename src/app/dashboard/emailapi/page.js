@@ -7,8 +7,8 @@ import Typography from '@mui/material/Typography';
 import { ArrowLeft as ArrowLeftIcon } from '@phosphor-icons/react/dist/ssr/ArrowLeft';
 
 import { config } from '@/config';
-import { paths } from '@/paths';
-import { CustomerCreateForm } from '@/components/dashboard/emailapi/course-categories-create-form';
+
+import {EmailApiForm } from '@/components/dashboard/emailapi/emailapi-create-form';
 
 export const metadata = { title: `Create | Customers | Dashboard | ${config.site.name}` };
 
@@ -31,7 +31,7 @@ export default function Page() {
             <Typography variant="h4">Email API</Typography>
           </div>
         </Stack>
-        <CustomerCreateForm />
+        <EmailApiForm />
       </Stack>
     </Box>
   );

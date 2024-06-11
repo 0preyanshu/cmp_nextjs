@@ -92,18 +92,11 @@ export function CustomersTable({ rows }) {
             id : row.id
           }
           await dispatch(updatestate(data)).then((res) => {
-            console.log(res,"reso");
             if (res?.payload?.data?.data) {
               
                   toast.success('Details updated');
                   router.push(paths.dashboard.states.list);
-                  const data = {
-                    page: 1,
-                    limit: 10,
-                    sort: 'asc',
-                    search: '',
-                  };
-                  dispatch(fetchState(data));
+                  
             } else {
               toast.error(res?.payload?.data?.error?.message  || 'Internal Server Error');
             }

@@ -45,14 +45,14 @@ const schema = z.object({
 export function CustomerCreateForm() {
   const [currentTimezone, setcurrentTimezone] = React.useState({});
 
-  const { allTimezones, totalData } = useSelector((state) => state?.timezone?.timezones);
+  const { allTimezones } = useSelector((state) => state?.timezone?.timezones);
 
   const { id } = useParams();
   const pathname = usePathname();
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const { fetchTimezones, deleteTimezones, createTimezones, updateTimezones } = TimezoneAction;
+  const {  createTimezones, updateTimezones } = TimezoneAction;
 
   const isEdit = pathname.includes('edit');
 
@@ -78,10 +78,7 @@ export function CustomerCreateForm() {
     reset(defaultValues);
   }, [currentTimezone, reset, defaultValues]);
 
-  React.useEffect(() => {
-    const data = { page: '', limit: '25' };
-    dispatch(fetchTimezones(data));
-  }, [dispatch]);
+
 
   React.useEffect(() => {
     console.log('id', id);
@@ -126,7 +123,7 @@ export function CustomerCreateForm() {
             if (res?.payload?.data) {
               toast.success('Update success!');
               router.push(paths.dashboard.timezones.list);
-              dispatch(fetchTimezones({ page: '', limit: '25' }));
+           
             } else {
               toast.error(res?.payload?.error?.message || 'Internal Server Error');
             }
@@ -137,7 +134,7 @@ export function CustomerCreateForm() {
             if (res?.payload?.data) {
               toast.success('Create success!');
               router.push(paths.dashboard.timezones.list);
-              dispatch(fetchTimezones({ page: '', limit: '25' }));
+            
             } else {
               toast.error(res?.payload?.error?.message || 'Internal Server Error');
             }
@@ -147,7 +144,7 @@ export function CustomerCreateForm() {
         logger.error(err);
       }
     },
-    [isEdit, currentTimezone.id, dispatch, router, fetchTimezones, updateTimezones, createTimezones]
+    [isEdit, currentTimezone.id, dispatch, router, updateTimezones, createTimezones]
   );
 
   return (

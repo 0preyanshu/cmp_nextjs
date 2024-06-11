@@ -76,20 +76,13 @@ export function CustomerCreateForm() {
     reset(defaultValues);
   }, [currentTax, reset, defaultValues]);
 
-  React.useEffect(() => {
-    const data = { page: "", limit: "25" };
-    dispatch(fetchTaxes(data));
-
-  }, [dispatch]);
 
   React.useEffect(() => {
 
-    console.log("id",id);
-    console.log("allTaxes",allTaxes);
     if (allTaxes?.length && id) {
       const data = allTaxes.find((allTaxes) => String(allTaxes?.id) === String(id));
       setcurrentTax(data);
-      console.log("currentTax",data);
+
     }
   }, [allTaxes, id]);
 
@@ -122,12 +115,10 @@ export function CustomerCreateForm() {
 
         if (isEdit) {
           await dispatch(updateTax(changedData)).then((res) => {
-            console.log(res?.payload?.data?.data,"restax");
-            toast.success('Update success!');
+            
             if (res?.payload?.data?.data) {
               toast.success('Update success!');
               router.push(paths.dashboard.taxes.list);
-              dispatch(fetchTaxes({ page: "", limit: "25" }));
             } else {
               toast.error(res?.payload?.data?.error?.message || 'Internal Server Error');
             }
@@ -138,7 +129,6 @@ export function CustomerCreateForm() {
             if (res?.payload?.data?.data) {
               toast.success('Create success!');
               router.push(paths.dashboard.taxes.list);
-              dispatch(fetchTaxes({ page: "", limit: "25" }));
    
             } else {
               toast.error(res?.payload?.data?.error?.message || 'Internal Server Error');

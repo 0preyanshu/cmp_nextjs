@@ -113,7 +113,17 @@ function createExtraReducers() {
                 state.instructors = { loading: true, allInstructors: state?.instructors?.allInstructors || [], totalData: state?.instructors?.totalData, };
             },
             [fulfilled]: (state, action) => {
-                
+                if(action?.paylload?.data?.data?.instructor){
+                    state.instructors = {
+                        allInstructors: [...state?.instructors?.allInstructors, action?.payload?.data?.instructor],
+                        loading: false,
+                        totalData: state?.instructors?.totalData + 1,
+                        toast: { message: 'instructors Added Successfully', variant: 'success' },
+                    };
+                }
+                 
+
+               
             },
             [rejected]: (state, action) => {
                 state.instructors = {
@@ -168,7 +178,18 @@ function createExtraReducers() {
                 state.instructors = { loading: true, allInstructors: state.instructors.allInstructors || [], totalData: state.instructors.totalData, };
             },
             [fulfilled]: (state, action) => {
-             
+                const deletedId = action?.meta?.arg;
+                if(action?.payload?.data?.data){
+                    state.instructors = {
+                        allInstructors: state?.instructors?.allInstructors?.map((item) => item.id === deletedId ? { ...item, valid: !item.valid } : item) || [],
+                        loading: false,
+                        totalData: state.instructors.totalData,
+                        toast: { message: 'instructors Added Successfully', variant: 'success', },
+                    };
+                    state.allInstructorsData = state?.allInstructorsData?.map((item) => item.id === deletedId ? { ...item, valid: !item.valid } : item);
+
+                }
+               
             },
             [rejected]: (state, action) => {
                 state.instructors = {
@@ -188,7 +209,16 @@ function createExtraReducers() {
                 state.instructors = { loading: true, allInstructors: state?.instructors?.allInstructors || [] };
             },
             [fulfilled]: (state, action) => {
+                if(action?.payload?.data?.data?.data){
+                    state.instructors = {
+                        allInstructors: state?.instructors?.allInstructors?.map((item) => item.id === action?.payload?.data?.data?.data?.id ? action?.payload?.data?.data?.data : item),
+                        loading: false,
+                        totalData: state?.instructors?.totalData,
+                        toast: { message: 'instructors Updated Successfully', variant: 'success', },
+                    };
 
+                }
+    
             },
             [rejected]: (state, action) => {
                 state.instructors = {

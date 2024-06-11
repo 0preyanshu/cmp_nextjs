@@ -1,9 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-// import { HOST_API } from '../../config';
+
 const HOST_API = 'https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg';
 
-// const initialState = [];
+
 
 const name = 'Currency';
 const initialState = createInitialState();
@@ -143,6 +143,15 @@ function createExtraReducers() {
         };
       },
       [fulfilled]: (state, action) => {
+        if(action?.payload?.data?.data?.currency){
+          state.currency = {
+            loading: false,
+            allCurrency: [...state.currency.allCurrency, action?.payload?.data?.data?.currency],
+            totalData: state?.currency?.totalData + 1,
+            toast: { message: 'Currency Added Successfully', variant: 'success' },
+          };
+          state.allCurrencyData = [...state?.allCurrencyData, action?.payload?.data?.data?.currency];
+        }
         
       },
       [rejected]: (state, action) => {
@@ -235,6 +244,20 @@ function createExtraReducers() {
         };
       },
       [fulfilled]: (state, action) => {
+        if(action.payload?.data?.data?.data){
+          state.currency = {
+            allCurrency: state?.currency?.allCurrency?.map((item) =>
+              item?.id === action?.payload?.data?.data?.data?.id ? action?.payload?.data?.data?.data : item
+            ),
+            loading: false,
+            totalData: state.currency.totalData,
+            toast: { message: 'User Updated Successfully', variant: 'success' },
+          };
+          state.allCurrencyData = [
+            ...state?.allCurrencyData?.filter((item) => item?.id !== action?.payload?.data?.data?.data.id),
+            action?.payload?.data?.data?.data,
+          ];
+        }
        
     
       },

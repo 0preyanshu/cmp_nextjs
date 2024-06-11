@@ -108,13 +108,7 @@ export function CustomersTable({ rows }) {
                         // console.log(data,"data");
                             toast.success('Details updated');
                             router.push(paths.dashboard.taxes.list);
-                            const data = {
-                              page: 1,
-                              limit: 10,
-                              sort: 'asc',
-                              search: '',
-                            };
-                            dispatch(fetchTaxes(data));
+                        
                       } else {
                         toast.error(res?.payload?.message || 'Internal Server Error');
                       }

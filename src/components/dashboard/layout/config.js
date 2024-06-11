@@ -12,7 +12,8 @@ export const layoutConfig = {
           title: 'Operations',
           icon: 'chart-pie',
           items: [
-            { key: 'Instructors', title: 'Instructors', href: paths.dashboard.instructors.list }
+            { key: 'Instructors', title: 'Instructors', href: paths.dashboard.instructors.list },
+            { key: 'Vendors', title: 'Vendors', href: paths.dashboard.vendors.list }
             
 
           

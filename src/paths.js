@@ -179,6 +179,11 @@ export const paths = {
     create: '/dashboard/instructors/create',
     edit : (timezoneId) => `/dashboard/instructors/edit/${timezoneId}`,
   },
+  vendors: {
+    list: '/dashboard/vendors',
+    create: '/dashboard/vendors/create',
+    edit : (vendorId) => `/dashboard/vendors/edit/${vendorId}`,
+  },
 
 
 
