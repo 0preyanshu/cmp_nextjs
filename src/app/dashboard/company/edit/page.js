@@ -11,12 +11,12 @@ import { useState, useEffect } from 'react';
 
 import { config } from '@/config';
 import { paths } from '@/paths';
-import { CustomerCreateForm } from '@/components/dashboard/company/course-categories-create-form';
+import { CompanyCreateForm } from '@/components/dashboard/company/company-create-form';
 
 import { useDispatch } from 'react-redux';
 import { CompanyActions } from '../../../../redux/slices';
 
-// export const metadata = { title: `Create | Customers | Dashboard | ${config.site.name}` };
+// export const metadata = { title: `Create | Companys | Dashboard | ${config.site.name}` };
 
 export default function Page() {
 
@@ -63,7 +63,7 @@ dispatch(fetchCompanies(data))
             <Typography variant="h5">Edit Company</Typography>
           </div>
         </Stack>
-        <CustomerCreateForm currentCompany={currentCompany}/>
+        <CompanyCreateForm currentCompany={currentCompany}/>
       </Stack>
     </Box>
   );

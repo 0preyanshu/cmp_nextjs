@@ -10,7 +10,7 @@ import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 
 import { CustomersFilters } from '@/components/dashboard/states/course-categories-filters';
 import { CustomersPagination } from '@/components/dashboard/courses/course-categories-pagination';
-import { CustomersSelectionProvider } from '@/components/dashboard/states/course-categories-selection-context';
+;
 import { CustomersTable } from '@/components/dashboard/states/course-categories-table';
 
 import InputAdornment from '@mui/material/InputAdornment';
@@ -24,7 +24,7 @@ import { countryActions } from '@/redux/slices';
 import TableSkeleton from '@/components/core/Skeletion';
 
 export default function Page({ searchParams }) {
-  const { email, phone, sortDir, status, page = 1, limit = 10, searchTerm = '', countryID = '' } = searchParams;
+  const { sortDir, page = 1, limit = 10, searchTerm = '', countryID = '' } = searchParams;
 
   const [currentPage, setCurrentPage] = React.useState(parseInt(page));
   const [rowsPerPage, setRowsPerPage] = React.useState(parseInt(limit));
@@ -37,33 +37,49 @@ export default function Page({ searchParams }) {
   const dispatch = useDispatch();
   const { deletestate, fetchState } = StateActions;
   const { fetchCountries } = countryActions;
+  const isInitialMount = React.useRef(true);
 
   React.useEffect(() => {
-    const data = {
-      page: currentPage,
-      limit: rowsPerPage,
-      sort: 'asc',
-      name: searchTerm || "",
-      countryId: countryID
-    };
-    dispatch(fetchCountries({ limit: "", page: "", sort: 'asc', name: '' }));
-    dispatch(fetchState(data));
-  }, [dispatch, searchTerm, currentPage, rowsPerPage, countryID]);
+    if (!isInitialMount.current) {
+      const data = {
+        page: currentPage,
+        limit: rowsPerPage,
+        name: searchInput || '',
+        countryId: countryID || '',
+      };
+      if(allCountries.length === 0){
+        dispatch(fetchCountries({ limit: "", page: "", search: "" }));
+      }
+      if(allState.length === 0 || !isInitialMount.current){
+       dispatch(fetchState(data));}
+
+      
+    }
+    updateSearchParams({ searchTerm: searchInput, page: currentPage, limit: rowsPerPage });
+    
+   
+    if(isInitialMount.current){
+      isInitialMount.current = false;
+    }
+  
+  },[searchInput, currentPage, rowsPerPage, countryID]);
+
+
 
   const handleSearchChange = (event) => {
     const value = event.target.value;
     setSearchInput(value);
-    updateSearchParams({ searchTerm: value, page: 1 }); // Reset to page 1 on search
+    updateSearchParams({ searchTerm: value, page: 1 }); 
   };
 
   const handlePageChange = (event, newPage) => {
-    setCurrentPage(newPage); // Zero-based index adjustment
+    setCurrentPage(newPage); 
     updateSearchParams({ page: newPage });
   };
 
   const handleRowsPerPageChange = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-    setCurrentPage(1); // Reset to page 1 on rows per page change
+    setCurrentPage(1); 
     updateSearchParams({ limit: parseInt(event.target.value, 10), page: 1 });
   };
 
@@ -135,7 +151,7 @@ export default function Page({ searchParams }) {
           />
         </Stack>
         <Card>
-          <CustomersFilters filters={{ email, phone, status, searchTerm, limit, page ,countryID}} sortDir={sortDir} Countries={allCountries} />
+          <CustomersFilters filters={{  searchTerm, limit, page ,countryID}} sortDir={sortDir} Countries={allCountries} />
           <Divider />
           <Box sx={{ overflowX: 'auto' }}>
             {isLoading && <TableSkeleton />}
@@ -144,7 +160,7 @@ export default function Page({ searchParams }) {
           <Divider />
           <CustomersPagination
             count={totalData || 0}
-            page={currentPage - 1} // Zero-based index adjustment
+            page={currentPage - 1} 
             rowsPerPage={rowsPerPage}
             onPageChange={handlePageChange}
             onRowsPerPageChange={handleRowsPerPageChange}

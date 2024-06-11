@@ -113,15 +113,9 @@ function deleteCourses() {
 }
 function updateCourses() {
   return createAsyncThunk(`${name}/updateCourses`, async (data) => {
-    // change the body
+
     try {
-    //   const newobj={
-    //     "courseName" : data.values.courseName,
-    //     "courseCategoryID" : data.values.categoryId,
-    //     "courseLogo" : data.values.courseLogo,
-    //     "courseShortName" :data.values.shortName,
-    //     "courseUrl": data.values.courseUrl,
-    // } 
+
       const response = await axios.put(HOST_API.concat(`/course/${data.id}`), data, {
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
       });
@@ -151,6 +145,16 @@ function createExtraReducers() {
         };
       },
       [fulfilled]: (state, action) => {
+        console.log(action.payload?.data?.data,"action.payload?.data?.data");
+        if(action.payload?.data?.data?.course){
+          state.courses = {
+            allCourses: [...state.courses.allCourses, action.payload?.data?.data?.course],
+            loading: false,
+            totalData: state.courses.totalData + 1,
+            toast: { message: 'courses Added Successfully', variant: 'success' },
+          };
+          state.allCoursesData = [...state.allCoursesData, action.payload?.data?.data?.course];
+        }
       
                                     
       },
@@ -211,6 +215,12 @@ function createExtraReducers() {
       },
       [fulfilled]: (state, action) => {
         const deletedId = action?.meta?.arg;
+        state.courses = {
+          allCourses: state.courses.allCourses.filter((course) => course.id !== deletedId),
+          loading: false,
+          totalData: state.courses.totalData - 1,
+          toast: { message: 'courses Deleted Successfully', variant: 'success' },
+        };
         
      
       },
@@ -236,6 +246,23 @@ function createExtraReducers() {
         };
       },
       [fulfilled]: (state, action) => {
+
+        state.courses.loading = false;
+        if(action?.payload?.data?.data?.data){
+          state.courses = {
+            allCourses: state?.courses?.allCourses?.map((item) =>
+              item.id === action?.payload?.data?.data?.data.id ? action?.payload?.data?.data?.data : item
+            ),
+          
+            totalData: state.courses.totalData,
+            toast: { message: 'courses Updated Successfully', variant: 'success' },
+          };
+  
+          state.allCoursesData = [
+            ...state?.allCoursesData?.filter((item) => item.id !== action?.payload?.data?.data?.data.id),
+            action?.payload?.data?.data?.data,
+          ];
+        }
         
       },
       [rejected]: (state, action) => {

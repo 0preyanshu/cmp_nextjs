@@ -124,12 +124,21 @@ function createExtraReducers() {
     return {
       [pending]: (state) => {
         state.timezones = {
-          loading: true,
+       
           allTimezones: state.timezones.allTimezones || [],
           totalData: state.timezones.totalData,
         };
       },
       [fulfilled]: (state, action) => {
+        if(action?.payload?.data?.timezone){
+          state.timezones = {
+            allTimezones: [...state.timezones.allTimezones, action?.payload?.data?.timezone],
+            totalData: state.timezones.totalData + 1,
+       
+            toast: { message: 'Timezones Added Successfully', variant: 'success' },
+          };
+          state.allTimezonesData = [...state?.allTimezonesData, action?.payload?.data?.timezone]
+        }
       
       },
       [rejected]: (state, action) => {
@@ -199,10 +208,10 @@ function createExtraReducers() {
           toast: { message: 'Timezones Deleted Successfully', variant: 'success' },
         }
         
-      ;
-        // state.allTimezonesData =
-        //   state?.allTimezonesData?.map((item) => (item.id === deletedId ? { ...item, valid: !item.valid } : item)) ||
-        //   [];
+      
+        state.allTimezonesData =
+          state?.allTimezonesData?.map((item) => (item.id === deletedId ? { ...item, valid: !item.valid } : item)) ||
+          [];
 
       
       },
@@ -222,12 +231,26 @@ function createExtraReducers() {
     return {
       [pending]: (state) => {
         state.timezones = {
-          loading: true,
+           loading: true, 
           allTimezones: state.timezones.allTimezones || [],
           totalData: state.timezones.totalData,
         };
       },
       [fulfilled]: (state, action) => {
+        console.log(action?.payload?.data?.data,"action");
+        state.timezones.loading = false;
+        if(action?.payload?.data?.data){
+          state.timezones = {
+            allTimezones: state.timezones.allTimezones.map((item) =>
+              item.id === action?.payload?.data?.data?.id ? action?.payload?.data?.data : item
+            ),
+            totalData: state.timezones.totalData ,
+          toast: { message: 'Timezones Updated Successfully', variant: 'success' },
+          };
+          state.allTimezonesData = state.allTimezonesData.map((item) =>
+            item.id === action?.payload?.data?.data?.id ? action?.payload?.data?.data : item)
+
+        }
       
       },
       [rejected]: (state, action) => {

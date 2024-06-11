@@ -26,11 +26,10 @@ import { paths } from '@/paths';
 import { logger } from '@/lib/default-logger';
 import { toast } from '@/components/core/toaster';
 import { useDispatch, useSelector } from 'react-redux';
-import { CourseCategoryActions } from '@/redux/slices';
+
 import {InstructorActions} from '@/redux/slices';
 import { LoadingButton } from '@mui/lab';
-import { MenuItem, Select } from '@mui/material';
-import { current } from '@reduxjs/toolkit';
+
 
 
 function fileToBase64(file) {
@@ -60,14 +59,14 @@ const schema = zod.object({
 export function CustomerCreateForm() {
   const [currentInstructor, setcurrentInstructor] = React.useState({});
 
-  const { allInstructors, loading: isLoading, totalData } = useSelector((state) => state?.instructors?.instructors);
+  const { allInstructors } = useSelector((state) => state?.instructors?.instructors);
 
   const { id } = useParams();
   const pathname = usePathname();
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const { fetchInstructor, deleteinstructor,createInstructor,updateinstructor } = InstructorActions;
+  const { fetchInstructor, createInstructor,updateinstructor } = InstructorActions;
 
   const isEdit = pathname.includes('edit');
 
@@ -92,11 +91,6 @@ export function CustomerCreateForm() {
     reset(defaultValues);
   }, [currentInstructor, reset, defaultValues]);
 
-  React.useEffect(() => {
-    const data = { page: "", limit: "25" };
-    dispatch(fetchInstructor(data));
-   
-  }, [dispatch]);
 
   React.useEffect(() => {
     console.log("allInstructors",allInstructors);
@@ -124,7 +118,7 @@ export function CustomerCreateForm() {
         changedFields[mappedKey] = data[key];
       }
     }
-    // Add the id to the changed fields
+
     changedFields.id = currentInstructor.id;
     return changedFields;
   };
@@ -141,7 +135,6 @@ export function CustomerCreateForm() {
             if (res?.payload?.data?.data?.data) {
               toast.success('Update success!');
               router.push(paths.dashboard.instructors.list);
-              dispatch(fetchInstructor({ page: "", limit: "25" }));
             } else {
               toast.error(res?.payload?.data?.data?.error?.message || 'Internal Server Error');
             }
@@ -150,9 +143,7 @@ export function CustomerCreateForm() {
           await dispatch(createInstructor(data)).then((res) => {
             if (res?.payload?.data?.data) {
               toast.success('Create success!');
-              router.push(paths.dashboard.instructors.list);
-              dispatch(fetchInstructor({ page: "", limit: "25" }));
-              console.log("allInstructors",allInstructors); 
+              router.push(paths.dashboard.instructors.list); 
             } else {
               toast.error(res?.payload?.data?.error?.message || 'Internal Server Error');
             }

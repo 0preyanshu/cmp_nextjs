@@ -8,12 +8,10 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 
-import { config } from '@/config';
-import { dayjs } from '@/lib/dayjs';
-import { CustomersFilters } from '@/components/dashboard/countries/course-categories-filters';
-import { CustomersPagination } from '@/components/dashboard/courses/course-categories-pagination';
-import { CustomersSelectionProvider } from '@/components/dashboard/countries/course-categories-selection-context';
-import { CustomersTable } from '@/components/dashboard/countries/course-categories-table';
+
+import { Pagination } from '@/components/core/pagination';
+
+import { CountriesTable } from '@/components/dashboard/countries/countries-table';
 
 import InputAdornment from '@mui/material/InputAdornment';
 import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass';
@@ -25,32 +23,39 @@ import { countryActions } from '@/redux/slices';
 import TableSkeleton from '@/components/core/Skeletion';
 
 export default function Page({ searchParams }) {
-  const { email, phone, sortDir, status, searchTerm, page = 1, limit = 10 } = searchParams;
+  const { searchTerm, page = 1, limit = 10 } = searchParams;
 
   const [currentPage, setCurrentPage] = React.useState(parseInt(page));
   const [rowsPerPage, setRowsPerPage] = React.useState(parseInt(limit));
   const [searchInput, setSearchInput] = React.useState(searchTerm || '');
 
   const router = useRouter();
+  const isInitialMount = React.useRef(true);
 
   const { allCountries, loading: isLoading, totalData } = useSelector((state) => state?.countries?.country);
   const dispatch = useDispatch();
-  const { deleteCountry, fetchCountries } = countryActions;
+  const { fetchCountries } = countryActions;
 
   React.useEffect(() => {
+
     const data = {
       page: currentPage,
       limit: rowsPerPage,
-      sort: 'asc',
-      name: searchTerm || '',
+      name: searchInput,
     };
-    dispatch(fetchCountries(data));
-    console.log('fetching countries', allCountries);
-  }, [dispatch, searchTerm, currentPage, rowsPerPage]);
+
+      
+   if(!isInitialMount.current||allCountries.length ===0) dispatch(fetchCountries(data));
+   updateSearchParams({ searchTerm: searchInput, page: currentPage, limit: rowsPerPage });
+
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+    }
+  }, [searchInput, currentPage, rowsPerPage]);
 
   const handleSearchChange = (event) => {
     setSearchInput(event.target.value);
-    updateSearchParams({ ...searchParams, searchTerm: event.target.value, page: 1 }); // Reset to page 1 on search
+    updateSearchParams({ ...searchParams, searchTerm: event.target.value, page: 1 }); 
   };
 
   const handlePageChange = (event, newPage) => {
@@ -60,7 +65,7 @@ export default function Page({ searchParams }) {
 
   const handleRowsPerPageChange = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-    setCurrentPage(1); // Reset to page 1 on rows per page change
+    setCurrentPage(1);
     updateSearchParams({ ...searchParams, limit: parseInt(event.target.value, 10), page: 1 });
   };
 
@@ -104,7 +109,7 @@ export default function Page({ searchParams }) {
             </Button>
           </Box>
         </Stack>
-        <CustomersSelectionProvider customers={[]}>
+   
           <Stack direction="row" spacing={2} sx={{ px: 3, py: 2 }}>
             <OutlinedInput
               placeholder="Search thread"
@@ -119,26 +124,20 @@ export default function Page({ searchParams }) {
             />
           </Stack>
           <Card>
-            {/* <CustomersFilters filters={{ email, phone, status }} sortDir={sortDir} /> */}
             <Divider />
             <Box sx={{ overflowX: 'auto' }}>
-              {isLoading && <>
-                <TableSkeleton />
-              </>}
-              {!isLoading && <>
-                <CustomersTable rows={allCountries} />
-              </>}
+              {isLoading ? <TableSkeleton /> : <CountriesTable rows={allCountries} />}
             </Box>
             <Divider />
-            <CustomersPagination
+            <Pagination
               count={totalData || 0}
-              page={currentPage-1}
+              page={currentPage - 1}
               rowsPerPage={rowsPerPage}
               onPageChange={handlePageChange}
               onRowsPerPageChange={handleRowsPerPageChange}
             />
           </Card>
-        </CustomersSelectionProvider>
+     
       </Stack>
     </Box>
   );

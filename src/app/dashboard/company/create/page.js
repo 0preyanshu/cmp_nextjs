@@ -1,16 +1,16 @@
 import * as React from 'react';
-import RouterLink from 'next/link';
+;
 import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
+
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { ArrowLeft as ArrowLeftIcon } from '@phosphor-icons/react/dist/ssr/ArrowLeft';
+;
 
 import { config } from '@/config';
-import { paths } from '@/paths';
-import { CustomerCreateForm } from '@/components/dashboard/course-categories/course-categories-create-form';
+;
+import { CompanyCreateForm } from '@/components/dashboard/company/company-create-form';
 
-export const metadata = { title: `Create | Customers | Dashboard | ${config.site.name}` };
+export const metadata = { title: `Create | Companys | Dashboard | ${config.site.name}` };
 
 export default function Page() {
   return (
@@ -30,7 +30,7 @@ export default function Page() {
             <Typography variant="h5">Save Changes</Typography>
           </div>
         </Stack>
-        <CustomerCreateForm />
+        <CompanyCreateForm />
       </Stack>
     </Box>
   );

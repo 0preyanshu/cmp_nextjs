@@ -8,8 +8,6 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 
-import { dayjs } from '@/lib/dayjs';
-import { CustomersFilters } from '@/components/dashboard/instructors/course-categories-filters';
 import { CustomersPagination } from '@/components/dashboard/courses/course-categories-pagination';
 import { CustomersTable } from '@/components/dashboard/instructors/course-categories-table';
 
@@ -25,7 +23,7 @@ import TableSkeleton from '@/components/core/Skeletion';
 
 
 export default function Page({ searchParams }) {
-  const { email, phone, sortDir, status, searchTerm, page = 1, limit = 10 } = searchParams;
+  const { sortDir,searchTerm, page = 1, limit = 10 } = searchParams;
 
   const [currentPage, setCurrentPage] = React.useState(parseInt(page));
   const [rowsPerPage, setRowsPerPage] = React.useState(parseInt(limit));
@@ -33,31 +31,40 @@ export default function Page({ searchParams }) {
   const router = useRouter();
 
 
-  const { allInstructors, loading: isLoading, totalData } = useSelector((state) => state?.instructors?.instructors);
+  const { allInstructors, loading: isLoading } = useSelector((state) => state?.instructors?.instructors);
   const dispatch = useDispatch();
 
 
-  const { fetchInstructor, deleteinstructor } = InstructorActions;
+  const { fetchInstructor} = InstructorActions;
 
 
   const [searchInput, setSearchInput] = React.useState(searchTerm || '');
+  const isInitialMount = React.useRef(true);
 
   React.useEffect(() => {
     const data = {
       page: currentPage,
       limit: rowsPerPage,
-      sort: 'asc',
-      name: searchTerm || '',
-    
+      name: searchInput || ''
     };
-
-    dispatch(fetchInstructor(data));
-
-  }, [dispatch, searchTerm, currentPage, rowsPerPage]);
+    if (!isInitialMount.current || allInstructors.length === 0) {
+      dispatch(fetchInstructor(data));
+    }
+  
+    updateSearchParams({
+      searchTerm: searchInput,
+      page: currentPage,
+      limit: rowsPerPage
+    });
+  
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+    }
+  }, [searchInput, currentPage, rowsPerPage]);
 
   const handleSearchChange = (event) => {
     setSearchInput(event.target.value);
-    updateSearchParams({ ...searchParams, searchTerm: event.target.value, page: 1 }, sortDir); // Reset to page 1 on search
+    updateSearchParams({ ...searchParams, searchTerm: event.target.value, page: 1 }, sortDir); 
   };
 
   const handlePageChange = (event, newPage) => {
@@ -67,7 +74,7 @@ export default function Page({ searchParams }) {
 
   const handleRowsPerPageChange = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-    setCurrentPage(1); // Reset to page 1 on rows per page change
+    setCurrentPage(1); 
     updateSearchParams({ ...searchParams, limit: parseInt(event.target.value, 10), page: 1 }, sortDir);
   };
 

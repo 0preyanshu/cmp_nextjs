@@ -44,14 +44,14 @@ function fileToBase64(file) {
   });
 }
 
-export function CustomerCreateForm() {
+export function CourseCategoriesCreateForm() {
   const [currentCategory, setCurrentCategory] = React.useState({});
   const { allCategories } = useSelector((state) => state?.categories?.categories);
   const { id } = useParams();
   const pathname = usePathname();
   const dispatch = useDispatch();
   const router = useRouter();
-  const { createCategories, updatecategories, fetchcategories } = CourseCategoryActions;
+  const { createCategories, updatecategories } = CourseCategoryActions;
 
   const isEdit = pathname.includes('edit');
 
@@ -74,10 +74,6 @@ export function CustomerCreateForm() {
     reset(defaultValues);
   }, [currentCategory, reset, defaultValues]);
 
-  React.useEffect(() => {
-    const data = { page: "", limit: "25" };
-    dispatch(fetchcategories(data));
-  }, [dispatch]);
 
   React.useEffect(() => {
     if (allCategories?.length && id) {
@@ -100,7 +96,7 @@ export function CustomerCreateForm() {
         changedFields[mappedKey] = data[key];
       }
     }
-    // Add the id to the changed fields
+  
     changedFields.id = currentCategory.id;
     return changedFields;
   };
@@ -115,7 +111,7 @@ export function CustomerCreateForm() {
             if (res?.payload?.data?.data) {
               toast.success('Update success!');
               router.push(paths.dashboard.coursecategories.list);
-              dispatch(fetchcategories({ page: "", limit: "25" }));
+           
             } else {
               toast.error(res?.payload?.data?.error?.message || 'Internal Server Error');
             }
@@ -126,7 +122,6 @@ export function CustomerCreateForm() {
             if (res?.payload?.data?.data) {
               toast.success('Create success!');
               router.push(paths.dashboard.coursecategories.list);
-              dispatch(fetchcategories({ page: "", limit: "25" }));
             } else {
               toast.error(res?.payload?.data?.error?.message || 'Internal Server Error');
             }
@@ -137,7 +132,7 @@ export function CustomerCreateForm() {
        
       }
     },
-    [isEdit, currentCategory.id, dispatch, router, fetchcategories, updatecategories, createCategories]
+    [isEdit, currentCategory.id, dispatch, router, updatecategories, createCategories]
   );
 
   const avatarInputRef = React.useRef(null);

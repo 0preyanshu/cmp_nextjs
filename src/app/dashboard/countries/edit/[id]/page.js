@@ -8,7 +8,7 @@ import { ArrowLeft as ArrowLeftIcon } from '@phosphor-icons/react/dist/ssr/Arrow
 
 import { config } from '@/config';
 import { paths } from '@/paths';
-import { CustomerCreateForm } from '@/components/dashboard/countries/course-categories-create-form';
+import { CountriesCreateForm } from '@/components/dashboard/countries/countries-create-form';
 
 export const metadata = { title: `Create | Customers | Dashboard | ${config.site.name}` };
 
@@ -40,7 +40,7 @@ export default function Page() {
             <Typography variant="h4">Edit Country</Typography>
           </div>
         </Stack>
-        <CustomerCreateForm />
+        <CountriesCreateForm />
       </Stack>
     </Box>
   );

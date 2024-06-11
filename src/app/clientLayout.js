@@ -13,8 +13,11 @@ import { SettingsButton } from '@/components/core/settings/settings-button';
 import { ThemeProvider } from '@/components/core/theme-provider/theme-provider';
 import { Toaster } from '@/components/core/toaster';
 import { Provider as ReduxProvider } from 'react-redux';
-import { PersistGate } from 'redux-persist/lib/integration/react';
-import { store, persistor } from '@/redux/store';
+import {persistStore} from 'redux-persist';
+import {store} from '@/redux/store';
+import {PersistGate} from 'redux-persist/integration/react';
+
+
 
 export const viewport = {
   width: 'device-width',
@@ -23,12 +26,13 @@ export const viewport = {
 };
 
 export default function Layout({ settings, children }) {
+  let persistor = persistStore(store);
   return (
     <html data-mui-color-scheme={settings.colorScheme} lang="en">
       <body>
         <Analytics>
           <ReduxProvider store={store}>
-            <PersistGate persistor={persistor}>
+            <PersistGate loading={null} persistor={persistor}>
               <LocalizationProvider>
                 <UserProvider>
                   <SettingsProvider settings={settings}>

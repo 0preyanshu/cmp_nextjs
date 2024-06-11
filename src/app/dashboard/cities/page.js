@@ -8,12 +8,9 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 
-import { config } from '@/config';
-import { dayjs } from '@/lib/dayjs';
-import { CustomersFilters } from '@/components/dashboard/cities/course-categories-filters';
-import { CustomersPagination } from '@/components/dashboard/courses/course-categories-pagination';
-import { CustomersSelectionProvider } from '@/components/dashboard/cities/course-categories-selection-context';
-import { CustomersTable } from '@/components/dashboard/cities/course-categories-table';
+import { CitiesFilters } from '@/components/dashboard/cities/cities-filters';
+import { Pagination } from '@/components/core/pagination';
+import { CitiesTable } from '@/components/dashboard/cities/cities-table';
 
 import InputAdornment from '@mui/material/InputAdornment';
 import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass';
@@ -25,15 +22,14 @@ import { cityActions } from '@/redux/slices';
 import { countryActions } from '@/redux/slices';
 import { StateActions } from '@/redux/slices';
 
-import { Skeleton, TableCell, TableRow } from '@mui/material';
 import TableSkeleton from '@/components/core/Skeletion';
-import state from '@/redux/slices/state';
 
 export default function Page({ searchParams }) {
-  const { email, phone, sortDir, status, countryID, stateID, searchTerm, page = 1, limit = 10 } = searchParams;
+  const { sortDir, countryID, stateID, searchTerm, page = 1, limit = 10 } = searchParams;
 
   const [currentPage, setCurrentPage] = React.useState(parseInt(page));
   const [rowsPerPage, setRowsPerPage] = React.useState(parseInt(limit));
+  const [searchInput, setSearchInput] = React.useState(searchTerm || '');
 
   const router = useRouter();
 
@@ -45,24 +41,39 @@ export default function Page({ searchParams }) {
   const { fetchCountries } = countryActions;
   const { fetchCities } = cityActions;
 
-  const [searchInput, setSearchInput] = React.useState(searchTerm || '');
+  const isInitialMount = React.useRef(true);
 
   React.useEffect(() => {
-    const data = {
-      page: currentPage,
-      limit: rowsPerPage,
-      name: searchTerm || '',
-      countryId: countryID || '',
-      stateId: stateID || '',
-    };
-    dispatch(fetchCountries({ limit: "", page: "", search: "" }));
-    dispatch(fetchState({ limit: "", page: "", search: "" }));
-    dispatch(fetchCities(data));
-  }, [dispatch, searchTerm, currentPage, rowsPerPage, countryID, stateID]);
+   
+      const data = {
+        page: currentPage,
+        limit: rowsPerPage,
+        name: searchInput || '',
+        countryId: countryID || '',
+        stateId: stateID || '',
+      };
+      if(allCountries.length === 0 ){
+        dispatch(fetchCountries({ limit: "", page: "", search: "" }));
+      }
+      if(allState.length === 0){
+        dispatch(fetchState({ limit: "", page: "", search: "" }));
+      }
+      if(allCities.length === 0|| !isInitialMount.current){  
+         dispatch(fetchCities(data));
+      }
+
+      updateSearchParams({ searchTerm: searchInput, page: currentPage, limit: rowsPerPage, countryID: countryID, stateID: stateID });
+     
+    
+    if(isInitialMount.current){
+      isInitialMount.current = false;
+
+    }
+  }, [searchInput, currentPage, rowsPerPage, countryID, stateID]);
 
   const handleSearchChange = (event) => {
     setSearchInput(event.target.value);
-    updateSearchParams({ ...searchParams, searchTerm: event.target.value, page: 1 }, sortDir); // Reset to page 1 on search
+    updateSearchParams({ ...searchParams, searchTerm: event.target.value, page: 1 }, sortDir);
   };
 
   const handlePageChange = (event, newPage) => {
@@ -72,7 +83,7 @@ export default function Page({ searchParams }) {
 
   const handleRowsPerPageChange = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-    setCurrentPage(1); // Reset to page 1 on rows per page change
+    setCurrentPage(1);
     updateSearchParams({ ...searchParams, limit: parseInt(event.target.value, 10), page: 1 }, sortDir);
   };
 
@@ -87,18 +98,6 @@ export default function Page({ searchParams }) {
       searchParams.set('stateID', newFilters.stateID);
     }
 
-    if (newFilters.email) {
-      searchParams.set('email', newFilters.email);
-    }
-
-    if (newFilters.phone) {
-      searchParams.set('phone', newFilters.phone);
-    }
-
-    if (newFilters.status) {
-      searchParams.set('status', newFilters.status);
-    }
-
     if (newFilters.searchTerm) {
       searchParams.set('searchTerm', newFilters.searchTerm);
     }
@@ -109,10 +108,6 @@ export default function Page({ searchParams }) {
 
     if (newFilters.limit) {
       searchParams.set('limit', newFilters.limit);
-    }
-
-    if (newSortDir === 'asc' || newSortDir === 'desc') {
-      searchParams.set('sortDir', newSortDir);
     }
 
     router.push(`${paths.dashboard.cities.list}?${searchParams.toString()}`);
@@ -156,51 +151,19 @@ export default function Page({ searchParams }) {
         </Stack>
 
         <Card>
-          <CustomersFilters filters={{ email, phone, status, countryID, stateID }} sortDir={sortDir} Countries={allCountries} States={allState} />
+          <CitiesFilters filters={{ countryID, stateID }} sortDir={sortDir} Countries={allCountries} States={allState} />
           <Divider />
           <Box sx={{ overflowX: 'auto' }}>
             {isLoading ? (
               <TableSkeleton />
             ) : (
-              <CustomersTable rows={allCities} />
+              <CitiesTable rows={allCities} />
             )}
           </Box>
           <Divider />
-          <CustomersPagination count={totalData} page={currentPage-1} rowsPerPage={rowsPerPage} onPageChange={handlePageChange} onRowsPerPageChange={handleRowsPerPageChange} />
+          <Pagination count={totalData} page={currentPage-1} rowsPerPage={rowsPerPage} onPageChange={handlePageChange} onRowsPerPageChange={handleRowsPerPageChange} />
         </Card>
       </Stack>
     </Box>
   );
-}
-
-// Sorting and filtering has to be done on the server.
-
-function applySort(row, sortDir) {
-  return row.sort((a, b) => {
-    if (sortDir === 'asc') {
-      return a.createdAt.getTime() - b.createdAt.getTime();
-    }
-    return b.createdAt.getTime() - a.createdAt.getTime();
-  });
-}
-
-function applyFilters(row, { email, phone, status }) {
-  return row.filter((item) => {
-    if (email) {
-      if (!item.email?.toLowerCase().includes(email.toLowerCase())) {
-        return false;
-      }
-    }
-    if (phone) {
-      if (!item.phone?.toLowerCase().includes(phone.toLowerCase())) {
-        return false;
-      }
-    }
-    if (status) {
-      if (item.status !== status) {
-        return false;
-      }
-    }
-    return true;
-  });
 }

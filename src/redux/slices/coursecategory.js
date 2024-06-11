@@ -1,8 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-// import { HOST_API } from '../../config';
 
-// const initialState = [];
+
 const HOST_API = 'https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg';
 
 const name = 'coursecategory';
@@ -14,16 +13,7 @@ const slice = createSlice({
   initialState,
   extraReducers,
 });
-// const customAxios = axios.create();
 
-// // Add a request interceptor
-// customAxios.interceptors.request.use((config) => {
-//   // Check if it's a preflight request (OPTIONS) and remove the Authorization header
-//   if (config.method === 'options') {
-//     delete config.headers.Authorization;
-//   }
-//   return config;
-// });
 export const CourseCategoryActions = { ...slice.actions, ...extraActions };
 
 export default slice.reducer;
@@ -49,27 +39,15 @@ function createExtraActions() {
   };
 }
 
-// create api
+
 function createCategories() {
   return createAsyncThunk(`${name}/createCategories`, async (data) => {
-//     categoryLogo
-// : 
-// "https://s3.amazonaws.com/cmp-backend/2024-05-25T12%3A54%3A31.157474063temp-4835493935686429210comb4or5.png"
-// categoryName
-// : 
-// "dsdsv"
-// shortName
-// : 
-// "dadffdfg"
-// valid
-// : 
-// false
 
-const newobj={
-  "courseCategoryName" : data.categoryname,
-  "categoryShortName" :  data.categoryshortname,
-  "categoryLogo" : data.avatar || "  ",
-}   
+    const newobj={
+      "courseCategoryName" : data.categoryname,
+      "categoryShortName" :  data.categoryshortname,
+      "categoryLogo" : data.avatar || "  ",
+    }   
     try {
       const response = await axios.post(HOST_API.concat(`/course-category`),newobj);
       return response;
@@ -116,16 +94,10 @@ function deletecategories() {
   });
 }
 function updatecategories() {
-  // change the body 
+ 
   return createAsyncThunk(`${name}/updatecategories`, async (data) => {
 
-    console.log(data,"dataskli"); 
-
-    // const newobj={
-    //   "courseCategoryName" : data.categoryname,
-    //   "categoryShortName" :  data.categoryshortname,
-    //   "categoryLogo" : data.avatar,
-    // }   
+    ;  
     try {
       const response = await axios.put(HOST_API.concat(`/course-category/${data.id}`), data, {
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
@@ -156,13 +128,14 @@ function createExtraReducers() {
         };
       },
       [fulfilled]: (state, action) => {
-        // state.categories = {
-        //   allCategories: [...state.categories.allCategories, action.payload?.data?.categoryDTO],
-        //   totalData: state.categories.totalData + 1,
-        //   loading: false,
-        //   toast: { message: 'categories Added Successfully', variant: 'success' },
-        // };
-        // state.allCourseCategories = [...state?.allCourseCategories, action.payload?.data?.data?.data];
+ 
+        state.categories = {
+          allCategories: [...state.categories.allCategories, action.payload?.data?.data?.courseCategory],
+          totalData: state.categories.allCategories.length + 1,
+          loading: false,
+          toast: { message: 'categories Added Successfully', variant: 'success' },
+        };
+        state.allCourseCategories = [...state?.allCourseCategories, action.payload?.data?.data?.courseCategory];
       },
       [rejected]: (state, action) => {
         state.categories = {
@@ -251,22 +224,28 @@ function createExtraReducers() {
       [pending]: (state) => {
         state.categories = {
           totalData: state.categories.totalData,
+          loading: true,
           allCategories: state.categories.allCategories || [],
         };
       },
       [fulfilled]: (state, action) => {
-        // state.categories = {
-        //   allCategories: state?.categories?.allCategories?.map((item) =>
-        //     item.id === action.payload.data?.categoryDTO?.id ? action.payload.data?.categoryDTO : item
-        //   ),
 
-        //   totalData: state.categories.totalData,
-        //   toast: { message: 'categories Updated Successfully', variant: 'success' },
-        // };
-        // state.allCourseCategories = [
-        //   ...state?.allCourseCategories?.filter((item) => item.id !== action.payload.data?.categoryDTO?.id),
-        //   action.payload.data?.categoryDTO,
-        // ];
+        console.log(action.payload?.data?.data,"action.payload?.data?.data?.data?.data")
+        state.categories.loading=false;
+        if(action?.payload?.data?.data?.data){
+          state.categories = {
+            allCategories: state?.categories?.allCategories?.map((item) =>
+              item.id === action?.payload?.data?.data?.data.id ? action?.payload?.data?.data?.data : item
+            ),
+  
+            totalData: state.categories.totalData,
+            toast: { message: 'categories Updated Successfully', variant: 'success' },
+          };
+          state.allCourseCategories = [
+            ...state?.allCourseCategories?.filter((item) => item.id !== action?.payload?.data?.data?.data.id),
+            action?.payload?.data?.data?.data,
+          ];
+        }
       },
       [rejected]: (state, action) => {
         state.categories = {
@@ -281,6 +260,6 @@ function createExtraReducers() {
   }
 }
 
-// Reducer
 
-// Actions
+
+

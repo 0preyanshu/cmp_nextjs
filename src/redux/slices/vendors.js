@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-import { HOST_API } from '../../config';
+
+const HOST_API = 'https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg';
 
 // const initialState = [];
 
@@ -45,7 +46,7 @@ function createExtraActions() {
 function createvendor() {
     return createAsyncThunk(`${name}/createvendor`, async (obj) => {
         try {
-            const response = await axios.post(HOST_API.concat(`/vendor/create`), obj, {
+            const response = await axios.post(HOST_API.concat(`/vendor`), obj, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
             });
             return response;
@@ -57,7 +58,7 @@ function createvendor() {
 function fetchVendors() {
     return createAsyncThunk(`${name}/fetchVendors`, async (data) => {
         try {
-            const response = await axios.get(HOST_API.concat(`/vendor/vendors?page=${data.page}&limit=${data.limit}&search=${data.name}`), {
+            const response = await axios.get(HOST_API.concat(`/vendor?page=${data.page}&limit=${data.limit}&search=${data.name}`), {
                 headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
             });
             return response.data;
@@ -83,7 +84,7 @@ function getVendorById() {
 function deletevendors() {
     return createAsyncThunk(`${name}/deletevendors`, async (id) => {
         try {
-            const response = await axios.delete(HOST_API.concat(`/vendor/delete/${id}`), {
+            const response = await axios.delete(HOST_API.concat(`/vendor/${id}`), {
                 headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
             });
             return response.data;
@@ -95,7 +96,7 @@ function deletevendors() {
 function updatevendors() {
     return createAsyncThunk(`${name}/updatevendors`, async (data) => {
         try {
-            const response = await axios.put(HOST_API.concat(`/vendor/update/${data.id}`), data.values, {
+            const response = await axios.put(HOST_API.concat(`/vendor/${data.id}`), data, {
                 headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
             });
             return response
@@ -123,13 +124,13 @@ function createExtraReducers() {
                 state.vendors = { loading: true, allVendors: state.vendors.allVendors || [], totalData: state.vendors.totalData };
             },
             [fulfilled]: (state, action) => {
-                state.vendors = {
-                    allVendors: [...state.vendors.allVendors, action.payload.data?.vendor],
-                    loading: false,
-                    totalData: state.vendors.totalData + 1,
-                    toast: { message: 'vendors Added Successfully', variant: 'success' },
-                };
-                state.allVendorsData = [...state.allVendorsData, action.payload.data?.vendor]
+                // state.vendors = {
+                //     allVendors: [...state.vendors.allVendors, action.payload.data?.vendor],
+                //     loading: false,
+                //     totalData: state.vendors.totalData + 1,
+                //     toast: { message: 'vendors Added Successfully', variant: 'success' },
+                // };
+                // state.allVendorsData = [...state.allVendorsData, action.payload.data?.vendor]
             },
             [rejected]: (state, action) => {
                 state.vendors = {
@@ -152,14 +153,15 @@ function createExtraReducers() {
             },
             [fulfilled]: (state, action) => {
                 const { isIndex } = action.meta.arg;
+                console.log(action?.payload, 'action?.payload?.vendors');
 
                 state.vendors = {
-                    allVendors: action?.payload?.vendors,
+                    allVendors: action?.payload?.data?.data || [],
                     loading: false,
                     totalData: action?.payload?.totalElements,
                     toast: { message: 'vendors Added Successfully', variant: 'success', },
                 };
-                state.allVendorsData = isIndex ? action?.payload?.vendors : state.allVendorsData
+                state.allVendorsData = isIndex ? action?.payload?.data?.data || [] : state.allVendorsData
 
             },
             [rejected]: (state, action) => {
@@ -209,13 +211,13 @@ function createExtraReducers() {
                 state.vendors = { loading: true, allVendors: state.vendors.allVendors || [] };
             },
             [fulfilled]: (state, action) => {
-                const deletedId = action?.meta?.arg;
-                state.vendors = {
-                    allVendors: state?.vendors?.allVendors?.map((item) => item.id === deletedId ? { ...item, valid: !item.valid } : item) || [],
-                    loading: false,
-                    toast: { message: 'vendors Added Successfully', variant: 'success', },
-                };
-                state.allVendorsData = state?.allVendorsData?.map((item) => item.id === deletedId ? { ...item, valid: !item.valid } : item) || []
+                // const deletedId = action?.meta?.arg;
+                // state.vendors = {
+                //     allVendors: state?.vendors?.allVendors?.map((item) => item.id === deletedId ? { ...item, valid: !item.valid } : item) || [],
+                //     loading: false,
+                //     toast: { message: 'vendors Added Successfully', variant: 'success', },
+                // };
+                // state.allVendorsData = state?.allVendorsData?.map((item) => item.id === deletedId ? { ...item, valid: !item.valid } : item) || []
             },
             [rejected]: (state, action) => {
                 state.vendors = {
@@ -235,13 +237,7 @@ function createExtraReducers() {
             },
             [fulfilled]: (state, action) => {
 
-                state.vendors = {
-                    allVendors: state?.vendors?.allVendors?.map((item) => item.id === action.payload.data?.vendor.id ? action.payload.data?.vendor : item),
-                    loading: false,
-                    totalData: state.vendors.totalData,
-                    toast: { message: 'vendors Updated Successfully', variant: 'success', },
-                };
-                state.allVendorsData = state?.allVendorsData?.map((item) => item.id === action.payload.data?.vendor.id ? action.payload.data?.vendor : item)
+                state.vendors.loading = false;
             },
             [rejected]: (state, action) => {
                 state.vendors = {

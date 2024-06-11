@@ -123,10 +123,19 @@ function createExtraReducers() {
     const { pending, fulfilled, rejected } = extraActions.createTax;
     return {
       [pending]: (state) => {
-        state.taxes = { loading: true, allTaxes: state.taxes.allTaxes || [], totalData: state.taxes.totalData };
+        state.taxes = { allTaxes: state.taxes.allTaxes || [], totalData: state.taxes.totalData };
       },
       [fulfilled]: (state, action) => {
-       
+
+        if(action?.payload?.data?.data?.tax){
+          state.taxes = {
+            allTaxes: [...state.taxes.allTaxes, action?.payload?.data?.data?.tax],
+            totalData: state.taxes.totalData + 1,
+            toast: { message: 'Tax Added Successfully', variant: 'success' },
+          };
+          state.allTaxData = [...state?.allTaxData, action?.payload?.data?.data?.tax];
+        }
+    
      
       },
       [rejected]: (state, action) => {
@@ -177,6 +186,12 @@ function createExtraReducers() {
         state.taxes = { loading: true, allTaxes: state.taxes.allTaxes, totalData: state.taxes.totalData };
       },
       [fulfilled]: (state, action) => {
+        state.taxes = {
+          allTaxes: state.taxes.allTaxes.filter((tax) => tax.id !== action.meta.arg),
+          totalData: state.taxes.totalData - 1,
+          loading: false,
+          toast: { message: 'Tax Deleted Successfully', variant: 'success' },
+        };
       
       },
       [rejected]: (state, action) => {
@@ -197,6 +212,21 @@ function createExtraReducers() {
         state.taxes = { loading: true, allTaxes: state.taxes.allTaxes || [], totalData: state.taxes.totalData };
       },
       [fulfilled]: (state, action) => {
+        console.log(action?.payload?.data?.data, 'action')
+        if(action?.payload?.data?.data?.data){
+          state.taxes = {
+            allTaxes: state?.taxes?.allTaxes?.map((item) =>
+              item?.id === action?.payload?.data?.data?.data?.id ? action?.payload?.data?.data?.data : item
+            ),
+            loading: false,
+            totalData: state.taxes.totalData,
+            toast: { message: 'User Updated Successfully', variant: 'success' },
+          };
+          state.allTaxData = [
+            ...state?.allTaxData?.filter((item) => item?.id !== action?.payload?.data?.data?.data.id),
+            action?.payload?.data?.data?.data,
+          ];
+        }
       
       },
       [rejected]: (state, action) => {

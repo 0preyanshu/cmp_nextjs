@@ -182,14 +182,14 @@ function createExtraReducers() {
         state.country = { loading: true, allCountries: state?.country?.allCountries, totalData: 0 };
       },
       [fulfilled]: (state, action) => {
-        // console.log(action.meta);
-        const { isIndex } = action.meta.arg;
+       
         state.country = {
           totalData: action.payload.totalElements || 0,
           allCountries: action.payload.countryDTOS || [],
           loading: false,
         };
-        state.allCountriesData = isIndex ? action.payload.countryDTOS : state.allCountriesData;
+        state.allCountriesData =  action.payload.countryDTOS || [];
+     
       },
       [rejected]: (state, action) => {
         state.country = {
@@ -251,17 +251,19 @@ function createExtraReducers() {
         console.log(state.country);
       },
       [fulfilled]: (state, action) => {
-        // console.log(action.payload?.data?.countryDTO);
+        console.log(action.payload?.data?.data, 'action.payload?.data?.data');
+       if(action.payload?.data?.data?.country){
         state.country = {
-          allCountries: state.country.allCountries,
+          allCountries: [...state?.country?.allCountries, action.payload?.data?.data?.country],
           totalData: state.country.totalData + 1,
           iserror: false,
           toast: { message: 'Country Added Successfully', variant: 'success' },
         };
-      ;
+        state.allCountriesData = [...state?.allCountriesData, action.payload?.data?.data?.country];
+      }
+       
       },
       [rejected]: (state, action) => {
-        // console.log(action);
         state.country = {
           allCountries: state?.country?.allCountries || [],
           iserror: true,
@@ -283,6 +285,19 @@ function createExtraReducers() {
       },
       [fulfilled]: (state, action) => {
         const deletedId = action?.meta?.arg;
+        if(action.payload?.data?.data){
+          state.country = {
+            allCountries:
+              state?.country?.allCountries?.map((item) =>
+                item.id === deletedId ? { ...item, valid: !item.valid } : item
+              ) || [],
+            totalData: state?.country?.totalData || 0,
+            toast: { message: 'Country deletion successful', variant: 'success' },
+          };
+          state.allCountriesData =
+            state?.allCountriesData?.map((item) => (item.id === deletedId ? { ...item, valid: !item.valid } : item)) ||
+            [];
+        }
 
        
       },
@@ -302,15 +317,35 @@ function createExtraReducers() {
     return {
       [pending]: (state, action) => {
         state.country = {
-          loading: true,
+          loading: false,
           iserror: false,
           allCountries: state?.country?.allCountries,
           totalData: state?.country?.totalData || 0,
         };
       },
       [fulfilled]: (state, action) => {
+        const updatedCountry = action.payload?.data?.data;
+        
+        if (updatedCountry) {
+          const updatedCountries = state.country.allCountries.map((device) =>
+            device.id === updatedCountry.data.id ? updatedCountry.data : device
+          );
       
+          state.country = {
+            ...state.country,
+            allCountries: updatedCountries,
+            totalData: state?.country?.totalData || 0,
+            iserror: false,
+            loading: false,
+            toast: { message: 'Device Updated successfully', variant: 'success' },
+          };
+      
+     
+          const filteredCountriesData = state?.allCountriesData?.filter((device) => device.id !== updatedCountry.id);
+          state.allCountriesData = [...filteredCountriesData, updatedCountry];
+        }
       },
+      
       [rejected]: (state, action) => {
         state.country = {
           error: action.error,

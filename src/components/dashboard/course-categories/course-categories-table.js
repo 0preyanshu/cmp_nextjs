@@ -20,15 +20,12 @@ import { paths } from '@/paths';
 import { dayjs } from '@/lib/dayjs';
 import { DataTable } from '@/components/core/data-table';
 
-import { useCustomersSelection } from './course-categories-selection-context';
+
 import { useDispatch } from 'react-redux';
-import { CourseCategoryActions } from '@/redux/slices';
+
 import { toast } from '@/components/core/toaster';
 import { useRouter } from 'next/navigation';
-
-
-// import RouterLink from 'next/link';
-
+import { CourseCategoryActions } from '@/redux/slices';
 
 
 
@@ -39,18 +36,22 @@ import { useRouter } from 'next/navigation';
 
 
 
-export function CustomersTable({ rows }) {
-  const { deselectAll, deselectOne, selectAll, selectOne, selected } = useCustomersSelection();
+
+
+
+
+export function CourseCategoriesTable({ rows }) {
+
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const { fetchcategories, deletecategories,updatecategories } = CourseCategoryActions;
+  const { updatecategories } = CourseCategoryActions;
 
 
   const columns = [
     {
       formatter: (row) => (
-        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center',marginLeft:3 }}>
           <Avatar src={row.categoryLogo} />{' '}
           <div>
             <Link
@@ -104,18 +105,10 @@ export function CustomersTable({ rows }) {
            }
 
           await dispatch(updatecategories(data)).then((res) => {
-            console.log(res,"reso");
             if (res?.payload?.data?.data) {
-              // console.log(data,"data");
                   toast.success('Details updated');
-                  router.push(paths.dashboard.coursecategories.list);
-                  const data = {
-                    page: 1,
-                    limit: 10,
-                    sort: 'asc',
-                    search: '',
-                  };
-                  dispatch(fetchcategories(data));
+                  router.push(paths.dashboard.coursecategories.list);   
+              
             } else {
               toast.error(res?.payload?.data?.error?.message || 'Internal Server Error');
             }
@@ -138,18 +131,9 @@ export function CustomersTable({ rows }) {
     <React.Fragment>
       <DataTable
         columns={columns}
-        onDeselectAll={deselectAll}
-        onDeselectOne={(_, row) => {
-          deselectOne(row.id);
-        }}
-        onSelectAll={selectAll}
-        onSelectOne={(_, row) => {
-          selectOne(row.id);
-        }}
         rows={rows}
       
-        selectable
-        selected={selected}
+       
       />
       {!rows.length ? (
         <Box sx={{ p: 3 }}>
