@@ -52,7 +52,7 @@ const schema = zod.object({
 
 });
 
-export function CustomerCreateForm() {
+export function StatesCreateForm() {
   const [currentState, setcurrentState] = React.useState({});
   const { allCountries } = useSelector((state) => state?.countries.country);
   const { allState, loading: isLoading, totalData } = useSelector((state) => state?.states?.state);

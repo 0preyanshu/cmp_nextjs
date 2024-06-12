@@ -54,7 +54,7 @@ export default function Page({ searchParams }) {
     if (!isInitialMount.current || allCourses.length === 0) {
       dispatch(fetchCourses(data));
     }
-    if (!isInitialMount.current || allCategories.length === 0) {
+    if ( allCategories.length === 0) {
       dispatch(fetchcategories({ limit: '', page: '', search: '' }));
     }
 

@@ -2,97 +2,60 @@
 
 import * as React from 'react';
 import RouterLink from 'next/link';
-import Avatar from '@mui/material/Avatar';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import IconButton from '@mui/material/IconButton';
-import LinearProgress from '@mui/material/LinearProgress';
 import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { CheckCircle as CheckCircleIcon } from '@phosphor-icons/react/dist/ssr/CheckCircle';
-import { Clock as ClockIcon } from '@phosphor-icons/react/dist/ssr/Clock';
+import { CheckCircle as CheckCircleIcon } from '@phosphor-icons/react/dist/ssr/CheckCircle';;
 import { Minus as MinusIcon } from '@phosphor-icons/react/dist/ssr/Minus';
 import { PencilSimple as PencilSimpleIcon } from '@phosphor-icons/react/dist/ssr/PencilSimple';
 import {TrashSimple as TrashSimpleIcon} from '@phosphor-icons/react/dist/ssr/TrashSimple';
 
 import { paths } from '@/paths';
-import { dayjs } from '@/lib/dayjs';
 import { DataTable } from '@/components/core/data-table';
 
-import { useCustomersSelection } from './course-categories-selection-context';
+
 import { useDispatch } from 'react-redux';
 
 import { toast } from '@/components/core/toaster';
 import { useRouter } from 'next/navigation';
-import { VendorActions } from '@/redux/slices';
-
-
-// import RouterLink from 'next/link';
+import { InstructorActions } from '@/redux/slices';
 
 
 
-
-
-
-
-
-
-
-
-export function CustomersTable({ rows }) {
-  const { deselectAll, deselectOne, selectAll, selectOne, selected } = useCustomersSelection();
+export function InstructorsTable({ rows }) {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const { deletevendors, fetchVendors,updatevendors } = VendorActions;
+  const { updateinstructor} = InstructorActions;
 
   const columns = [
     {
       formatter: (row) => (
-        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center',marginLeft:3 }}>
          {' '}
           <div>
             <Link
             
             >
-              {row.vendorname}
+              {row.firstname + " " + row.lastname}
             </Link>
         
           </div>
         </Stack>
       ),
-      name: 'Vendor Name',
-      width: '150px',
+      name: 'Instructor Name',
+      width: '250px',
     },
    
-    {
-      formatter(row) {
-        return row.firstname;
-      },
-      name: 'First Name',
-      width: '150px',
-    },
-    {
-      formatter(row) {
-        return row.lastname;
-      },
-      name: 'Last Name',
-      width: '150px',
-    },
     {
       formatter(row) {
         return row.email;
       },
       name: 'Email',
-      width: '150px',
-    },
-    {
-      formatter(row) {
-        return row.phone;
-      },
-      name: 'Phone Number',
-      width: '150px',
+      width: '200px',
     },
     
     {
@@ -114,7 +77,7 @@ export function CustomersTable({ rows }) {
     {
       formatter: (row) => (<div style={{display:"flex"}}>
   
-      <IconButton component={RouterLink} href={paths.dashboard.vendors.edit(row.id)}>
+      <IconButton component={RouterLink} href={paths.dashboard.instructors.edit(row.id)}>
           <PencilSimpleIcon />
         </IconButton>
         
@@ -124,19 +87,18 @@ export function CustomersTable({ rows }) {
             status_ :status_==="ACTIVE"?"INACTIVE":"ACTIVE",
             id : row.id
           }
-          await dispatch(updatevendors(data)).then((res) => {
+          await dispatch(updateinstructor(data)).then((res) => {
             console.log(res?.payload?.data?.data?.data,"reso");
             if (res?.payload?.data?.data?.data) {
             
                   toast.success('Details updated');
-                  router.push(paths.dashboard.vendors.list);
+                  router.push(paths.dashboard.instructors.list);
                   const data = {
                     page: 1,
                     limit: 10,
                     sort: 'asc',
                     search: '',
                   };
-                  dispatch(fetchVendors(data));
             } else {
               toast.error(res?.payload?.data?.data?.error?.message || 'Internal Server Error');
             }
@@ -162,18 +124,8 @@ export function CustomersTable({ rows }) {
     <React.Fragment>
       <DataTable
         columns={columns}
-        onDeselectAll={deselectAll}
-        onDeselectOne={(_, row) => {
-          deselectOne(row.id);
-        }}
-        onSelectAll={selectAll}
-        onSelectOne={(_, row) => {
-          selectOne(row.id);
-        }}
         rows={rows}
-      
-        selectable
-        selected={selected}
+ 
       />
       {!rows.length ? (
         <Box sx={{ p: 3 }}>

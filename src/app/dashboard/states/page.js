@@ -8,10 +8,10 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 
-import { CustomersFilters } from '@/components/dashboard/states/course-categories-filters';
-import { CustomersPagination } from '@/components/dashboard/courses/course-categories-pagination';
-;
-import { CustomersTable } from '@/components/dashboard/states/course-categories-table';
+import { StatesFilters } from '@/components/dashboard/states/states-filters';
+import {Pagination } from '@/components/core/pagination';
+
+import { StatesTable } from '@/components/dashboard/states/states-table';
 
 import InputAdornment from '@mui/material/InputAdornment';
 import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass';
@@ -33,9 +33,9 @@ export default function Page({ searchParams }) {
   const router = useRouter();
 
   const { allCountries } = useSelector((state) => state?.countries?.country);
-  const { allState, loading: isLoading, totalData } = useSelector((state) => state?.states?.state);
+  const { allState, loading: isLoading, } = useSelector((state) => state?.states?.state);
   const dispatch = useDispatch();
-  const { deletestate, fetchState } = StateActions;
+  const { fetchState } = StateActions;
   const { fetchCountries } = countryActions;
   const isInitialMount = React.useRef(true);
 
@@ -151,15 +151,14 @@ export default function Page({ searchParams }) {
           />
         </Stack>
         <Card>
-          <CustomersFilters filters={{  searchTerm, limit, page ,countryID}} sortDir={sortDir} Countries={allCountries} />
+          <StatesFilters filters={{  searchTerm, limit, page ,countryID}} sortDir={sortDir} Countries={allCountries} />
           <Divider />
           <Box sx={{ overflowX: 'auto' }}>
             {isLoading && <TableSkeleton />}
-            {!isLoading && <CustomersTable rows={allState} />}
+            {!isLoading && <StatesTable rows={allState} />}
           </Box>
           <Divider />
-          <CustomersPagination
-            count={totalData || 0}
+          <Pagination
             page={currentPage - 1} 
             rowsPerPage={rowsPerPage}
             onPageChange={handlePageChange}

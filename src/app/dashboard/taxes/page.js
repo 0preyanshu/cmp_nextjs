@@ -9,8 +9,8 @@ import Typography from '@mui/material/Typography';
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 
 
-import { CustomersPagination } from '@/components/dashboard/courses/course-categories-pagination';
-import { CustomersTable } from '@/components/dashboard/taxes/course-categories-table';
+import { Pagination } from '@/components/core/pagination';
+import { TaxesTable } from '@/components/dashboard/taxes/taxes-table';
 
 import InputAdornment from '@mui/material/InputAdornment';
 import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass';
@@ -127,11 +127,11 @@ export default function Page({ searchParams }) {
               <TableSkeleton />
             </>}
             {!isLoading && <>
-              <CustomersTable rows={allTaxes} />
+              <TaxesTable rows={allTaxes} />
             </>}
           </Box>
           <Divider />
-          <CustomersPagination
+          <Pagination
             count={totalData || 0}
             page={currentPage-1}
             rowsPerPage={rowsPerPage}

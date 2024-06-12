@@ -8,10 +8,9 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 
-import { dayjs } from '@/lib/dayjs';
-import { CustomersFilters } from '@/components/dashboard/vendors/course-categories-filters';
-import { CustomersPagination } from '@/components/dashboard/courses/course-categories-pagination';
-import { CustomersTable } from '@/components/dashboard/vendors/course-categories-table';
+
+import { Pagination } from '@/components/core/pagination';
+import { VendorsTable } from '@/components/dashboard/vendors/vendors-table';
 
 import InputAdornment from '@mui/material/InputAdornment';
 import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass';
@@ -25,7 +24,7 @@ import TableSkeleton from '@/components/core/Skeletion';
 
 
 export default function Page({ searchParams }) {
-  const { email, phone, sortDir, status, searchTerm, page = 1, limit = 10 } = searchParams;
+  const {  sortDir, searchTerm, page = 1, limit = 10 } = searchParams;
 
   const [currentPage, setCurrentPage] = React.useState(parseInt(page));
   const [rowsPerPage, setRowsPerPage] = React.useState(parseInt(limit));
@@ -34,9 +33,9 @@ export default function Page({ searchParams }) {
   const dispatch = useDispatch();
 
 
-  const { allVendors, iserror, toast, loading: isLoading, totalData } = useSelector((state) => state?.vendors?.vendors);
+  const { allVendors,  loading: isLoading,} = useSelector((state) => state?.vendors?.vendors);
 
-  const { deletevendors, fetchVendors } = VendorActions;
+  const { fetchVendors } = VendorActions;
 
 
   const [searchInput, setSearchInput] = React.useState(searchTerm || '');
@@ -66,7 +65,7 @@ export default function Page({ searchParams }) {
 
   const handleRowsPerPageChange = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
-    setCurrentPage(1); // Reset to page 1 on rows per page change
+    setCurrentPage(1); 
     updateSearchParams({ ...searchParams, limit: parseInt(event.target.value, 10), page: 1 }, sortDir);
   };
 
@@ -134,12 +133,11 @@ export default function Page({ searchParams }) {
               <TableSkeleton />
             </>}
             {!isLoading && <>
-              <CustomersTable rows={allVendors} />
+              <VendorsTable rows={allVendors} />
             </>}
           </Box>
           <Divider />
-          <CustomersPagination
-            count={100}
+          <Pagination
             page={currentPage-1}
             rowsPerPage={rowsPerPage}
             onPageChange={handlePageChange}
@@ -151,38 +149,3 @@ export default function Page({ searchParams }) {
   );
 }
 
-// Sorting and filtering has to be done on the server.
-
-function applySort(row, sortDir) {
-  return row.sort((a, b) => {
-    if (sortDir === 'asc') {
-      return a.createdAt.getTime() - b.createdAt.getTime();
-    }
-
-    return b.createdAt.getTime() - a.createdAt.getTime();
-  });
-}
-
-function applyFilters(row, { email, phone, status }) {
-  return row.filter((item) => {
-    if (email) {
-      if (!item.email?.toLowerCase().includes(email.toLowerCase())) {
-        return false;
-      }
-    }
-
-    if (phone) {
-      if (!item.phone?.toLowerCase().includes(phone.toLowerCase())) {
-        return false;
-      }
-    }
-
-    if (status) {
-      if (item.status !== status) {
-        return false;
-      }
-    }
-
-    return true;
-  });
-}

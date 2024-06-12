@@ -22,7 +22,7 @@ const schema = z.object({
   LiveSecretKey: z.string().min(1, 'Live Secret Key is required').max(255),
 });
 
-export function SendGrid() {
+export function StripeForm() {
   const pathname = usePathname();
   const dispatch = useDispatch();
   const router = useRouter();
