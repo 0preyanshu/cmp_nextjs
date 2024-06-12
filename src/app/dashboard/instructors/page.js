@@ -8,8 +8,8 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 
-import { CustomersPagination } from '@/components/dashboard/courses/course-categories-pagination';
-import { CustomersTable } from '@/components/dashboard/instructors/course-categories-table';
+import { Pagination } from '@/components/core/pagination';
+import { InstructorsTable } from '@/components/dashboard/instructors/instructors-table';
 
 import InputAdornment from '@mui/material/InputAdornment';
 import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass';
@@ -142,12 +142,11 @@ export default function Page({ searchParams }) {
               <TableSkeleton />
             </>}
             {!isLoading && <>
-              <CustomersTable rows={allInstructors} />
+              <InstructorsTable rows={allInstructors} />
             </>}
           </Box>
           <Divider />
-          <CustomersPagination
-            count={100}
+          <Pagination
             page={currentPage-1}
             rowsPerPage={rowsPerPage}
             onPageChange={handlePageChange}
@@ -159,38 +158,4 @@ export default function Page({ searchParams }) {
   );
 }
 
-// Sorting and filtering has to be done on the server.
 
-function applySort(row, sortDir) {
-  return row.sort((a, b) => {
-    if (sortDir === 'asc') {
-      return a.createdAt.getTime() - b.createdAt.getTime();
-    }
-
-    return b.createdAt.getTime() - a.createdAt.getTime();
-  });
-}
-
-function applyFilters(row, { email, phone, status }) {
-  return row.filter((item) => {
-    if (email) {
-      if (!item.email?.toLowerCase().includes(email.toLowerCase())) {
-        return false;
-      }
-    }
-
-    if (phone) {
-      if (!item.phone?.toLowerCase().includes(phone.toLowerCase())) {
-        return false;
-      }
-    }
-
-    if (status) {
-      if (item.status !== status) {
-        return false;
-      }
-    }
-
-    return true;
-  });
-}

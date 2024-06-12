@@ -8,7 +8,8 @@ import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { CheckCircle as CheckCircleIcon } from '@phosphor-icons/react/dist/ssr/CheckCircle';;
+import { CheckCircle as CheckCircleIcon } from '@phosphor-icons/react/dist/ssr/CheckCircle';
+
 import { Minus as MinusIcon } from '@phosphor-icons/react/dist/ssr/Minus';
 import { PencilSimple as PencilSimpleIcon } from '@phosphor-icons/react/dist/ssr/PencilSimple';
 import {TrashSimple as TrashSimpleIcon} from '@phosphor-icons/react/dist/ssr/TrashSimple';
@@ -16,49 +17,55 @@ import {TrashSimple as TrashSimpleIcon} from '@phosphor-icons/react/dist/ssr/Tra
 import { paths } from '@/paths';
 import { DataTable } from '@/components/core/data-table';
 
-import { useCustomersSelection } from './course-categories-selection-context';
 import { useDispatch } from 'react-redux';
-
+import { TimezoneAction } from '@/redux/slices';
 import { toast } from '@/components/core/toaster';
 import { useRouter } from 'next/navigation';
-import { InstructorActions } from '@/redux/slices';
 
 
+export function TimezonesTable({ rows }) {
 
-export function CustomersTable({ rows }) {
-  const { deselectAll, deselectOne, selectAll, selectOne, selected } = useCustomersSelection();
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const { updateinstructor} = InstructorActions;
+ const {  updateTimezones} = TimezoneAction;
+
 
   const columns = [
     {
       formatter: (row) => (
-        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-         {' '}
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center', marginLeft:3}}>
+         {'   '}
           <div>
             <Link
             
             >
-              {row.firstname + " " + row.lastname}
+              {row.timezoneName}
             </Link>
         
           </div>
         </Stack>
       ),
-      name: 'Instructor Name',
+      name: 'Time Zone',
       width: '250px',
     },
    
     {
       formatter(row) {
-        return row.email;
+        return row.timezoneShortName;
       },
-      name: 'Email',
+      name: 'Time Zone ShortName',
       width: '200px',
     },
     
+   
+    {
+      formatter(row) {
+        return row.gmtOffset;
+      },
+      name: 'Gmt Offset',
+      width: '200px',
+    },
     {
       formatter: (row) => {
         const mapping = {
@@ -78,32 +85,26 @@ export function CustomersTable({ rows }) {
     {
       formatter: (row) => (<div style={{display:"flex"}}>
   
-      <IconButton component={RouterLink} href={paths.dashboard.instructors.edit(row.id)}>
+      <IconButton component={RouterLink} href={paths.dashboard.timezones.edit(row.id)}>
           <PencilSimpleIcon />
         </IconButton>
         
         <IconButton onClick={async ()=>{
-          const {status_} = row;
-          const data ={
-            status_ :status_==="ACTIVE"?"INACTIVE":"ACTIVE",
-            id : row.id
-          }
-          await dispatch(updateinstructor(data)).then((res) => {
-            console.log(res?.payload?.data?.data?.data,"reso");
-            if (res?.payload?.data?.data?.data) {
-            
-                  toast.success('Details updated');
-                  router.push(paths.dashboard.instructors.list);
-                  const data = {
-                    page: 1,
-                    limit: 10,
-                    sort: 'asc',
-                    search: '',
-                  };
-            } else {
-              toast.error(res?.payload?.data?.data?.error?.message || 'Internal Server Error');
-            }
-          })
+                    const {status_} = row;
+                    const data ={
+                      status_ :status_==="ACTIVE"?"INACTIVE":"ACTIVE",
+                      id : row.id
+                    }
+                    await dispatch(updateTimezones(data)).then((res) => {
+                      console.log(res,"reso");
+                      if (res?.payload?.data) {
+                        // console.log(data,"data");
+                            toast.success('Details updated');
+                            router.push(paths.dashboard.timezones.list);
+                      } else {
+                        toast.error(res?.payload?.error?.message|| 'Internal Server Error');
+                      }
+                    })
   
         }}>
           <TrashSimpleIcon />
@@ -118,25 +119,11 @@ export function CustomersTable({ rows }) {
     },
   ];
 
-
-  console.log(rows,"rows"); 
-
   return (
     <React.Fragment>
       <DataTable
         columns={columns}
-        onDeselectAll={deselectAll}
-        onDeselectOne={(_, row) => {
-          deselectOne(row.id);
-        }}
-        onSelectAll={selectAll}
-        onSelectOne={(_, row) => {
-          selectOne(row.id);
-        }}
         rows={rows}
-      
-        selectable
-        selected={selected}
       />
       {!rows.length ? (
         <Box sx={{ p: 3 }}>

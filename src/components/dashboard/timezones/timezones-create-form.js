@@ -42,7 +42,7 @@ const schema = z.object({
   gmtOffset: z.string().nonempty('GMT Offset is required'),
 });
 
-export function CustomerCreateForm() {
+export function TimezonesCreateForm() {
   const [currentTimezone, setcurrentTimezone] = React.useState({});
 
   const { allTimezones } = useSelector((state) => state?.timezone?.timezones);

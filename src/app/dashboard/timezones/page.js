@@ -8,9 +8,9 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 
-import { CustomersPagination } from '@/components/dashboard/courses/course-categories-pagination';
+import { Pagination } from '@/components/core/pagination';
 
-import { CustomersTable } from '@/components/dashboard/timezones/course-categories-table';
+import { TimezonesTable } from '@/components/dashboard/timezones/timezones-table';
 
 import InputAdornment from '@mui/material/InputAdornment';
 import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass';
@@ -22,7 +22,7 @@ import { TimezoneAction } from '@/redux/slices';
 import TableSkeleton from '@/components/core/Skeletion';
 
 export default function Page({ searchParams }) {
-  const { sortDir, searchTerm, page = 1, limit = 10 } = searchParams;
+  const {  searchTerm, page = 1, limit = 10 } = searchParams;
 
   const [currentPage, setCurrentPage] = React.useState(parseInt(page));
   const [rowsPerPage, setRowsPerPage] = React.useState(parseInt(limit));
@@ -129,11 +129,11 @@ export default function Page({ searchParams }) {
               <TableSkeleton />
             </>}
             {!isLoading && <>
-              <CustomersTable rows={allTimezones} />
+              <TimezonesTable rows={allTimezones} />
             </>}
           </Box>
           <Divider />
-          <CustomersPagination
+          <Pagination
             count={totalData || 0}
             page={currentPage-1}
             rowsPerPage={rowsPerPage}

@@ -4,8 +4,7 @@ import * as React from 'react';
 import RouterLink from 'next/link';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import Avatar from '@mui/material/Avatar';
-import Box from '@mui/material/Box';
+
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
@@ -14,13 +13,9 @@ import Divider from '@mui/material/Divider';
 import FormControl from '@mui/material/FormControl';
 import FormHelperText from '@mui/material/FormHelperText';
 import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
 import OutlinedInput from '@mui/material/OutlinedInput';
-import Select from '@mui/material/Select';
 import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Unstable_Grid2';
-import { Camera as CameraIcon } from '@phosphor-icons/react/dist/ssr/Camera';
 import { Controller, useForm } from 'react-hook-form';
 import { z as zod } from 'zod';
 
@@ -42,7 +37,7 @@ const schema = zod.object({
 
 });
 
-export function CustomerCreateForm() {
+export function TaxesCreateForm() {
   const [currentTax, setcurrentTax] = React.useState({});
 
   const { allTaxes, iserror , loading: isLoading, totalData } = useSelector((state) => state?.taxes?.taxes);

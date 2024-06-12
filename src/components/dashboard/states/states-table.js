@@ -17,27 +17,27 @@ import { PencilSimple as PencilSimpleIcon } from '@phosphor-icons/react/dist/ssr
 import {TrashSimple as TrashSimpleIcon} from '@phosphor-icons/react/dist/ssr/TrashSimple';
 
 import { paths } from '@/paths';
-import { dayjs } from '@/lib/dayjs';
+
 import { DataTable } from '@/components/core/data-table';
 
-import { useCustomersSelection } from './course-categories-selection-context';
+
 import { useDispatch } from 'react-redux';
 import { StateActions } from '@/redux/slices';
 import { toast } from '@/components/core/toaster';
 import { useRouter } from 'next/navigation';
 
 
-export function CustomersTable({ rows }) {
-  const { deselectAll, deselectOne, selectAll, selectOne, selected } = useCustomersSelection();
+export function StatesTable({ rows }) {
+
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const { deletestate, fetchState,createstate, updatestate } = StateActions;
+  const {updatestate } = StateActions;
 
   const columns = [
     {
       formatter: (row) => (
-        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center',marginLeft:3 }}>
            {' '}
           <div>
             <Link
@@ -121,17 +121,7 @@ export function CustomersTable({ rows }) {
     <React.Fragment>
       <DataTable
         columns={columns}
-        onDeselectAll={deselectAll}
-        onDeselectOne={(_, row) => {
-          deselectOne(row.id);
-        }}
-        onSelectAll={selectAll}
-        onSelectOne={(_, row) => {
-          selectOne(row.id);
-        }}
         rows={rows}
-        selectable
-        selected={selected}
       />
       {!rows.length ? (
         <Box sx={{ p: 3 }}>
