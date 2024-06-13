@@ -9,7 +9,7 @@ import { useState } from 'react';
 
 import { TabContext, TabList, TabPanel } from '@mui/lab';
 import { PreRequisiteEmails } from './prerequisite-email-form';
-import { WelcomeEmails } fro./welcome-email-formemail-form';
+import { WelcomeEmails } from './welcome-email-formemail-form';
 
 
 
