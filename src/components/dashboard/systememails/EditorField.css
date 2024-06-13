@@ -1,0 +1,16 @@
+.custom-quill .ql-container {
+     min-height: 30vh; 
+     max-height: 60vh;
+    font-size: 20px;
+    overflow-y: scroll;
+
+
+  }
+
+    .custom-quill .ql-editor {
+        .ql-editor::before {
+            font-style: normal; /* Placeholder text style */
+            color: #aaa; /* Placeholder text color */
+          }
+        
+    }

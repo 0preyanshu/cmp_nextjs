@@ -184,6 +184,11 @@ export const paths = {
     create: '/dashboard/vendors/create',
     edit : (vendorId) => `/dashboard/vendors/edit/${vendorId}`,
   },
+  coupons: {
+    list: '/dashboard/coupons',
+    create: '/dashboard/vendors/coupons',
+    edit : (couponId) => `/dashboard/coupons/edit/${couponId}`,
+  },
 
 
 
