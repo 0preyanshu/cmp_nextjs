@@ -9,7 +9,7 @@ import { useState } from 'react';
 
 import { TabContext, TabList, TabPanel } from '@mui/lab';
 import { PreRequisiteEmails } from './prerequisite-email-form';
-import { WelcomeEmails } from './welcome-email-formemail-form';
+import { WelcomeEmails } from './welcome-email-form';
 
 
 
@@ -55,7 +55,7 @@ const emailTypeIds = {
             <TabPanel value="2">
               <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'column', md: 'row' },alignItems:"center", justifyContent:"center",width:"100%"}}>
                 <Box sx={{ mt: 2, width: { sm: '100%', md: '100%' } }}>
-                  <StripeForm/>
+                  <WelcomeEmails/>
                 </Box>
                
               </Box>
