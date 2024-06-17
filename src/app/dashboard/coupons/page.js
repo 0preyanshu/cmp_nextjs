@@ -99,7 +99,7 @@ export default function Page({ searchParams }) {
       <Stack spacing={4}>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} sx={{ alignItems: 'flex-start' }}>
           <Box sx={{ flex: '1 1 auto' }}>
-            <Typography variant="h4">Tax</Typography>
+            <Typography variant="h4">Coupons</Typography>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Button startIcon={<PlusIcon />} variant="contained" onClick={() => {

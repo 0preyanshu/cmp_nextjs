@@ -55,7 +55,7 @@ export default function Page({ searchParams }) {
 
   const handleSearchChange = (event) => {
     setSearchInput(event.target.value);
-    updateSearchParams({ ...searchParams, searchTerm: event.target.value, page: 1 }, sortDir); // Reset to page 1 on search
+    updateSearchParams({ ...searchParams, searchTerm: event.target.value, page: 1 }, sortDir); 
   };
 
   const handlePageChange = (event, newPage) => {
@@ -101,7 +101,7 @@ export default function Page({ searchParams }) {
       <Stack spacing={4}>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} sx={{ alignItems: 'flex-start' }}>
           <Box sx={{ flex: '1 1 auto' }}>
-            <Typography variant="h4">Instructors</Typography>
+            <Typography variant="h4">Vendors</Typography>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Button startIcon={<PlusIcon />} variant="contained" onClick={() => {

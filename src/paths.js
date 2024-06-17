@@ -186,8 +186,19 @@ export const paths = {
   },
   coupons: {
     list: '/dashboard/coupons',
-    create: '/dashboard/vendors/coupons',
+    create: '/dashboard/coupons/create',
     edit : (couponId) => `/dashboard/coupons/edit/${couponId}`,
+  },
+  systememails: {
+    list: '/dashboard/systememails',
+    create: '/dashboard/coupons/create',
+    edit : (couponId) => `/dashboard/coupons/edit/${couponId}`,
+  },
+  
+  eventmanagement: {
+    list: '/dashboard/event-management',
+    create: '/dashboard/event-management/create',
+    edit : (eventmanagementId) => `/dashboard/event-management/edit/${eventmanagementId}`,
   },
 
 

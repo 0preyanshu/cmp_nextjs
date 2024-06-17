@@ -19,41 +19,38 @@ import { LoadingButton } from '@mui/lab';
 import { toast } from '@/components/core/toaster';
 import { EditorField } from './editor-field';
 import { useSelector } from 'react-redux';
-import { paths } from '@/paths';
-import { useRouter } from 'next/router';
-import { logger } from '@/lib/default-logger';
+import axios from 'axios';
+
+
+
 
 // Define the Zod schema
 const schema = z.object({
-  emailSubject: z.string().min(1, 'Subject is required'),
-  eventId: z.string().min(0, 'Event is required'),
+  subject: z.string().min(1, 'Subject is required'),
+  eventID: z.string().max(0).or(z.string().min(1, 'Event is required')),
   testEmail: z.string().email('Enter a valid Email').optional().or(z.literal('')),
   courseID: z.string().min(1, 'Course is required'),
   html : z.string().min(0, ''),
 
+
 });
 
-const courses = [
-  { currencyType: 'course1', symbol: '$' },
-  { currencyType: 'course2', symbol: '€' },
-];
+const HOST_API = "https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg"
 
-const events = [
-  { currencyType: 'event1', symbol: 'Event 1' },
-  { currencyType: 'event2', symbol: 'Event 2' },
-];
+
 
 export function PreRequisiteEmails({ filteredEvents = [], sendTestEmail, sendTestEmailLoading = 0 }) {
   const [currentDetails, setCurrentDetails] = React.useState({});
-  // const [value, setValue] = React.useState('<p>hiiiiiiii<p>');
 
-  const { allCountries } = useSelector((state) => state?.countries?.country);
+  const { allCourses } = useSelector((state) => state?.courses?.courses);
+  const { allEvents } = useSelector((state) => state?.event?.events);
+  
 
   const defaultValues = React.useMemo(
     () => ({
       courseID: currentDetails.courseID || '',
-      emailSubject: currentDetails.emailSubject || '',
-      eventId: currentDetails.eventId || '',
+      subject: currentDetails.emailSubject || '',
+      eventID: currentDetails.eventId || '',
       testEmail: currentDetails.testEmail || '',
       html : currentDetails.html || '<p>Write Something . . . <p>'
     }),
@@ -72,6 +69,18 @@ export function PreRequisiteEmails({ filteredEvents = [], sendTestEmail, sendTes
   React.useEffect(() => {
     reset(defaultValues);
   }, [currentDetails, reset, defaultValues]);
+
+  const initialMount = React.useRef(true);
+  React.useEffect(() => {
+    if(initialMount.current){
+      initialMount.current = false;
+      fetchEmailTemplateDetails().then((data) => {
+        if(data.data){
+          setCurrentDetails(data);
+        }
+      });
+    }
+  }, []);
 
   const variablesList = [
     '[Name] for Participant Name',
@@ -95,8 +104,9 @@ export function PreRequisiteEmails({ filteredEvents = [], sendTestEmail, sendTes
 
   const fieldMapping = {
     courseID: 'courseID',
-    symbol: 'currencySymbol',
-    countryID: 'countryID',
+    subject: 'subject',
+    html: 'html',
+
   };
 
   const getChangedFields = (data) => {
@@ -111,13 +121,47 @@ export function PreRequisiteEmails({ filteredEvents = [], sendTestEmail, sendTes
     return changedFields;
   };
 
-  const onSubmit = async (data) => {
+
+  const onSubmit = async (obj) => {
     try {
-      console.log(data, 'data');
-    } catch (err) {
-      logger.error(err);
+      const data = await axios.put(
+        HOST_API.concat(`/email-template/01HZNWYG622K0R4N9C2T2E2XGW`),
+        getChangedFields(obj)
+        ,
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+        }
+      );
+      if(data.data){
+        toast('Pre-Rrequisite email updated!');
+      }
+      else{
+        toast.error(data.error.message||'Something went wrong!');
+      }
+     
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message||'Something went wrong!');
     }
   };
+
+  const fetchEmailTemplateDetails = async () => {
+    try {
+      const response = await axios.get(
+        HOST_API.concat(`/email-template/01HZNWYG622K0R4N9C2T2E2XGW`),
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(error);
+      toast.error(error.message || 'Something went wrong while fetching email template details!');
+    }
+  };
+  
+
+
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -131,9 +175,9 @@ export function PreRequisiteEmails({ filteredEvents = [], sendTestEmail, sendTes
               <MenuItem value="">
                 <>Select Course</>
               </MenuItem>
-              {courses.map((c) => (
-                <MenuItem key={c.currencyType} value={c.currencyType}>
-                  {`${c.currencyType} (${c.symbol})`}
+              {allCourses.filter((e) => e.status_ === "ACTIVE").map((c) => (
+                <MenuItem key={c.id} value={c.id}>
+                  {c.courseName}
                 </MenuItem>
               ))}
             </Select>
@@ -143,7 +187,7 @@ export function PreRequisiteEmails({ filteredEvents = [], sendTestEmail, sendTes
       />
 
       <Controller
-        name="emailSubject"
+        name="subject"
         control={control}
         render={({ field }) => (
           <TextField
@@ -152,14 +196,14 @@ export function PreRequisiteEmails({ filteredEvents = [], sendTestEmail, sendTes
             variant="outlined"
             margin="normal"
             fullWidth
-            error={!!errors.emailSubject}
-            helperText={errors.emailSubject?.message}
+            error={!!errors.subject}
+            helperText={errors.subject?.message}
           />
         )}
       />
 
       <Box sx={{ mt: 5 }}>
-        <EditorField name="emailContent" setValue={setValue} simple />
+        <EditorField name="html" setValue={setValue} simple />
       </Box>
 
       <LoadingButton sx={{ my: 3 }} loading={isSubmitting} variant="contained" size="large" type="submit">
@@ -183,21 +227,21 @@ export function PreRequisiteEmails({ filteredEvents = [], sendTestEmail, sendTes
       <Stack direction="column" gap={3} alignItems="flex-end" justifyContent="space-between" sx={{ my: 1 }}>
         <Controller
           control={control}
-          name="eventId"
+          name="eventID"
           render={({ field }) => (
-            <FormControl error={Boolean(errors.eventId)} fullWidth variant="outlined">
+            <FormControl error={Boolean(errors.eventID)} fullWidth variant="outlined">
               <InputLabel>Events</InputLabel>
               <Select {...field}>
                 <MenuItem value="">
                   <>Select Event</>
                 </MenuItem>
-                {events.map((e) => (
-                  <MenuItem key={e.currencyType} value={e.currencyType}>
-                    {`${e.symbol}`}
+                {allEvents.filter((e) => e.status_ === "ACTIVE").map((e) => (
+                  <MenuItem key={e.id} value={e.id}>
+                    {e.eventName}
                   </MenuItem>
                 ))}
               </Select>
-              <FormHelperText>{errors.eventId?.message}</FormHelperText>
+              <FormHelperText>{errors.eventID?.message}</FormHelperText>
             </FormControl>
           )}
         />

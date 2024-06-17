@@ -8,9 +8,9 @@ import { ArrowLeft as ArrowLeftIcon } from '@phosphor-icons/react/dist/ssr/Arrow
 
 import { config } from '@/config';
 import { paths } from '@/paths';
-import { TaxesCreateForm } from '@/components/dashboard/coupons/taxes-create-form';
+import { CitiesCreateForm } from '@/components/dashboard/event-management/cities-create-form';
 
-export const metadata = { title: `Create | Taxes | Dashboard | ${config.site.name}` };
+export const metadata = { title: `Create | Customers | Dashboard | ${config.site.name}` };
 
 export default function Page() {
   return (
@@ -28,7 +28,7 @@ export default function Page() {
             <Link
               color="text.primary"
               component={RouterLink}
-              href={paths.dashboard.coupons.list}
+              href={paths.dashboard.eventmanagement.list}
               sx={{ alignItems: 'center', display: 'inline-flex', gap: 1 }}
               variant="subtitle2"
             >
@@ -37,10 +37,10 @@ export default function Page() {
             </Link>
           </div>
           <div>
-            <Typography variant="h4">Create Coupon</Typography>
+            <Typography variant="h5">Create City</Typography>
           </div>
         </Stack>
-        <TaxesCreateForm />
+        <CitiesCreateForm />
       </Stack>
     </Box>
   );

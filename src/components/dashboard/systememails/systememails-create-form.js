@@ -36,7 +36,7 @@ const emailTypeIds = {
 
   return (
   
-      <Container >
+      <Container>
                <TabContext value={value}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
               <TabList onChange={handleChange} aria-label="lab API tabs example">
@@ -49,7 +49,6 @@ const emailTypeIds = {
                 <Box sx={{ mt: 2, width: { sm: '100%', md: '100%' } }}>
                   <PreRequisiteEmails emailTypeIds={emailTypeIds}/>
                 </Box>
-               
               </Box>
             </TabPanel>
             <TabPanel value="2">

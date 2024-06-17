@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 // import axios from 'axios';
-import { HOST_API } from '../../config';
 import axios from 'axios';
+ const HOST_API = 'https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg';
 
 // const initialState = [];
 
@@ -198,7 +198,7 @@ function createExtraActions() {
 function createEvents() {
   return createAsyncThunk(`${name}/createEvents`, async (obj) => {
     try {
-      const response = await axios.post(HOST_API.concat(`/event/create`), obj, {
+      const response = await axios.post(HOST_API.concat(`/event`), obj, {
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
       });
       return response;
@@ -212,7 +212,7 @@ function fetchEvents() {
     try {
       const response = await axios.get(
         HOST_API.concat(
-          `/event/events?page=${data.page}&limit=${data.limit}&search=${data.name}&courseId=${data.courseId}&instructorId=${data.instructorId}&courseCategoryId=${data.courseCategoryId}&countryId=${data.countryId}&timezone=${data.timezone}&status=${data.status}`
+          `/event?page=${data.page}&limit=${data.limit}&search=${data.name}&courseId=${data.courseId}&instructorId=${data.instructorId}&courseCategoryId=${data.courseCategoryId}&countryId=${data.countryId}&timezone=${data.timezone}&status=${data.status}`
         ),
         {
           headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
@@ -228,7 +228,7 @@ function fetchEvents() {
 function fetchEventById() {
   return createAsyncThunk(`${name}/fetchEventById`, async (id) => {
     try {
-      const response = await axios.get(HOST_API.concat(`/event/eventById/${id}`), {
+      const response = await axios.get(HOST_API.concat(`/event/${id}`), {
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
       });
       return response.data;
@@ -254,7 +254,7 @@ function fetchEventsAnalytics() {
 function deleteEvents() {
   return createAsyncThunk(`${name}/deleteEvents`, async (id) => {
     try {
-      const response = await axios.delete(HOST_API.concat(`/event/delete/${id}`), {
+      const response = await axios.delete(HOST_API.concat(`/event/${id}`), {
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
       });
       return response.data;
@@ -266,7 +266,7 @@ function deleteEvents() {
 function updateEvents() {
   return createAsyncThunk(`${name}/updateEvents`, async (data) => {
     try {
-      const response = await axios.put(HOST_API.concat(`/event/update/${data.id}`), data, {
+      const response = await axios.put(HOST_API.concat(`/event/${data.id}`), data, {
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
       });
       return response;
@@ -293,15 +293,18 @@ function createExtraReducers() {
         state.events = { loading: true, allEvents: state.events.allEvents || [], totalData: state.events.totalData };
       },
       [fulfilled]: (state, action) => {
-        console.log(action);
+        state.events.loading=false;
+       if(action.payload?.data?.event){
         state.events = {
-          allEvents: [...state.events.allEvents, action.payload?.data?.eventDTO],
-          loading: false,
+          allEvents: [...state.events.allEvents, action.payload?.data?.data?.event] ,
           totalData: state.events.totalData + 1,
           toast: { message: 'events Added Successfully', variant: 'success' },
         };
+       }
+      
       },
       [rejected]: (state, action) => {
+        
         state.events = {
           error: action.error.message,
           loading: false,
@@ -322,9 +325,9 @@ function createExtraReducers() {
       },
       [fulfilled]: (state, action) => {
         const { isIndex } = action.meta.arg;
-
+        console.log(action.payload?.data?.data, 'action.payload?.data?.data?.data');
         state.events = {
-          allEvents: action?.payload?.eventDTOs,
+          allEvents: action.payload?.data?.data|| [],
           loading: false,
           totalData: action?.payload?.totalElements,
           toast: { message: 'events Added Successfully', variant: 'success' },
@@ -414,14 +417,18 @@ function createExtraReducers() {
         state.events = { loading: true, allEvents: state.events.allEvents || [] };
       },
       [fulfilled]: (state, action) => {
-        state.events = {
-          allEvents: state?.events?.allEvents?.map((item) =>
-            item.id === action.payload?.data?.eventDTO?.id ? action.payload?.data?.eventDTO : item
-          ),
-          loading: false,
-          totalData: state.events.totalData,
-          toast: { message: 'events Updated Successfully', variant: 'success' },
-        };
+        state.events.loading=false;
+        if(action.payload?.data?.data){
+          state.events = {
+            allEvents: state?.events?.allEvents?.map((item) =>
+              item.id === action.payload?.data?.data?.data?.id ? action.payload?.data?.data?.data : item
+            ),
+            totalData: state.events.totalData,
+            toast: { message: 'events Updated Successfully', variant: 'success' },
+          };
+
+        }
+      
       },
       [rejected]: (state, action) => {
         state.events = {

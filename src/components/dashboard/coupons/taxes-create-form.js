@@ -26,7 +26,10 @@ import { paths } from '@/paths';
 import { logger } from '@/lib/default-logger';
 import { toast } from '@/components/core/toaster';
 import { useDispatch, useSelector } from 'react-redux';
-import { TaxActions } from '@/redux/slices';
+import { CouponActions } from '@/redux/slices';
+import { CurrencyAction } from '@/redux/slices';
+import { EventsActions } from '@/redux/slices';
+import { CoursesActions } from '@/redux/slices';
 import { useParams, usePathname } from 'next/navigation';
 import dayjs from 'dayjs';
 import { useState } from 'react';
@@ -34,6 +37,7 @@ import { Checkbox, TextField, Autocomplete } from '@mui/material';
 import { Typography,createFilterOptions } from '@mui/material';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
+import { all } from 'axios';
 
 
 
@@ -57,20 +61,30 @@ const schema = zod.object({
   couponAmount: zod.preprocess((val) => Number(val), zod.number().min(1, 'Coupon amount must be at least 1')),
   currencyID: zod.string().min(1, 'Currency type is required'),
   usageLimit: zod.preprocess((val) => Number(val), zod.number().min(1, 'Usage limit must be at least 1')),
-  courseIds: zod.array(zod.number()),
+  courseID: zod.array(zod.string()).min(1, 'At least one course is required'),
+  eventID: zod.array(zod.string()).min(1, 'At least one event is required'),
+  couponType: zod.string().min(1, 'Coupon type is required'),
 });
 
 export function TaxesCreateForm() {
   const [currentCoupon, setcurrentCoupon] = React.useState({});
+  const { allCourses } = useSelector((state) => state?.courses?.courses);
+  const { allCoupons, loading: isLoading, totalData } = useSelector((state) => state?.coupon?.coupons);
 
-  const { allTaxes, iserror, loading: isLoading, totalData } = useSelector((state) => state?.taxes?.taxes);
+
+  const { allCurrency } = useSelector((state) => state?.currency?.currency);
+  const { allEvents } = useSelector((state) => state?.event?.events);
+
+  const { fetchCurrency, deleteCurrency } = CurrencyAction;
+  const { fetchCourses} = CoursesActions;
+  const { fetchCoupons, deletecoupons,updateCoupons,creataCoupons } = CouponActions;
+  const { fetchEvents } = EventsActions;
 
   const { id } = useParams();
   const pathname = usePathname();
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const { createTax, updateTax, fetchTaxes } = TaxActions;
 
   const isEdit = pathname.includes('edit');
 
@@ -78,13 +92,14 @@ export function TaxesCreateForm() {
 
   const defaultValues = React.useMemo(
     () => ({
-      couponCode: '',
-      expiryDate: dateIsValid(currentCoupon?.expiryDate) && dateIsInFuture(currentCoupon?.expiryDate) ? new Date(currentCoupon.expiryDate).toISOString() : new Date().toISOString() ,  // Hardcoded future date
-      couponType: '',
-      couponAmount: '',
-      currencyID: 'USD',
-      usageLimit: '',
-      courseIds: [],
+      couponCode: currentCoupon?.couponCode ||'',
+      expiryDate: dateIsValid(currentCoupon?.expiryDate) && dateIsInFuture(currentCoupon?.expiryDate) ? new Date(currentCoupon.expiryDate).toISOString() : new Date().toISOString() , 
+      couponType: currentCoupon?.couponType||'FIXED',
+      couponAmount: currentCoupon?.couponAmount|| '',
+      currencyID: currentCoupon?.currencyID|| '',
+      usageLimit: currentCoupon?.usageLimit||'',
+      courseID: currentCoupon?.courseID|| [],
+      eventID:currentCoupon?.eventID|| [],
     }),
     [currentCoupon]
   );
@@ -103,11 +118,24 @@ export function TaxesCreateForm() {
   }, [currentCoupon, reset, defaultValues]);
 
   React.useEffect(() => {
-    if (allTaxes?.length && id) {
-      const data = allTaxes.find((allTaxes) => String(allTaxes?.id) === String(id));
+    if (allCoupons?.length && id) {
+      const data = allCoupons.find((allCoupons) => String(allCoupons?.id) === String(id));
       setcurrentCoupon(data);
     }
-  }, [allTaxes, id]);
+  }, [allCoupons, id]);
+
+  React.useEffect(() => {
+    const data ={
+      page: 1,
+      limit: '',
+      name : '',
+    }
+    if(allCurrency.length===0)dispatch(fetchCurrency(data));
+    if(allCourses.length===0)dispatch(fetchCourses(data));
+    if(allEvents.length===0)dispatch(fetchEvents(data));
+
+  }, [dispatch]);
+
 
   const fieldMapping = {
     couponCode: 'couponCode',
@@ -116,14 +144,16 @@ export function TaxesCreateForm() {
     couponAmount: 'couponAmount',
     currencyID: 'currencyID',
     usageLimit: 'usageLimit',
+    courseID: 'courseID',
+    eventID: 'eventID',
   };
 
   const getChangedFields = (data) => {
     const changedFields = {};
     for (const key in data) {
-      const mappedKey = fieldMapping[key];
-      if (String(data[key]) !== String(currentCoupon[mappedKey])) {
-        changedFields[mappedKey] = data[key];
+      const mKey = fieldMapping[key];
+      if (String(data[key]) !== String(currentCoupon[mKey])) {
+        changedFields[mKey] = data[key];
       }
     }
     changedFields.id = currentCoupon.id;
@@ -134,10 +164,11 @@ export function TaxesCreateForm() {
     async (data) => {
       try {
         const changedData = getChangedFields(data);
+        console.log(changedData, 'changedData');
         console.log(data, 'data');
 
         if (isEdit) {
-          await dispatch(updateTax(changedData)).then((res) => {
+          await dispatch(updateCoupons(changedData)).then((res) => {
             if (res?.payload?.data?.data) {
               toast.success('Update success!');
               router.push(paths.dashboard.coupons.list);
@@ -146,20 +177,20 @@ export function TaxesCreateForm() {
             }
           });
         } else {
-          // await dispatch(createTax(changedData)).then((res) => {
-          //   if (res?.payload?.data?.data) {
-          //     toast.success('Create success!');
-          //     router.push(paths.dashboard.coupons.list);
-          //   } else {
-          //     toast.error(res?.payload?.data?.error?.message || 'Internal Server Error');
-          //   }
-          // });
+          await dispatch(creataCoupons(changedData)).then((res) => {
+            if (res?.payload?.data?.data) {
+              toast.success('Create success!');
+              router.push(paths.dashboard.coupons.list);
+            } else {
+              toast.error(res?.payload?.data?.error?.message || 'Internal Server Error');
+            }
+          });
         }
       } catch (err) {
         logger.error(err);
       }
     },
-    [isEdit, currentCoupon.id, dispatch, router, fetchTaxes, updateTax, createTax]
+    [isEdit, currentCoupon.id, dispatch, router]
   );
 
   return (
@@ -247,9 +278,12 @@ export function TaxesCreateForm() {
                       <FormControl error={Boolean(errors.currencyID)} fullWidth>
                         <InputLabel required>Currency Type</InputLabel>
                         <Select {...field}>
-                          <MenuItem value="USD">USD</MenuItem>
-                          <MenuItem value="EUR">EUR</MenuItem>
-                          <MenuItem value="GBP">GBP</MenuItem>
+                          <MenuItem value="">Select Currency</MenuItem>
+                          {allCurrency.map((currency) => (
+                            <MenuItem key={currency.id} value={currency.id}>
+                              {currency.currencyName}
+                            </MenuItem>
+                          ))}
                         </Select>
                         {errors.currencyID ? <FormHelperText>{errors.currencyID.message}</FormHelperText> : null}
                       </FormControl>
@@ -281,7 +315,7 @@ export function TaxesCreateForm() {
                 <CourseSelection control={control} errors={errors} />
                 </Grid>
           <Grid md={6} xs={12} mt={3}>
-                <CourseSelection control={control} errors={errors} />
+                <EventsSelection control={control} errors={errors} />
                 </Grid>
         </CardContent>
         <CardActions sx={{ justifyContent: 'flex-end' }}>
@@ -302,61 +336,114 @@ const checkedIcon = <CheckBoxIcon fontSize="small" />;
 
 
 function CourseSelection({ control, errors }) {
-  const [selectedCourses, setSelectedCourses] = useState([]);
+  const { allCourses } = useSelector((state) => state?.courses?.courses);
 
   return (
     <div>
+      <Controller
+        name="courseID"
+        control={control}
+        render={({ field }) => (
+          <>
+            <Autocomplete
+              {...field}
+              multiple
+              disableCloseOnSelect
+              freeSolo
+              onChange={(event, newValue) => {
+                if (newValue.find((option) => option.all))
+                  return field.onChange(field?.value?.length === allCourses?.length ? [] : allCourses?.map((option) => option.id));
 
-                <Controller
-                  name="courseIds"
-                  control={control}
-                  render={({ field }) => (
-                    <Autocomplete
-                      {...field}
-                      multiple
-                      disableCloseOnSelect
-                      freeSolo
-                      // onChange={(event, newValue) => field.onChange(newValue)}
-                      onChange={(event, newValue) => {
-                        if (newValue.find(option => option.all))
-                          return field.onChange(field?.value?.length === allCoursesData?.length ? [] : allCoursesData?.map((option) => option.id))
-
-                        field.onChange(newValue)
-                      }}
-                      options={allCoursesData && allCoursesData?.map((option) => option.id)}
-                      getOptionLabel={(eventId) =>
-                        allCoursesData.find((event) => event.id === eventId)?.courseName || ''
-                      }
-                      filterOptions={(options, params) => { // <<<--- inject the Select All option
-                        const filter = createFilterOptions()
-                        const filtered = filter(options, params)
-                        return [{ title: 'Select All...', all: true }, ...filtered]
-                      }}
-                      renderOption={(props, option, { selected }) => (
-                        <li {...props}>
-                          <Checkbox
-                            icon={icon}
-                            checkedIcon={checkedIcon}
-                            style={{ marginRight: 8 }}
-                            checked={option.all ? (field.value.length===allCoursesData.length): selected}
-                          />
-                          {option.all ? option?.title : allCoursesData.find((event) => event.id === option)?.courseName || ''}
-                        </li>
-                      )}
-                      // renderTags={(value, getTagProps) =>
-                      //   value.map((eventId, index) => (
-                      //     <Chip
-                      //       {...getTagProps({ index })}
-                      //       key={eventId}
-                      //       size="small"
-                      //       label={allCoursesData.find((event) => event.id === eventId)?.courseName || ''}
-                      //     />
-                      //   ))
-                      // }
-                      renderInput={(params) => <TextField label="Courses" {...params} />}
-                    />
-                  )}
+                field.onChange(newValue);
+              }}
+              options={allCourses && allCourses?.map((option) => option.id)}
+              getOptionLabel={(eventId) =>
+                allCourses.find((event) => event.id === eventId)?.courseName || ''
+              }
+              filterOptions={(options, params) => {
+                const filter = createFilterOptions();
+                const filtered = filter(options, params);
+                return [{ title: 'Select All...', all: true }, ...filtered];
+              }}
+              renderOption={(props, option, { selected }) => (
+                <li {...props}>
+                  <Checkbox
+                    icon={icon}
+                    checkedIcon={checkedIcon}
+                    style={{ marginRight: 8 }}
+                    checked={option.all ? (field.value.length === allCourses.length) : selected}
+                  />
+                  {option.all ? option?.title : allCourses.find((event) => event.id === option)?.courseName || ''}
+                </li>
+              )}
+              renderInput={(params) => (
+                <TextField
+                  label="Select Applicable Courses:"
+                  {...params}
+                  error={!!errors.courseID}
+                  helperText={errors.courseID ? errors.courseID.message : ''}
                 />
+              )}
+            />
+          </>
+        )}
+      />
+    </div>
+  );
+}
+function EventsSelection({ control, errors }) {
+  const { allEvents } = useSelector((state) => state?.event?.events);
+
+  return (
+    <div>
+      <Controller
+        name="eventID"
+        control={control}
+        render={({ field }) => (
+          <>
+            <Autocomplete
+              {...field}
+              multiple
+              disableCloseOnSelect
+              freeSolo
+              onChange={(event, newValue) => {
+                if (newValue.find((option) => option.all))
+                  return field.onChange(field?.value?.length === allEvents?.length ? [] : allEvents?.map((option) => option.id));
+
+                field.onChange(newValue);
+              }}
+              options={allEvents && allEvents?.map((option) => option.id)}
+              getOptionLabel={(eventId) =>
+                allEvents.find((event) => event.id === eventId)?.eventName || ''
+              }
+              filterOptions={(options, params) => {
+                const filter = createFilterOptions();
+                const filtered = filter(options, params);
+                return [{ title: 'Select All...', all: true }, ...filtered];
+              }}
+              renderOption={(props, option, { selected }) => (
+                <li {...props}>
+                  <Checkbox
+                    icon={icon}
+                    checkedIcon={checkedIcon}
+                    style={{ marginRight: 8 }}
+                    checked={option.all ? (field.value.length === allEvents.length) : selected}
+                  />
+                  {option.all ? option?.title : allEvents.find((event) => event.id === option)?.eventName || ''}
+                </li>
+              )}
+              renderInput={(params) => (
+                <TextField
+                  label="Select Applicable Events:"
+                  {...params}
+                  error={!!errors.eventID}
+                  helperText={errors.eventID ? errors.eventID.message : ''}
+                />
+              )}
+            />
+          </>
+        )}
+      />
     </div>
   );
 }

@@ -37,7 +37,7 @@ export default function Page() {
             </Link>
           </div>
           <div>
-            <Typography variant="h4">Edit Tax</Typography>
+            <Typography variant="h4">Edit Coupon</Typography>
           </div>
         </Stack>
         <TaxesCreateForm />

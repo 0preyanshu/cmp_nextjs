@@ -13,7 +13,10 @@ export const layoutConfig = {
           icon: 'chart-pie',
           items: [
             { key: 'Instructors', title: 'Instructors', href: paths.dashboard.instructors.list },
-            { key: 'Vendors', title: 'Vendors', href: paths.dashboard.vendors.list }
+            { key: 'Vendors', title: 'Vendors', href: paths.dashboard.vendors.list },
+            { key: 'Coupons', title: 'Coupons', href: paths.dashboard.coupons.list },
+            { key: 'System Emails', title: 'System Emails', href: paths.dashboard.systememails.list },
+            { key: 'Event Managment', title: 'Event Managment', href: paths.dashboard.eventmanagement.list },
             
 
           
