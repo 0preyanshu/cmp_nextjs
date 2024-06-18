@@ -105,7 +105,7 @@ const schema = zod.object({
 
 });
 
-export function CitiesCreateForm() {
+export function EventCreateForm() {
   const [currentEvent, setcurrentEvent] = React.useState({});
   const [filteredStates, setFilteredStates] = React.useState([]);
   const [filteredCities, setFilteredCities] = React.useState([]);
@@ -866,7 +866,7 @@ export function CitiesCreateForm() {
             style={{ textTransform: 'capitalize' }}
             loading={isSubmitting}
           >
-            {!isEdit ? 'Create City' : 'Save Changes'}
+            {!isEdit ? 'Create Event' : 'Save Changes'}
           </LoadingButton>
         </CardActions>
       </Card>

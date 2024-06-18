@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { HOST_API } from '../../config';
 import axios from 'axios';
+
+const HOST_API = "https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg";
 
 const name = 'waitlist';
 const initialState = {
@@ -18,8 +19,8 @@ function getWaitlistData() {
     try {
       const response = await axios.get(
         HOST_API.concat(
-          `/order/waitList?page=${data?.page}&limit=${data?.limit}&courseId=${data?.courseId || ''}&search=${data?.search || ''
-          }&eventId=${data?.eventId || ''}&eventStartDate=${data?.eventStartDate || ''}`
+          `/waitlist?page=${data?.page}&limit=${data?.limit}&courseID=${data?.courseID || ''}&search=${data?.name || ''
+          }&eventID=${data?.eventId || ''}&startDate=${data?.startDate || ''}`
         ),
         {
           headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
@@ -47,8 +48,8 @@ const createExtraReducers = () => {
         state.waitlist.totalElements = 0;
       },
       [fulfilled]: (state, actions) => {
-        state.waitlist.waitlistData = actions?.payload?.waitListDTOS;
-        state.waitlist.totalElements = actions?.payload?.totalElements;
+        state.waitlist.waitlistData = actions?.payload?.data?.data || [];
+        state.waitlist.totalElements = actions?.payload?.totalElements || 0;
         state.waitlist.isLoading = false;
         state.waitlist.toast = actions?.payload?.message || 'Waitlist fetched successfully!';
       },

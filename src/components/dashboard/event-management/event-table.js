@@ -32,7 +32,7 @@ import { format } from 'path';
 
 
 
-export function CitiesTable({ rows }) {
+export function EventTable({ rows }) {
 
   const dispatch = useDispatch();
   const router = useRouter();

@@ -200,6 +200,11 @@ export const paths = {
     create: '/dashboard/event-management/create',
     edit : (eventmanagementId) => `/dashboard/event-management/edit/${eventmanagementId}`,
   },
+  waitlist: {
+    list: '/dashboard/waitlist',
+    create: '/dashboard/waitlist/create',
+    edit : (eventmanagementId) => `/dashboard/waitlist/edit/${eventmanagementId}`,
+  },
 
 
 

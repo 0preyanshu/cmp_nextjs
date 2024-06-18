@@ -8,9 +8,9 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 import {Download as DownloadIcon} from '@phosphor-icons/react/dist/ssr/Download';
-import { CitiesFilters } from '@/components/dashboard/event-management/cities-filters';
+import { EventFilters } from '@/components/dashboard/event-management/event-filters';
 import { Pagination } from '@/components/core/pagination';
-import { CitiesTable } from '@/components/dashboard/event-management/cities-table';
+import { EventTable } from '@/components/dashboard/event-management/event-table';
 import InputAdornment from '@mui/material/InputAdornment';
 import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass';
 import OutlinedInput from '@mui/material/OutlinedInput';
@@ -200,13 +200,13 @@ export default function Page({ searchParams }) {
         </TabContext>
 
         <Card>
-          <CitiesFilters filters={{ countryID, stateID, instructorID, courseCategoryID, courseID, timezoneID, limit, page }} sortDir={sortDir} />
+          <EventFilters filters={{ countryID, stateID, instructorID, courseCategoryID, courseID, timezoneID, limit, page }} sortDir={sortDir} />
           <Divider />
           <Box sx={{ overflowX: 'auto' }}>
             {isLoading ? (
               <TableSkeleton />
             ) : (
-              <CitiesTable rows={allEvents} />
+              <EventTable rows={allEvents} />
             )}
           </Box>
           <Divider />
