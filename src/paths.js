@@ -205,6 +205,11 @@ export const paths = {
     create: '/dashboard/waitlist/create',
     edit : (eventmanagementId) => `/dashboard/waitlist/edit/${eventmanagementId}`,
   },
+  abandonedcart: {
+    list: '/dashboard/abandoned-cart',
+    create: '/dashboard/abandonedcart/create',
+    edit : (eventmanagementId) => `/dashboard/abandonedcart/edit/${eventmanagementId}`,
+  },
 
 
 
