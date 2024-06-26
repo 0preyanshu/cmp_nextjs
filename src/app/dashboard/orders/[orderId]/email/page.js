@@ -8,11 +8,10 @@ import { ArrowLeft as ArrowLeftIcon } from '@phosphor-icons/react/dist/ssr/Arrow
 
 import { config } from '@/config';
 import { paths } from '@/paths';
-// import { TaxesCreateForm } from '@/components/dashboard/taxes/taxes-create-form';
-import OrderDetails from '@/components/dashboard/orders/order-details';
+import { PaymentApiForm } from '@/components/dashboard/paymentapi/paymentapi-create-form';
+import { EmailForm } from '../../../../../components/dashboard/orders/email-form';
 
-
-export const metadata = { title: `Create | Order | Dashboard | ${config.site.name}` };
+export const metadata = { title: `Create | Payment | Dashboard | ${config.site.name}` };
 
 export default function Page() {
   return (
@@ -26,11 +25,11 @@ export default function Page() {
     >
       <Stack spacing={4}>
         <Stack spacing={3}>
-          <div>
+        <div>
             <Link
               color="text.primary"
               component={RouterLink}
-              href={paths.dashboard.orders.list}
+              href={paths.dashboard.orders.details("1")}
               sx={{ alignItems: 'center', display: 'inline-flex', gap: 1 }}
               variant="subtitle2"
             >
@@ -39,11 +38,12 @@ export default function Page() {
             </Link>
           </div>
           <div>
-            <Typography variant="h4">Order Details</Typography>
+            <Typography variant="h4">
+                 Order Email
+            </Typography>
           </div>
         </Stack>
-        {/* <TaxesCreateForm /> */}
-        <OrderDetails />
+       <EmailForm />
       </Stack>
     </Box>
   );

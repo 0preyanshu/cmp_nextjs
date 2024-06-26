@@ -167,12 +167,12 @@ function createExtraReducers() {
         const { isIndex } = action.meta.arg;
 
         state.timezones = {
-          allTimezones: action?.payload?.timeZoneDTOS,
+          allTimezones: action?.payload?.timeZoneDTOS || [],
           loading: false,
-          totalData: action.payload?.totalElements,
+          totalData: action.payload?.totalElements||0,
           toast: { message: 'User Added Successfully', variant: 'success' },
         };
-        state.allTimezonesData = isIndex ? action?.payload?.timeZoneDTOS : state.allTimezonesData;
+        state.allTimezonesData = isIndex ? action?.payload?.timeZoneDTOS : state.allTimezonesData||[];
       },
       [rejected]: (state, action) => {
         state.timezones = {

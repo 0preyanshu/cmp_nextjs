@@ -160,12 +160,12 @@ function createExtraReducers() {
         const { isIndex } = action.meta.arg;
 
         state.taxes = {
-          allTaxes: action?.payload?.taxDTOs,
+          allTaxes: action?.payload?.taxDTOs || [],
           loading: false,
           totalData: action.payload?.totalElements,
           toast: { message: 'User Added Successfully', variant: 'success' },
         };
-        state.allTaxData = isIndex ? action?.payload?.taxDTOs : state.allTaxData;
+        state.allTaxData = isIndex ? action?.payload?.taxDTOs || [] : state.allTaxData;
       },
       [rejected]: (state, action) => {
         state.taxes = {

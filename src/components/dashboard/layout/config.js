@@ -7,6 +7,22 @@ export const layoutConfig = {
       key: 'general',
       title: 'General',
       items: [,
+
+        {
+          key: 'Performance',
+          title: 'Performance',
+          icon: 'gauge',
+          items: [
+            // { key: 'order', title: 'Instructors', href: paths.dashboard.instructors.list },
+            { key: 'Waiting List', title: 'Waiting List', href: paths.dashboard.waitlist.list },
+            { key: 'Abandoned Carts', title: 'Abandoned Carts', href: paths.dashboard.abandonedcart.list },
+
+            
+
+          
+     
+          ]
+        },
         {
           key: 'Operations',
           title: 'Operations',

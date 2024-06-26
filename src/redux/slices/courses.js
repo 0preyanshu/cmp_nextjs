@@ -184,12 +184,12 @@ function createExtraReducers() {
         const { isIndex } = action.meta.arg;
 
         state.courses = {
-          allCourses: action?.payload?.courseDTOS,
+          allCourses: action?.payload?.courseDTOS || [],
           loading: false,
           totalData: action?.payload?.totalElements,
           toast: { message: 'courses Added Successfully', variant: 'success' },
         };
-        state.allCoursesData = isIndex ? action.payload.courseDTOS : state.allCoursesData;
+        state.allCoursesData = isIndex ? action.payload.courseDTOS || []: state.allCoursesData;
       },
       [rejected]: (state, action) => {
         state.courses = {

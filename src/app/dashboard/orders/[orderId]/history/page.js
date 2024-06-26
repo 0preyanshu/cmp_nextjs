@@ -8,7 +8,7 @@ import Typography from '@mui/material/Typography';
 
 import { CitiesFilters } from '@/components/dashboard/abandoned-cart/cities-filters';
 import { Pagination } from '@/components/core/pagination';
-import { CitiesTable } from '@/components/dashboard/abandoned-cart/cities-table';
+import { HistoryTable } from '@/components/dashboard/orders/history-table';
 
 import InputAdornment from '@mui/material/InputAdornment';
 import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass';
@@ -22,6 +22,10 @@ import Tab from '@mui/material/Tab';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TableSkeleton from '@/components/core/Skeletion';
+import { Link } from '@mui/material';
+import RouterLink from 'next/link';
+import { ArrowLeft as ArrowLeftIcon } from '@phosphor-icons/react/dist/ssr/ArrowLeft';
+
 
 export default function Page({ searchParams }) {
   const {  searchTerm, page = 1, limit = 10,startDate,vendorID,courseID,endDate } = searchParams;
@@ -138,7 +142,7 @@ export default function Page({ searchParams }) {
     }
 
 
-    router.push(`${paths.dashboard.orders.list}?${searchParams.toString()}`);
+    // router.push(`${paths.dashboard.abandonedcart.list}?${searchParams.toString()}`);
   };
 
   return (
@@ -151,44 +155,67 @@ export default function Page({ searchParams }) {
       }}
     >
       <Stack spacing={4}>
+      <div>
+            <Link
+              color="text.primary"
+              component={RouterLink}
+              href={paths.dashboard.orders.details("1")}
+              sx={{ alignItems: 'center', display: 'inline-flex', gap: 1 }}
+              variant="subtitle2"
+            >
+              <ArrowLeftIcon fontSize="var(--icon-fontSize-md)" />
+              back
+            </Link>
+          </div>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} sx={{ alignItems: 'flex-start' }}>
+        
           <Box sx={{ flex: '1 1 auto' }}>
-            <Typography variant="h4">Orders</Typography>
+            <Typography variant="h4">Order History</Typography>
           </Box>
         </Stack>
 
-        <TabContext value={tabValue}>
-          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            <TabList onChange={handleTabChange}>
-              <Tab label="Upcoming" value="1" />
-              <Tab label="Past" value="2" />
-              <Tab label="All" value="3" />
-            </TabList>
-          </Box>
-        </TabContext>
 
-        <Stack direction="row" spacing={2} sx={{ px: 3, py: 2 }}>
-          <OutlinedInput
-            placeholder="Search thread"
-            value={searchInput}
-            onChange={handleSearchChange}
-            startAdornment={
-              <InputAdornment position="start">
-                <MagnifyingGlassIcon fontSize="var(--icon-fontSize-md)" />
-              </InputAdornment>
-            }
-            sx={{ width: '100%' }}
-          />
-        </Stack>
+        <Card sx={{ p: 3, width: '100%', position: 'relative', mb: 3 }}>
+              <Typography variant="h6" sx={{ mb: 3 }}>
+                Order - 118
+              </Typography>
+              <Stack direction="column" alignItems="flex-start" spacing={1} sx={{ mr: 8 }}>
+                <Stack direction="row" justifyContent="flex-start" sx={{ width: '200px' }}>
+                  <Typography variant="h7" align="left" sx={{ flex: 1 }}>
+                    SubTotal:
+                  </Typography>
+                  <Typography align="left"> USD</Typography>
+                </Stack>
+                <Stack direction="row" justifyContent="flex-start" sx={{ width: '200px' }}>
+                  <Typography variant="h7" align="left" sx={{ flex: 1 }}>
+                    Fees:
+                  </Typography>
+                  <Typography align="left"> USD</Typography>
+                </Stack>
+                <Stack direction="row" justifyContent="flex-start" sx={{ width: '200px' }}>
+                  <Typography variant="h7" align="left" sx={{ flex: 1 }}>
+                    Tax:
+                  </Typography>
+                  <Typography color="error" align="left">
+                    USD
+                  </Typography>
+                </Stack>
+                <Stack direction="row" justifyContent="flex-start" sx={{ width: '200px' }}>
+                  <Typography variant="h7" align="left" sx={{ flex: 1 }}>
+                    Total:
+                  </Typography>
+                  <Typography align="left"> USD</Typography>
+                </Stack>
+              </Stack>
+            </Card>
 
         <Card>
-          <CitiesFilters filters={{ page,limit,courseID,vendorID,startDate,endDate }} />
           <Divider />
           <Box sx={{ overflowX: 'auto' }}>
             {isLoading ? (
               <TableSkeleton />
             ) : (
-              <CitiesTable rows={allOrders} />
+              <HistoryTable rows={[]} />
             )}
           </Box>
           <Divider />
