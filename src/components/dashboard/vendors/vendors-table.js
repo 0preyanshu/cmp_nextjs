@@ -119,12 +119,6 @@ export function VendorsTable({ rows }) {
             
                   toast.success('Details updated');
                   router.push(paths.dashboard.vendors.list);
-                  const data = {
-                    page: 1,
-                    limit: 10,
-                    sort: 'asc',
-                    search: '',
-                  };
             } else {
               toast.error(res?.payload?.data?.data?.error?.message || 'Internal Server Error');
             }

@@ -93,10 +93,10 @@ export function VendorsCreateForm() {
       phone: currentVendor.phone || '',
       applicableForSystemEmail: currentVendor.applicableForSystemEmail || false,
       emailToBeSend: currentVendor.emailToBeSend || [],
-      "Pre-requisite-Email": currentVendor?.emailTypes?.includes("Prerequisite Email"),
-      "Welcome-Email": currentVendor?.emailTypes?.includes("Welcome Email"),
-      "Order-Email": currentVendor?.emailTypes?.includes("Order Email"),
-      "Transfer-Email": currentVendor?.emailTypes?.includes("Transfer Email"),
+      "Pre-requisite-Email": currentVendor?.emailTypes?.includes("Prerequisite Email") || false ,
+      "Welcome-Email": currentVendor?.emailTypes?.includes("Welcome Email") || false ,
+      "Order-Email": currentVendor?.emailTypes?.includes("Order Email") || false ,
+      "Transfer-Email": currentVendor?.emailTypes?.includes("Transfer Email") || false ,
     }),
     [currentVendor]
   );
@@ -120,6 +120,7 @@ export function VendorsCreateForm() {
     if (allVendors?.length && id) {
       const data = allVendors.find((allVendors) => String(allVendors?.id) === String(id));
       setcurrentVendor(data);
+    console.log("AA",data?.emailTypes?.includes("Order Email")) ;
     }
   }, [allVendors, id]);
 
@@ -131,8 +132,12 @@ export function VendorsCreateForm() {
         changedFields[key] = data[key];
       }
     }
-    // Add the id to the changed fields
     changedFields.id = currentVendor.id;
+    delete changedFields['Pre-requisite-Email'];
+    delete changedFields['Welcome-Email'];
+    delete changedFields['Order-Email'];
+    delete changedFields['Transfer-Email'];
+
     return changedFields;
   };
 
@@ -178,6 +183,7 @@ export function VendorsCreateForm() {
 
         if (isEdit) {
           await dispatch(updatevendors(changedData)).then((res) => {
+            console.log(res);
             if (res?.payload?.data?.data?.data) {
               toast.success('Update success!');
               router.push(paths.dashboard.vendors.list);
@@ -187,13 +193,13 @@ export function VendorsCreateForm() {
           });
         } else {
           await dispatch(createvendor(data)).then((res) => {
-            if (res?.payload?.data?.data) {
+            if (res?.payload?.data?.data?.data) {
               toast.success('Create success!');
               router.push(paths.dashboard.vendors.list);
 
               console.log('allVendors', allVendors);
             } else {
-              toast.error(res?.payload?.data?.error?.message || 'Internal Server Error');
+              toast.error(res?.payload?.data?.data?.error?.message  || 'Internal Server Error');
             }
           });
         }
@@ -332,11 +338,11 @@ export function VendorsCreateForm() {
             <Controller
               name="Welcome-Email"
               control={control}
-              defaultValue={false}
               render={({ field }) => (
                 <FormControlLabel
                   control={<Checkbox {...field} />}
                   label="Welcome Email"
+                  checked={field.value}
                 />
               )}
             />
@@ -348,11 +354,12 @@ export function VendorsCreateForm() {
             <Controller
               name="Pre-requisite-Email"
               control={control}
-              defaultValue={false}
+           
               render={({ field }) => (
                 <FormControlLabel
                   control={<Checkbox {...field} />}
                   label="Pre-requisite Email"
+                  checked={field.value}
                 />
               )}
             />
@@ -364,11 +371,12 @@ export function VendorsCreateForm() {
             <Controller
               name="Order-Email"
               control={control}
-              defaultValue={false}
+        
               render={({ field }) => (
                 <FormControlLabel
                   control={<Checkbox {...field} />}
                   label="Order Email"
+                  checked={field.value}
                 />
               )}
             />
@@ -380,11 +388,12 @@ export function VendorsCreateForm() {
             <Controller
               name="Transfer-Email"
               control={control}
-              defaultValue={false}
+
               render={({ field }) => (
                 <FormControlLabel
                   control={<Checkbox {...field} />}
                   label="Transfer Email"
+                  checked={field.value}
                 />
               )}
             />

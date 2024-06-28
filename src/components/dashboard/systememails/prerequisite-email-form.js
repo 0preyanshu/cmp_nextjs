@@ -24,7 +24,7 @@ import axios from 'axios';
 
 
 
-// Define the Zod schema
+
 const schema = z.object({
   subject: z.string().min(1, 'Subject is required'),
   eventID: z.string().max(0).or(z.string().min(1, 'Event is required')),
@@ -39,7 +39,7 @@ const HOST_API = "https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg"
 
 
 
-export function PreRequisiteEmails({ filteredEvents = [], sendTestEmail, sendTestEmailLoading = 0 }) {
+export function PreRequisiteEmails({  sendTestEmail, sendTestEmailLoading = 0 }) {
   const [currentDetails, setCurrentDetails] = React.useState({});
 
   const { allCourses } = useSelector((state) => state?.courses?.courses);
@@ -49,7 +49,7 @@ export function PreRequisiteEmails({ filteredEvents = [], sendTestEmail, sendTes
   const defaultValues = React.useMemo(
     () => ({
       courseID: currentDetails.courseID || '',
-      subject: currentDetails.emailSubject || '',
+      subject: currentDetails.subject || '',
       eventID: currentDetails.eventId || '',
       testEmail: currentDetails.testEmail || '',
       html : currentDetails.html || '<p>Write Something . . . <p>'
@@ -113,7 +113,7 @@ export function PreRequisiteEmails({ filteredEvents = [], sendTestEmail, sendTes
     const changedFields = {};
     for (const key in data) {
       const mappedKey = fieldMapping[key];
-      if (String(data[key]) !== String(currentDetails[mappedKey])) {
+      if (String(data[key]) !== String(currentDetails[mappedKey]) && key !== 'html') {
         changedFields[mappedKey] = data[key];
       }
     }
@@ -123,10 +123,13 @@ export function PreRequisiteEmails({ filteredEvents = [], sendTestEmail, sendTes
 
 
   const onSubmit = async (obj) => {
+    const encodedHtml = btoa(obj.html); 
+    const dataToSubmit = { ...getChangedFields(obj), html: encodedHtml }; 
+    dataToSubmit.templateName = 'prerequisite-email'; 
     try {
       const data = await axios.put(
-        HOST_API.concat(`/email-template/01HZNWYG622K0R4N9C2T2E2XGW`),
-        getChangedFields(obj)
+        HOST_API.concat(`/email-template?templateName=prerequisite-email`),
+        dataToSubmit
         ,
         {
           headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
@@ -148,7 +151,7 @@ export function PreRequisiteEmails({ filteredEvents = [], sendTestEmail, sendTes
   const fetchEmailTemplateDetails = async () => {
     try {
       const response = await axios.get(
-        HOST_API.concat(`/email-template/01HZNWYG622K0R4N9C2T2E2XGW`),
+        HOST_API.concat(`/email-template?templateName=prerequisite-email`),
         {
           headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
         }
@@ -203,7 +206,7 @@ export function PreRequisiteEmails({ filteredEvents = [], sendTestEmail, sendTes
       />
 
       <Box sx={{ mt: 5 }}>
-        <EditorField name="html" setValue={setValue} simple />
+        <EditorField name="html" setValue={setValue} simple control={control} />
       </Box>
 
       <LoadingButton sx={{ my: 3 }} loading={isSubmitting} variant="contained" size="large" type="submit">

@@ -24,7 +24,7 @@ import TabList from '@mui/lab/TabList';
 import TableSkeleton from '@/components/core/Skeletion';
 
 export default function Page({ searchParams }) {
-  const {  searchTerm, page = 1, limit = 10,startDate,vendorID,courseID,endDate } = searchParams;
+  const {  searchTerm, page = 1, limit = 10,startDate,eventID,courseID,endDate } = searchParams;
 
   const [currentPage, setCurrentPage] = React.useState(parseInt(page));
   const [rowsPerPage, setRowsPerPage] = React.useState(parseInt(limit));
@@ -40,10 +40,9 @@ export default function Page({ searchParams }) {
   // const {allTimezones}=useSelector((state)=>state?.timezone?.timezones);
   const { allEvents } = useSelector((state) => state?.event?.events);
   const { allOrders, loading: isLoading, totalData } = useSelector((state) => state?.orders?.abandonedCart);
-  const { allVendors } = useSelector((state) => state?.vendors?.vendors);
   const {fetchCourses} = CoursesActions;
   const {fetchAbandonedCart} = OrderActions;
-  const { fetchVendors } = VendorActions;
+  const { fetchEvents } = EventsActions;
 
 
 
@@ -63,7 +62,7 @@ export default function Page({ searchParams }) {
         name: searchInput || '',
         startDate: startDate || '',
         courseID: courseID || '',
-        vendorID: vendorID || '',
+        eventID: eventID || '',
         endDate: endDate || '',
       
         tab : tabValue  // Pass the tab value
@@ -72,21 +71,21 @@ export default function Page({ searchParams }) {
       if(allCourses.length === 0 ){
         dispatch(fetchCourses({ limit: "", page: "", search: "" }));
       }
-      if(allVendors.length === 0){
-        dispatch(fetchVendors({ limit: "", page: "", search: "" }));
+      if(allEvents.length === 0){
+        dispatch(fetchEvents({ limit: "", page: "", search: "" }));
       }
       if(allOrders.length === 0 || !isInitialMount.current){
         dispatch(fetchAbandonedCart(data));
       }
 
-      updateSearchParams({ searchTerm: searchInput, page: currentPage, limit: rowsPerPage, startDate:startDate, courseID:courseID, vedorID:vendorID, endDate:endDate});
+      updateSearchParams({ searchTerm: searchInput, page: currentPage, limit: rowsPerPage, startDate:startDate, courseID:courseID, eventID:eventID, endDate:endDate});
      
     
     if(isInitialMount.current){
       isInitialMount.current = false;
 
     }
-  }, [searchInput, currentPage, rowsPerPage,courseID,vendorID,startDate,tabValue,endDate]);
+  }, [searchInput, currentPage, rowsPerPage,courseID,eventID,startDate,tabValue,endDate]);
 
   const handleSearchChange = (event) => {
     setSearchInput(event.target.value);
@@ -133,8 +132,8 @@ export default function Page({ searchParams }) {
     if(newFilters.courseID){
       searchParams.set('courseID', newFilters.courseID);
     }
-    if(newFilters.vendorID){
-      searchParams.set('vendorsID', newFilters.vendorID);
+    if(newFilters.eventID){
+      searchParams.set('eventID', newFilters.eventID);
     }
 
 
@@ -182,7 +181,7 @@ export default function Page({ searchParams }) {
         </Stack>
 
         <Card>
-          <CitiesFilters filters={{ page,limit,courseID,vendorID,startDate,endDate }} />
+          <CitiesFilters filters={{ page,limit,courseID,eventID,startDate,endDate }} />
           <Divider />
           <Box sx={{ overflowX: 'auto' }}>
             {isLoading ? (

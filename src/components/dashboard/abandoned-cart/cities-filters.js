@@ -14,9 +14,9 @@ import { paths } from '@/paths';
 import { Option } from '@/components/core/option';
 
 export function CitiesFilters({ filters = {}, sortDir = 'desc' }) {
-  const { email, phone, status, limit, page, courseID, vendorID, startDate, endDate } = filters;
+  const { email, phone, status, limit, page, courseID, eventID, startDate, endDate } = filters;
   const { allCourses } = useSelector((state) => state?.courses?.courses);
-  const { allVendors } = useSelector((state) => state?.vendors?.vendors);
+  const { allEvents } = useSelector((state) => state?.event?.events);
 
   const router = useRouter();
 
@@ -44,7 +44,7 @@ export function CitiesFilters({ filters = {}, sortDir = 'desc' }) {
   const handleClearFilters = React.useCallback(() => {
     updateSearchParams({
       courseID: '',
-      vendorID: '',
+      eventID: '',
       startDate: '',
       endDate: '',
       limit: 10,
@@ -66,28 +66,30 @@ export function CitiesFilters({ filters = {}, sortDir = 'desc' }) {
     [updateSearchParams, sortDir]
   );
 
-  const handleVendorChange = React.useCallback(
+  const handleEventChange = React.useCallback(
     (event) => {
-      updateSearchParams({ vendorID: event.target.value }, sortDir);
+      updateSearchParams({ eventID: event.target.value }, sortDir);
     },
     [updateSearchParams, sortDir]
   );
 
   const handleStartDateChange = React.useCallback(
     (newValue) => {
-      updateSearchParams({ startDate: newValue ? dayjs(newValue).format('YYYY-MM-DD') : '' }, sortDir);
+      const dateString = newValue ? dayjs(newValue).set('hour', 0).set('minute', 0).set('second', 0).format('YYYY-MM-DD HH:mm:ss') : '';
+      updateSearchParams({ startDate: dateString }, sortDir);
     },
     [updateSearchParams, sortDir]
   );
 
   const handleEndDateChange = React.useCallback(
     (newValue) => {
-      updateSearchParams({ endDate: newValue ? dayjs(newValue).format('YYYY-MM-DD') : '' }, sortDir);
+      const dateString = newValue ? dayjs(newValue).set('hour', 0).set('minute', 0).set('second', 0).format('YYYY-MM-DD HH:mm:ss') : '';
+      updateSearchParams({ endDate: dateString }, sortDir);
     },
     [updateSearchParams, sortDir]
   );
 
-  const hasFilters = status || email || phone || courseID || vendorID || startDate || endDate;
+  const hasFilters = status || email || phone || courseID || eventID || startDate || endDate;
 
   return (
     <div>
@@ -114,13 +116,13 @@ export function CitiesFilters({ filters = {}, sortDir = 'desc' }) {
         <Select
           sx={{ maxWidth: '100%', width: '165px' }}
           defaultValue=""
-          value={vendorID || ''}
-          onChange={handleVendorChange}
+          value={eventID || ''}
+          onChange={handleEventChange}
         >
-          <Option value="">Select Vendor</Option>
-          {allVendors.map((vendor) => (
-            <Option key={vendor.id} value={vendor.id}>
-              {vendor.vendorname}
+          <Option value="">Select Event</Option>
+          {allEvents.map((event) => (
+            <Option key={event.id} value={event.id}>
+              {event.eventName}
             </Option>
           ))}
         </Select>
