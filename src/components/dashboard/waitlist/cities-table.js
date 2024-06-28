@@ -102,14 +102,14 @@ export function CitiesTable({ rows }) {
     },
     {
       formatter(row) {
-        return row.course?.courseName;
+        return row.course?.courseName || 'N/A';
       },
       name: 'Course',
       width: '200px',
     },
     {
       formatter(row) {
-        return row.event?.eventName;
+        return row.event?.eventName || 'N/A';
       },
       name: 'Event Start Date',
       width: '200px',

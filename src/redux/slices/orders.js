@@ -88,7 +88,7 @@ function fetchAbandonedCart() {
     try {
       const response = await axios.get(
         HOST_API.concat(
-          `/abandoned-cart?limit=${data.limit}&vendorID=${data.vendorID}&eventID=${data.eventID}&search=${data.name}&startDate=${data.startDate}&endDate=${data.endDate}`
+          `/abandoned-cart?limit=${data.limit}&courseID=${data.courseID}&eventID=${data.eventID}&search=${data.name}&startDate=${data.startDate}&endDate=${data.endDate}`
         ),
         {
           headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
