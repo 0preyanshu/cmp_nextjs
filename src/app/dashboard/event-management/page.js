@@ -19,7 +19,7 @@ import { paths } from '@/paths';
 import { useDispatch, useSelector } from 'react-redux';
 import { EventsActions } from '@/redux/slices';
 import { countryActions } from '@/redux/slices';
-import { StateActions } from '@/redux/slices';
+import { StateActions,cityActions,CoursesActions,InstructorActions,TimezoneAction,CourseCategoryActions } from '@/redux/slices';
 import TableSkeleton from '@/components/core/Skeletion';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
@@ -41,10 +41,32 @@ export default function Page({ searchParams }) {
   const { allCountries } = useSelector((state) => state?.countries?.country);
   const { allState } = useSelector((state) => state?.states?.state);
   const { allEvents, loading: isLoading } = useSelector((state) => state?.event?.events);
+
+
+
+  const { allCities } = useSelector((state) => state?.cities?.city);
+  const {allCourses}=useSelector((state)=>state?.courses?.courses);
+  const { allInstructors } = useSelector((state) => state?.instructors?.instructors);
+  const {allTimezones}=useSelector((state)=>state?.timezone?.timezones);
+  const {
+    allCategories
+  } = useSelector((state) => state?.categories?.categories);
+
+  
+
+
+
+
+
   const dispatch = useDispatch();
   const { fetchState } = StateActions;
   const { fetchCountries } = countryActions;
   const { fetchEvents } = EventsActions;
+  const { fetchCities } = cityActions;
+  const { fetchCourses } = CoursesActions;
+  const { fetchInstructor } = InstructorActions;
+  const { fetchTimezones } = TimezoneAction;
+  const { fetchcategories } = CourseCategoryActions;
 
   const isInitialMount = React.useRef(true);
 
@@ -67,6 +89,21 @@ export default function Page({ searchParams }) {
     }
     if (allState.length === 0) {
       dispatch(fetchState({ limit: "", page: "", search: "" }));
+    }
+    if(allCities.length===0){
+      dispatch(fetchCities({limit:"",page:"",search:""}));
+    }
+    if(allCourses.length===0){
+      dispatch(fetchCourses({limit:"",page:"",search:""}));
+    }
+    if(allInstructors.length===0){
+      dispatch(fetchInstructor({limit:"",page:"",search:""}));
+    }
+    if(allTimezones.length===0){
+      dispatch(fetchTimezones({limit:"",page:"",search:""}));
+    }
+    if(allCategories.length===0){
+      dispatch(fetchcategories({limit:"",page:"",search:""}));
     }
     if (allEvents.length === 0 || !isInitialMount.current) {
       dispatch(fetchEvents(data));

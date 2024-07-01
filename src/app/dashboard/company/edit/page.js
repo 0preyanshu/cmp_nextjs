@@ -26,15 +26,9 @@ export default function Page() {
   const { deletecompanies, fetchCompanies } = CompanyActions;
 
 
-  const { allCompanies } = useSelector((state) => state?.company?.companies);
 
-  useEffect(() => {
-    if (allCompanies) {
-      setCurrentCompany(allCompanies);
-    }
-  }, [allCompanies]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     const data = {
       page: 1,
       limit: 10,
@@ -63,7 +57,7 @@ dispatch(fetchCompanies(data))
             <Typography variant="h5">Edit Company</Typography>
           </div>
         </Stack>
-        <CompanyCreateForm currentCompany={currentCompany}/>
+        <CompanyCreateForm />
       </Stack>
     </Box>
   );

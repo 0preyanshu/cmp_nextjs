@@ -109,7 +109,7 @@ export function EventTable({ rows }) {
     {
       formatter(row) {
         const instructors = row?.instructor[0] || [];
-        return instructors.firstname + " " + instructors.lastname;
+        return (instructors.firstname ||"-") + " " + (instructors.lastname || "-")
       },
       name: 'Instructors',
       width: '200px',

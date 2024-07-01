@@ -10,7 +10,7 @@ import { config } from '@/config';
 import { paths } from '@/paths';
 import { SystemEmailsForm } from '@/components/dashboard/systememails/systememails-create-form';
 
-export const metadata = { title: `Create | Payment | Dashboard | ${config.site.name}` };
+export const metadata = { title: `Create | Emails | Dashboard | ${config.site.name}` };
 
 export default function Page() {
   return (

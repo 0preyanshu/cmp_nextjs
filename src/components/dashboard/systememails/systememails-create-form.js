@@ -10,12 +10,17 @@ import { useState } from 'react';
 import { TabContext, TabList, TabPanel } from '@mui/lab';
 import { PreRequisiteEmails } from './prerequisite-email-form';
 import { WelcomeEmails } from './welcome-email-form';
+import { useSelector,useDispatch } from 'react-redux';
+import { CoursesActions ,InstructorActions,EventsActions} from '@/redux/slices';
 
 
 
 export function SystemEmailsForm() {
 
   const [value, setValue2] = useState('1');
+  const {allCourses}=useSelector((state)=>state?.courses?.courses);
+  const { allInstructors } = useSelector((state) => state?.instructors?.instructors);
+  const {allEvents} = useSelector((state)=>state?.event?.events);
 
 const handleChange = (event, newValue) => {
   setValue2(newValue);
@@ -29,6 +34,26 @@ const emailTypeIds = {
   cancelEmail: 5,
   refundEmail: 6
 }
+
+  const initialMount = React.useRef(true);
+  const dispatch = useDispatch();
+  const { fetchCourses } = CoursesActions;
+  const { fetchInstructor } = InstructorActions;
+  const { fetchEvents } = EventsActions;
+  React.useEffect(() => {
+    if(allCourses.length===0){
+      dispatch(fetchCourses({ limit: "", page: "", search: "" }));
+     
+    }
+    if(allInstructors.length===0){
+      dispatch(fetchInstructor({ limit: "", page: "", search: "" }));
+     
+    }
+    if(allEvents.length===0){
+      dispatch(fetchEvents({ limit: "", page: "", search: "" }));
+     
+    }
+  }, []);
 
 
 
