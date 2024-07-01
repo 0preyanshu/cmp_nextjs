@@ -1,8 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-import { HOST_API } from '../../config';
+
 
 // const initialState = [];
+const HOST_API = 'https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg';
 
 const name = 'Orders';
 const initialState = createInitialState();
@@ -87,7 +88,7 @@ function fetchAbandonedCart() {
     try {
       const response = await axios.get(
         HOST_API.concat(
-          `/order/abandonCart/new?lastOrderId=${data.lastOrderId}&limit=${data.limit}&vendorId=${data.vendorId}&courseId=${data.courseId}&search=${data.name}&startDate=${data.startDate}&endDate=${data.endDate}&eventStatus=${data.eventStatus}`
+          `/abandoned-cart?limit=${data.limit}&courseID=${data.courseID}&eventID=${data.eventID}&search=${data.name}&startDate=${data.startDate}&endDate=${data.endDate}`
         ),
         {
           headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
@@ -280,7 +281,7 @@ function createExtraReducers() {
       },
       [fulfilled]: (state, action) => {
         state.abandonedCart = {
-          allOrders: action?.payload?.orderDTOS,
+          allOrders: action?.payload?.data?.data || [],
           loading: false,
           totalData: action?.payload?.totalElements || 0,
           toast: { message: 'orders Added Successfully', variant: 'success' },

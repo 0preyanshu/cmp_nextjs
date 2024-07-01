@@ -72,8 +72,8 @@ export default function Page({ searchParams }) {
   };
 
   const handlePageChange = (event, newPage) => {
-    setCurrentPage(newPage + 1);
-    updateSearchParams({ ...searchParams, page: newPage + 1 });
+    setCurrentPage(newPage );
+    updateSearchParams({ ...searchParams, page: newPage });
   };
 
   const handleRowsPerPageChange = (event) => {

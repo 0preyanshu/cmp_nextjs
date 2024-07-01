@@ -238,6 +238,10 @@ function createExtraReducers() {
             [fulfilled]: (state, action) => {
 
                 state.vendors.loading = false;
+                if(action?.payload?.data?.data?.data){
+                    state.vendors.allVendors = state.vendors.allVendors.map((item) => item.id === action?.payload?.data?.data?.data?.id ? action?.payload?.data?.data?.data : item)
+
+                }
             },
             [rejected]: (state, action) => {
                 state.vendors = {

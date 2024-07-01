@@ -86,7 +86,7 @@ export function CitiesFilters({ filters = {}, sortDir = 'desc', Countries, State
         <Stack direction="row" spacing={2} sx={{ alignItems: 'center', flex: '1 1 auto', flexWrap: 'wrap' }}>
           {hasFilters ? <Button onClick={handleClearFilters}>Clear filters</Button> : null}
         </Stack>
-l
+
 
         <Select
           sx={{ maxWidth: '100%', width: '165px' }}

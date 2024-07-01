@@ -21,13 +21,16 @@ import Grid from '@mui/material/Unstable_Grid2';
 import { Camera as CameraIcon } from '@phosphor-icons/react/dist/ssr/Camera';
 import { Controller, useForm } from 'react-hook-form';
 import { z as zod } from 'zod';
-
+import axios from 'axios';
 import { paths } from '@/paths';
 import { logger } from '@/lib/default-logger';
 import { toast } from '@/components/core/toaster';
 import { useDispatch, useSelector } from 'react-redux';
 import { CourseCategoryActions } from '@/redux/slices';
 import { LoadingButton } from '@mui/lab';
+import { get } from 'http';
+
+const S3_URL = 'https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg';
 
 const schema = zod.object({
   avatar: zod.string().optional(),
@@ -74,7 +77,6 @@ export function CourseCategoriesCreateForm() {
     reset(defaultValues);
   }, [currentCategory, reset, defaultValues]);
 
-
   React.useEffect(() => {
     if (allCategories?.length && id) {
       const data = allCategories.find((category) => String(category?.id) === String(id));
@@ -96,7 +98,7 @@ export function CourseCategoriesCreateForm() {
         changedFields[mappedKey] = data[key];
       }
     }
-  
+
     changedFields.id = currentCategory.id;
     return changedFields;
   };
@@ -111,7 +113,6 @@ export function CourseCategoriesCreateForm() {
             if (res?.payload?.data?.data) {
               toast.success('Update success!');
               router.push(paths.dashboard.coursecategories.list);
-           
             } else {
               toast.error(res?.payload?.data?.error?.message || 'Internal Server Error');
             }
@@ -129,7 +130,6 @@ export function CourseCategoriesCreateForm() {
         }
       } catch (err) {
         logger.error(err);
-       
       }
     },
     [isEdit, currentCategory.id, dispatch, router, updatecategories, createCategories]
@@ -138,12 +138,45 @@ export function CourseCategoriesCreateForm() {
   const avatarInputRef = React.useRef(null);
   const avatar = watch('avatar');
 
+  const [dataUrl, setDataUrl] = React.useState(""); 
+  const [isImageUploading, setIsImageUploading] = React.useState(false);
+
+  const getAvatarSrc = (avatar) => {
+    return avatar?.startsWith('http') || avatar?.startsWith('http')   ? avatar : dataUrl|| avatar;
+  };
+
   const handleAvatarChange = React.useCallback(
     async (event) => {
       const file = event.target.files?.[0];
       if (file) {
-        const url = await fileToBase64(file);
-        setValue('avatar', url);
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = async () => {
+
+          const dataurl = reader.result;
+          setDataUrl(dataurl);              
+          setIsImageUploading(true);
+          try {
+            const imageId = `image-${Date.now()}`;
+            const { data } = await axios.get(`${S3_URL}/s3-signed-url/upload/${imageId}`);
+            await axios.put(data?.data?.s3SignedUrl, file, {
+              headers: {
+                'Content-Type': file.type,
+              },
+            });
+            setValue('avatar', imageId);
+            toast.success('Image uploaded successfully');
+          } catch (err) {
+            logger.error(err);
+            toast.error('Failed to upload image');
+          }
+          finally{
+            setIsImageUploading(false);
+          }
+        };
+        reader.onerror = () => {
+          toast.error('Failed to read file');
+        };
       }
     },
     [setValue]
@@ -167,7 +200,7 @@ export function CourseCategoriesCreateForm() {
                       }}
                     >
                       <Avatar
-                        src={avatar}
+                        src={getAvatarSrc(avatar)}
                         sx={{
                           '--Avatar-size': '100px',
                           '--Icon-fontSize': 'var(--icon-fontSize-lg)',
@@ -233,7 +266,7 @@ export function CourseCategoriesCreateForm() {
             type="submit"
             variant="contained"
             style={{ textTransform: 'capitalize' }}
-            loading={isSubmitting}
+            loading={isSubmitting || isImageUploading}
           >
             {!isEdit ? 'Create Course Category' : 'Save Changes'}
           </LoadingButton>
@@ -242,3 +275,4 @@ export function CourseCategoriesCreateForm() {
     </form>
   );
 }
+  

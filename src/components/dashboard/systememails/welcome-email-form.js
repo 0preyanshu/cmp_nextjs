@@ -41,15 +41,234 @@ export function WelcomeEmails({ filteredEvents = [], sendTestEmail, sendTestEmai
   const { allCourses } = useSelector((state) => state?.courses?.courses);
   const { allEvents } = useSelector((state) => state?.event?.events);
   const { allInstructors } = useSelector((state) => state?.instructors?.instructors);
+  const quillContent = `
+  <body>
+    <div style="font-family: 'Montserrat', sans-serif; margin: 0; padding: 0">
+      <div
+        style="
+          padding: 24px 16px;
+          background-color: #fff;
+          width: 800px;
+          border: 2px solid #000;
+          margin: auto;
+        "
+      >
+        <div style="display: flex">
+          <h5
+            style="
+              text-decoration: underline;
+              color: #000;
+              margin-left: 30px;
+              font-size: 18px;
+            "
+          >
+            Abandon Cart Users on {{date}}
+          </h5>
+          <div style="margin-left: 180px; margin-top: 19px">
+            <img
+              src="https://cmpmediafiles.s3.ap-south-1.amazonaws.com/skillbooklogo.png"
+              alt="logo"
+              style="width: 250px"
+            />
+          </div>
+        </div>
 
+        <div
+          style="
+            background-color: #000;
+            margin: 0px 24px;
+            border-radius: 15px;
+            height: 50px;
+          "
+        >
+          <h3 style="color: #fff; padding-top: 1.5%; text-align: center">
+            Abandon Cart Details
+          </h3>
+        </div>
+
+        <div style="margin: 24px">
+          <p style="font-weight: 500">Hello Admin,</p>
+          <p style="font-weight: 500">
+            Find below list of {{length}} abandon cart users details
+          </p>
+        </div>
+
+        <div style="margin: 24px; margin-bottom: 100px">
+          <table
+            style="
+              width: 100%;
+              border: 1px solid #adadad;
+              padding: 10px;
+              border-collapse: collapse;
+              margin-top: 10px;
+            "
+          >
+            <thead
+              style="
+                font-weight: bold;
+                border: 1px solid #adadad;
+                padding: 10px;
+              "
+            >
+              <tr style="border: 1px solid #adadad; padding: 10px">
+                <td
+                  style="border: 1px solid #adadad; padding: 10px"
+                  align="center"
+                >
+                  Date
+                </td>
+                <td
+                  style="border: 1px solid #adadad; padding: 10px"
+                  align="center"
+                >
+                  Name
+                </td>
+                <td
+                  style="border: 1px solid #adadad; padding: 10px"
+                  align="center"
+                >
+                  Phone No.
+                </td>
+                <td
+                  style="border: 1px solid #adadad; padding: 10px"
+                  align="center"
+                >
+                  Email
+                </td>
+                <td
+                  style="border: 1px solid #adadad; padding: 10px"
+                  align="center"
+                >
+                  Event
+                </td>
+                <td
+                  style="border: 1px solid #adadad; padding: 10px"
+                  align="center"
+                >
+                  Course
+                </td>
+              </tr>
+            </thead>
+            {{tbody}}
+          </table>
+        </div>
+
+        <div
+          style="
+            background-color: #999999;
+            margin: 24px;
+            border-radius: 23px;
+            height: 40px;
+            font-size: 20px;
+          "
+        >
+          <h6 style="font-weight: 500; text-align: center; padding-top: 10px">
+            © 2023 <span style="font-weight: 900">SKILLBOOK ACADEMY.</span> ALL
+            RIGHTS RESERVED.
+          </h6>
+        </div>
+        <div
+          style="
+            background-color: #999999;
+            margin: 24px;
+            border-radius: 23px;
+            height: 40px;
+            font-size: 20px;
+          "
+        >
+          <h6 style="font-weight: 500; text-align: center; padding-top: 10px">
+            © 2023 <span style="font-weight: 900">SKILLBOOK ACADEMY.</span> ALL
+            RIGHTS RESERVED.
+          </h6>
+        </div>
+        <div
+          style="
+            background-color: #999999;
+            margin: 24px;
+            border-radius: 23px;
+            height: 40px;
+            font-size: 20px;
+          "
+        >
+          <h6 style="font-weight: 500; text-align: center; padding-top: 10px">
+            © 2023 <span style="font-weight: 900">SKILLBOOK ACADEMY.</span> ALL
+            RIGHTS RESERVED.
+          </h6>
+        </div>
+        <div
+          style="
+            background-color: #999999;
+            margin: 24px;
+            border-radius: 23px;
+            height: 40px;
+            font-size: 20px;
+          "
+        >
+          <h6 style="font-weight: 500; text-align: center; padding-top: 10px">
+            © 2023 <span style="font-weight: 900">SKILLBOOK ACADEMY.</span> ALL
+            RIGHTS RESERVED.
+          </h6>
+        </div>
+        <div
+          style="
+            background-color: #999999;
+            margin: 24px;
+            border-radius: 23px;
+            height: 40px;
+            font-size: 20px;
+          "
+        >
+          <h6 style="font-weight: 500; text-align: center; padding-top: 10px">
+            © 2023 <span style="font-weight: 900">SKILLBOOK ACADEMY.</span> ALL
+            RIGHTS RESERVED.
+          </h6>
+        </div>
+        <div
+          style="
+            background-color: #999999;
+            margin: 24px;
+            border-radius: 23px;
+            height: 40px;
+            font-size: 20px;
+          "
+        >
+          <h6 style="font-weight: 500; text-align: center; padding-top: 10px">
+            © 2023 <span style="font-weight: 900">SKILLBOOK ACADEMY.</span> ALL
+            RIGHTS RESERVED.
+          </h6>
+        </div>
+        <div
+          style="
+            background-color: #999999;
+            margin: 24px;
+            border-radius: 23px;
+            height: 40px;
+            font-size: 20px;
+          "
+        >
+          <h6 style="font-weight: 500; text-align: center; padding-top: 10px">
+            © 2023 <span style="font-weight: 900">SKILLBOOK ACADEMY.</span> ALL
+            RIGHTS RESERVED.
+          </h6>
+        </div>
+      </div>
+    </div>
+  </body>
+`;
+
+  React.useEffect(() => {
+  
+      console.log(currentDetails, 'currentDetails');
+
+    }, [currentDetails]);
   const defaultValues = React.useMemo(
     () => ({
-      courseID: currentDetails.courseID || '',
-      subject: currentDetails.emailSubject || '',
-      eventID: currentDetails.eventId || '',
-      testEmail: currentDetails.testEmail || '',
-      html : currentDetails.html || '<p>Write Something . . . <p>',
-      instructorID : currentDetails.instructorID || ''
+      courseID: currentDetails?.courseID || '',
+      subject: currentDetails?.subject || '',
+      eventID: currentDetails?.eventId || '',
+      testEmail: currentDetails?.testEmail || '',
+      html : currentDetails?.html || '<p>Write Something . . . <p>',
+      instructorID : currentDetails?.instructorID || ''
     }),
     [currentDetails]
   );
@@ -60,6 +279,7 @@ export function WelcomeEmails({ filteredEvents = [], sendTestEmail, sendTestEmai
     formState: { errors, isSubmitting },
     setValue,
     reset,
+    watch
   } = useForm({ defaultValues, resolver: zodResolver(schema) });
 
   React.useEffect(() => {
@@ -71,9 +291,11 @@ export function WelcomeEmails({ filteredEvents = [], sendTestEmail, sendTestEmai
     if(initialMount.current){
       initialMount.current = false;
       fetchEmailTemplateDetails().then((data) => {
-        if(data.data){
-          setCurrentDetails(data);
-        }
+        console.log(data, 'data');  
+     
+          setCurrentDetails(data?.data?.emailTemplate
+      );
+      
       });
     }
   }, []);
@@ -109,7 +331,7 @@ export function WelcomeEmails({ filteredEvents = [], sendTestEmail, sendTestEmai
     const changedFields = {};
     for (const key in data) {
       const mappedKey = fieldMapping[key];
-      if (String(data[key]) !== String(currentDetails[mappedKey])) {
+      if (String(data[key]) !== String(currentDetails[mappedKey] && key !== 'html')) {
         changedFields[mappedKey] = data[key];
       }
     }
@@ -118,15 +340,17 @@ export function WelcomeEmails({ filteredEvents = [], sendTestEmail, sendTestEmai
   };
 
   const onSubmit = async (obj) => {
+    const encodedHtml = btoa(obj.html); 
+      const dataToSubmit = { ...getChangedFields(obj), html: encodedHtml }; 
+      dataToSubmit.templateName = 'welcome-email';  
     try {
       const data = await axios.put(
-        HOST_API.concat(`/email-template/01HZNWYG622K0R4N9C2T2E2XGW`),
-        getChangedFields(obj),
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-        }
+        HOST_API.concat(`/email-template?templateName=welcome-email`),
+        dataToSubmit
       );
-      if(data.data){
+
+      if(data?.data){
+        console.log(data?.data, 'datares');
         toast('Pre-Rrequisite email updated!');
       }
       else{
@@ -141,11 +365,9 @@ export function WelcomeEmails({ filteredEvents = [], sendTestEmail, sendTestEmai
   const fetchEmailTemplateDetails = async () => {
     try {
       const response = await axios.get(
-        HOST_API.concat(`/email-template/01HZNWYG622K0R4N9C2T2E2XGW`),
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-        }
+        HOST_API.concat(`/email-template?templateName=welcome-email`),
       );
+      console.log(response.data, 'response.data');
       return response.data;
     } catch (error) {
       console.error(error);
@@ -220,7 +442,7 @@ export function WelcomeEmails({ filteredEvents = [], sendTestEmail, sendTestEmai
       />
 
       <Box sx={{ mt: 5 }}>
-        <EditorField name="html" setValue={setValue} simple />
+        <EditorField name="html" setValue={setValue}  watch={watch} simple control={control}/>
       </Box>
 
       <LoadingButton sx={{ my: 3 }} loading={isSubmitting} variant="contained" size="large" type="submit">

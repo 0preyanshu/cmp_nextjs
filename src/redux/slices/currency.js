@@ -180,12 +180,12 @@ function createExtraReducers() {
         const { isIndex } = action.meta.arg;
 
         state.currency = {
-          allCurrency: action?.payload?.currencies,
-          totalData: action?.payload?.totalElements,
+          allCurrency: action?.payload?.currencies||[],
+          totalData: action?.payload?.totalElements||[],
           loading: false,
           toast: { message: 'User Added Successfully', variant: 'success' },
         };
-        state.allCurrencyData = isIndex ? action?.payload?.currencies : state.allCurrencyData;
+        state.allCurrencyData = isIndex ? action?.payload?.currencies||[] : state.allCurrencyData;
       },
       [rejected]: (state, action) => {
         state.currency = {

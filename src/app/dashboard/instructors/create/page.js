@@ -37,7 +37,7 @@ export default function Page() {
             </Link>
           </div>
           <div>
-            <Typography variant="h5">Create Course</Typography>
+            <Typography variant="h5">Create Instructor</Typography>
           </div>
         </Stack>
         <InstructorsCreateForm />

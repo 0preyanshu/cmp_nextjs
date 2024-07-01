@@ -11,7 +11,7 @@ import { paths } from '@/paths';
 import { Option } from '@/components/core/option';
 import { useSelector } from 'react-redux';
 
-export function CitiesFilters({ filters = {} }) {
+export function EventFilters({ filters = {} }) {
   const { countryID, instructorID, courseCategoryID, courseID, timezoneID } = filters;
   const router = useRouter();
   const { allCountries } = useSelector((state) => state?.countries?.country);

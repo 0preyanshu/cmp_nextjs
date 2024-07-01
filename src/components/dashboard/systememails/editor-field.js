@@ -2,21 +2,24 @@ import React, { useEffect, useState } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import './EditorField.css'; 
+import { useWatch } from 'react-hook-form';
 
-export function EditorField({value,setValue}) {
+export function EditorField({ setValue, control }) {
+  const html = useWatch({
+    control,
+    name: 'html',
+  });
 
-  const [editorHtml, setEditorHtml] = useState('');
-
-  useEffect(() => {
-    setValue('html',editorHtml);
-  }, [editorHtml]);
+  const handleChange = (content) => {
+    setValue('html', content);  // Set the updated content in the form
+  };
 
   const modules = {
     toolbar: [
-      [{ 'header': '1'}, {'header': '2'}, { 'font': [] }],
-      [{size: []}],
+      [{ 'header': '1' }, { 'header': '2' }, { 'font': [] }],
+      [{ size: [] }],
       ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-      [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
+      [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
       [{ 'align': [] }],
       ['link', 'image'],
       ['clean']
@@ -35,8 +38,8 @@ export function EditorField({value,setValue}) {
   return (
     <ReactQuill
       theme="snow"
-      value={editorHtml}
-      onChange={setEditorHtml}
+      value={html}
+      onChange={handleChange}
       modules={modules}
       formats={formats}
       placeholder={placeholderText}

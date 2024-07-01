@@ -1,152 +1,200 @@
+'use client';
 import * as React from 'react';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 
-import { config } from '@/config';
-import { dayjs } from '@/lib/dayjs';
-import { OrderModal } from '@/components/dashboard/order/order-modal';
-import { OrdersFilters } from '@/components/dashboard/order/orders-filters';
-import { OrdersPagination } from '@/components/dashboard/order/orders-pagination';
-import { OrdersSelectionProvider } from '@/components/dashboard/order/orders-selection-context';
-import { OrdersTable } from '@/components/dashboard/order/orders-table';
+import { CitiesFilters } from '@/components/dashboard/abandoned-cart/cities-filters';
+import { Pagination } from '@/components/core/pagination';
+import { CitiesTable } from '@/components/dashboard/abandoned-cart/cities-table';
 
-export const metadata = { title: `List | Orders | Dashboard | ${config.site.name}` };
-
-const orders = [
-  {
-    id: 'ORD-005',
-    customer: { name: 'Penjani Inyene', avatar: '/assets/avatar-4.png', email: 'penjani.inyene@domain.com' },
-    lineItems: 1,
-    paymentMethod: { type: 'visa', last4: '4011' },
-    currency: 'USD',
-    totalAmount: 56.7,
-    status: 'pending',
-    createdAt: dayjs().subtract(3, 'hour').toDate(),
-  },
-  {
-    id: 'ORD-004',
-    customer: { name: 'Jie Yan', avatar: '/assets/avatar-8.png', email: 'jie.yan@domain.com' },
-    lineItems: 1,
-    paymentMethod: { type: 'amex', last4: '5678' },
-    currency: 'USD',
-    totalAmount: 49.12,
-    status: 'completed',
-    createdAt: dayjs().subtract(6, 'hour').toDate(),
-  },
-  {
-    id: 'ORD-003',
-    customer: { name: 'Fran Perez', avatar: '/assets/avatar-5.png', email: 'fran.perez@domain.com' },
-    lineItems: 2,
-    paymentMethod: { type: 'applepay' },
-    currency: 'USD',
-    totalAmount: 18.75,
-    status: 'canceled',
-    createdAt: dayjs().subtract(7, 'hour').toDate(),
-  },
-  {
-    id: 'ORD-002',
-    customer: { name: 'Carson Darrin', avatar: '/assets/avatar-3.png', email: 'carson.darrin@domain.com' },
-    lineItems: 1,
-    paymentMethod: { type: 'googlepay' },
-    currency: 'USD',
-    totalAmount: 49.99,
-    status: 'rejected',
-    createdAt: dayjs().subtract(1, 'hour').subtract(1, 'day').toDate(),
-  },
-  {
-    id: 'ORD-001',
-    customer: { name: 'Miron Vitold', avatar: '/assets/avatar-1.png', email: 'miron.vitold@domain.com' },
-    lineItems: 2,
-    paymentMethod: { type: 'mastercard', last4: '4242' },
-    currency: 'USD',
-    totalAmount: 94.01,
-    status: 'completed',
-    createdAt: dayjs().subtract(3, 'hour').subtract(1, 'day').toDate(),
-  },
-];
+import InputAdornment from '@mui/material/InputAdornment';
+import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import { useRouter } from 'next/navigation';
+import { paths } from '@/paths';
+import { useDispatch, useSelector } from 'react-redux';
+import { OrderActions,VendorActions } from '@/redux/slices';
+import { CoursesActions,WaitlistActions,EventsActions } from '@/redux/slices';
+import Tab from '@mui/material/Tab';
+import TabContext from '@mui/lab/TabContext';
+import TabList from '@mui/lab/TabList';
+import TableSkeleton from '@/components/core/Skeletion';
 
 export default function Page({ searchParams }) {
-  const { customer, id, previewId, sortDir, status } = searchParams;
+  const {  searchTerm, page = 1, limit = 10,startDate,vendorID,courseID,endDate } = searchParams;
 
-  const sortedOrders = applySort(orders, sortDir);
-  const filteredOrders = applyFilters(sortedOrders, { customer, id, status });
+  const [currentPage, setCurrentPage] = React.useState(parseInt(page));
+  const [rowsPerPage, setRowsPerPage] = React.useState(parseInt(limit));
+  const [searchInput, setSearchInput] = React.useState(searchTerm || '');
+  const [tabValue, setTabValue] = React.useState('1');
+
+  const router = useRouter();
+
+
+
+  const {allCourses}=useSelector((state)=>state?.courses?.courses);
+  // const { allInstructors } = useSelector((state) => state?.instructors?.instructors);
+  // const {allTimezones}=useSelector((state)=>state?.timezone?.timezones);
+  const { allEvents } = useSelector((state) => state?.event?.events);
+  const { allOrders, loading: isLoading, totalData } = useSelector((state) => state?.orders?.abandonedCart);
+  const { allVendors } = useSelector((state) => state?.vendors?.vendors);
+  const {fetchCourses} = CoursesActions;
+  const {fetchAbandonedCart} = OrderActions;
+  const { fetchVendors } = VendorActions;
+
+
+
+
+
+  const dispatch = useDispatch();
+
+
+
+  const isInitialMount = React.useRef(true);
+
+  React.useEffect(() => {
+   
+      const data = {
+        page: currentPage,
+        limit: rowsPerPage,
+        name: searchInput || '',
+        startDate: startDate || '',
+        courseID: courseID || '',
+        vendorID: vendorID || '',
+        endDate: endDate || '',
+      
+        tab : tabValue  // Pass the tab value
+  
+      };
+      if(allCourses.length === 0 ){
+        dispatch(fetchCourses({ limit: "", page: "", search: "" }));
+      }
+      if(allVendors.length === 0){
+        dispatch(fetchVendors({ limit: "", page: "", search: "" }));
+      }
+      if(allOrders.length === 0 || !isInitialMount.current){
+        dispatch(fetchAbandonedCart(data));
+      }
+
+      updateSearchParams({ searchTerm: searchInput, page: currentPage, limit: rowsPerPage, startDate:startDate, courseID:courseID, vedorID:vendorID, endDate:endDate});
+     
+    
+    if(isInitialMount.current){
+      isInitialMount.current = false;
+
+    }
+  }, [searchInput, currentPage, rowsPerPage,courseID,vendorID,startDate,tabValue,endDate]);
+
+  const handleSearchChange = (event) => {
+    setSearchInput(event.target.value);
+    updateSearchParams({ ...searchParams, searchTerm: event.target.value, page: 1 });
+  };
+
+  const handlePageChange = (event, newPage) => {
+    setCurrentPage(newPage);
+    updateSearchParams({ ...searchParams, page: newPage });
+  };
+
+  const handleRowsPerPageChange = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setCurrentPage(1);
+    updateSearchParams({ ...searchParams, limit: parseInt(event.target.value, 10), page: 1 });
+  };
+
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
+    setCurrentPage(1);
+  }
+
+  const updateSearchParams = (newFilters, newSortDir) => {
+    const searchParams = new URLSearchParams();
+
+
+    if (newFilters.searchTerm) {
+      searchParams.set('searchTerm', newFilters.searchTerm);
+    }
+
+    if (newFilters.page) {
+      searchParams.set('page', newFilters.page);
+    }
+
+    if (newFilters.limit) {
+      searchParams.set('limit', newFilters.limit);
+    }
+    if(newFilters.startDate){
+      searchParams.set('startDate', newFilters.startDate);
+    }
+    if(newFilters.endDate){
+      searchParams.set('endDate', newFilters.endDate);
+    }
+    if(newFilters.courseID){
+      searchParams.set('courseID', newFilters.courseID);
+    }
+    if(newFilters.vendorID){
+      searchParams.set('vendorsID', newFilters.vendorID);
+    }
+
+
+    router.push(`${paths.dashboard.orders.list}?${searchParams.toString()}`);
+  };
 
   return (
-    <React.Fragment>
-      <Box
-        sx={{
-          maxWidth: 'var(--Content-maxWidth)',
-          m: 'var(--Content-margin)',
-          p: 'var(--Content-padding)',
-          width: 'var(--Content-width)',
-        }}
-      >
-        <Stack spacing={4}>
-          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} sx={{ alignItems: 'flex-start' }}>
-            <Box sx={{ flex: '1 1 auto' }}>
-              <Typography variant="h4">Orders</Typography>
-            </Box>
-            <div>
-              <Button startIcon={<PlusIcon />} variant="contained">
-                Add
-              </Button>
-            </div>
-          </Stack>
-          <OrdersSelectionProvider orders={filteredOrders}>
-            <Card>
-              <OrdersFilters filters={{ customer, id, status }} sortDir={sortDir} />
-              <Divider />
-              <Box sx={{ overflowX: 'auto' }}>
-                <OrdersTable rows={filteredOrders} />
-              </Box>
-              <Divider />
-              <OrdersPagination count={filteredOrders.length} page={0} />
-            </Card>
-          </OrdersSelectionProvider>
+    <Box
+      sx={{
+        maxWidth: 'var(--Content-maxWidth)',
+        m: 'var(--Content-margin)',
+        p: 'var(--Content-padding)',
+        width: 'var(--Content-width)',
+      }}
+    >
+      <Stack spacing={4}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} sx={{ alignItems: 'flex-start' }}>
+          <Box sx={{ flex: '1 1 auto' }}>
+            <Typography variant="h4">Orders</Typography>
+          </Box>
         </Stack>
-      </Box>
-      <OrderModal open={Boolean(previewId)} />
-    </React.Fragment>
+
+        <TabContext value={tabValue}>
+          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <TabList onChange={handleTabChange}>
+              <Tab label="Upcoming" value="1" />
+              <Tab label="Past" value="2" />
+              <Tab label="All" value="3" />
+            </TabList>
+          </Box>
+        </TabContext>
+
+        <Stack direction="row" spacing={2} sx={{ px: 3, py: 2 }}>
+          <OutlinedInput
+            placeholder="Search thread"
+            value={searchInput}
+            onChange={handleSearchChange}
+            startAdornment={
+              <InputAdornment position="start">
+                <MagnifyingGlassIcon fontSize="var(--icon-fontSize-md)" />
+              </InputAdornment>
+            }
+            sx={{ width: '100%' }}
+          />
+        </Stack>
+
+        <Card>
+          <CitiesFilters filters={{ page,limit,courseID,vendorID,startDate,endDate }} />
+          <Divider />
+          <Box sx={{ overflowX: 'auto' }}>
+            {isLoading ? (
+              <TableSkeleton />
+            ) : (
+              <CitiesTable rows={allOrders} />
+            )}
+          </Box>
+          <Divider />
+          <Pagination page={currentPage-1} rowsPerPage={rowsPerPage} onPageChange={handlePageChange} onRowsPerPageChange={handleRowsPerPageChange} />
+        </Card>
+      </Stack>
+    </Box>
   );
-}
-
-// Sorting and filtering has to be done on the server.
-
-function applySort(row, sortDir) {
-  return row.sort((a, b) => {
-    if (sortDir === 'asc') {
-      return a.createdAt.getTime() - b.createdAt.getTime();
-    }
-
-    return b.createdAt.getTime() - a.createdAt.getTime();
-  });
-}
-
-function applyFilters(row, { customer, id, status }) {
-  return row.filter((item) => {
-    if (customer) {
-      if (!item.customer?.name?.toLowerCase().includes(customer.toLowerCase())) {
-        return false;
-      }
-    }
-
-    if (id) {
-      if (!item.id?.toLowerCase().includes(id.toLowerCase())) {
-        return false;
-      }
-    }
-
-    if (status) {
-      if (item.status !== status) {
-        return false;
-      }
-    }
-
-    return true;
-  });
 }

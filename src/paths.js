@@ -200,6 +200,27 @@ export const paths = {
     create: '/dashboard/event-management/create',
     edit : (eventmanagementId) => `/dashboard/event-management/edit/${eventmanagementId}`,
   },
+  waitlist: {
+    list: '/dashboard/waitlist',
+    create: '/dashboard/waitlist/create',
+    edit : (eventmanagementId) => `/dashboard/waitlist/edit/${eventmanagementId}`,
+  },
+  abandonedcart: {
+    list: '/dashboard/abandoned-cart',
+    create: '/dashboard/abandonedcart/create',
+    edit : (eventmanagementId) => `/dashboard/abandonedcart/edit/${eventmanagementId}`,
+  },
+  orders: {
+    list: '/dashboard/orders',
+    create: '/dashboard/orders/create',
+    details : (orderId) => `/dashboard/orders/${orderId}`,
+    edit : (orderId) => `/dashboard/orders/edit/${orderId}`,
+    transfer : (orderId) => `/dashboard/orders/${orderId}/transfer`,
+    cancel : (orderId) => `/dashboard/orders/${orderId}/cancel`,
+    invoice : (orderId) => `/dashboard/orders/${orderId}/invoice`,
+    history : (orderId) => `/dashboard/orders/${orderId}/history`,
+     email : (orderId) => `/dashboard/orders/${orderId}/email`,
+  },
 
 
 

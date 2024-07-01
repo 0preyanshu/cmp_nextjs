@@ -21,28 +21,15 @@ import Grid from '@mui/material/Unstable_Grid2';
 import { Camera as CameraIcon } from '@phosphor-icons/react/dist/ssr/Camera';
 import { Controller, useForm } from 'react-hook-form';
 import { z as zod } from 'zod';
-
+import axios from 'axios';
 import { paths } from '@/paths';
 import { logger } from '@/lib/default-logger';
 import { toast } from '@/components/core/toaster';
-import { useDispatch,useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { CompanyActions } from '../../../redux/slices';
-
 import { LoadingButton } from '@mui/lab';
 
-
-function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      resolve(reader.result);
-    };
-    reader.onerror = () => {
-      reject(new Error('Error converting file to base64'));
-    };
-  });
-}
+const S3_URL = 'https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg';  
 
 const schema = zod.object({
   avatar: zod.string().optional(),
@@ -56,12 +43,9 @@ const schema = zod.object({
 export function CompanyCreateForm({ currentCompany }) {
   const router = useRouter();
   const dispatch = useDispatch();
-  const [currentCategory, setCurrentCategory] = React.useState({});
+  const [isImageUploading, setIsImageUploading] = React.useState(false);
 
-  const { deletecompanies, fetchCompanies,updatecompanies } = CompanyActions;
-
-
-
+  const { updatecompanies } = CompanyActions;
 
   const defaultValues = React.useMemo(() => {
     return {
@@ -83,7 +67,6 @@ export function CompanyCreateForm({ currentCompany }) {
     reset,
   } = useForm({ defaultValues, resolver: zodResolver(schema) });
 
-  // Reset form values when currentCompany changes
   React.useEffect(() => {
     reset(defaultValues);
   }, [currentCompany, reset, defaultValues]);
@@ -91,55 +74,66 @@ export function CompanyCreateForm({ currentCompany }) {
   const onSubmit = React.useCallback(
     async (data) => {
       try {
-
-//         avatar
-// : 
-// ""
-// companyadd
-// : 
-// "123 Updated St, Updated City, Country"
-// companyemail
-// : 
-// "updated@example.com"
-// companyname
-// : 
-// "Update2345"
-// companyphone
-// : 
-// "456"
-// companywebsite
-// : 
-// "https:/"
-
-await dispatch(updatecompanies(data)).then((res) => {
-  console.log(res,"reso");
-  if (res?.payload?.data?.data) {
-    console.log(data,"data");
-        toast.success('Details updated');
-        router.push(paths.dashboard.companies.list);
-  } else {
-    toast.error(res?.payload?.message || 'Internal Server Error');
-  }
-})
-        
+        await dispatch(updatecompanies(data)).then((res) => {
+          console.log(res, 'res');
+          if (res?.payload?.data?.data) {
+            toast.success('Details updated');
+            // router.push(paths.dashboard.companies.list);
+          } else {
+            toast.error(res?.payload?.message || 'Internal Server Error');
+          }
+        });
       } catch (err) {
         logger.error(err);
-        
+        // toast.error('Failed to update company details');
       }
     },
-    [router]
+    [router, dispatch]
   );
 
   const avatarInputRef = React.useRef(null);
   const avatar = watch('avatar');
+
+  const [dataUrl, setDataUrl] = React.useState(""); 
+
+  const getAvatarSrc = (avatar) => {
+    return avatar?.startsWith('http') || avatar?.startsWith('http')   ? avatar : dataUrl|| avatar;
+  };
 
   const handleAvatarChange = React.useCallback(
     async (event) => {
       const file = event.target.files?.[0];
 
       if (file) {
-        const url = await fileToBase64(file);
-        setValue('avatar', url);
+        setIsImageUploading(true);
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = async () => {
+          const dataurl = reader.result;
+          setDataUrl(dataurl);
+          try {
+            const imageId = `image-${Date.now()}`;
+            const { data} = await axios.get(`${S3_URL}/s3-signed-url/upload/${imageId}`);
+            console.log(data,"s3");
+            await axios.put(data?.data?.s3SignedUrl, file, {
+              headers: {
+                'Content-Type': file.type,
+              },
+            });
+            setValue('avatar', imageId);
+            
+            toast.success('Image uploaded successfully');
+          } catch (err) {
+            logger.error(err);
+            toast.error('Failed to upload image');
+          } finally {
+            setIsImageUploading(false);
+          }
+        };
+        reader.onerror = () => {
+          toast.error('Failed to read file');
+          setIsImageUploading(false);
+        };
       }
     },
     [setValue]
@@ -163,7 +157,7 @@ await dispatch(updatecompanies(data)).then((res) => {
                       }}
                     >
                       <Avatar
-                        src={avatar || "https://s.yimg.com/fz/api/res/1.2/UNFEB7JcR670u5K5_GwShA--~C/YXBwaWQ9c3JjaGRkO2ZpPWZpdDtoPTI0MDtxPTgwO3c9MjQw/https://s.yimg.com/zb/imgv1/668bcde9-2e90-37fc-a539-84e96867c9bc/t_500x300"}
+                        src={getAvatarSrc(avatar)}
                         sx={{
                           '--Avatar-size': '100px',
                           '--Icon-fontSize': 'var(--icon-fontSize-lg)',
@@ -262,14 +256,14 @@ await dispatch(updatecompanies(data)).then((res) => {
           </Stack>
         </CardContent>
         <CardActions sx={{ justifyContent: 'flex-end' }}>
-              <LoadingButton
-                type="submit"
-                variant="contained"
-                style={{ textTransform: 'capitalize' }}
-                loading={isSubmitting}
-              >
-                Save Changes
-              </LoadingButton>
+          <LoadingButton
+            type="submit"
+            variant="contained"
+            style={{ textTransform: 'capitalize' }}
+            loading={isSubmitting || isImageUploading}
+          >
+            Save Changes
+          </LoadingButton>
         </CardActions>
       </Card>
     </form>
