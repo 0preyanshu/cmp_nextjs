@@ -49,10 +49,10 @@ export function CompanyCreateForm({ currentCompany }) {
 
   const defaultValues = React.useMemo(() => {
     return {
-      avatar: currentCompany?.logoUrl || '',
+      avatar: currentCompany?.companyLogo|| '',
       companyname: currentCompany?.companyName || '',
       companyemail: currentCompany?.companyEmail || '',
-      companyphone: currentCompany?.companyPhoneNumber || '',
+      companyphone: currentCompany?.companyPhone || '',
       companyadd: currentCompany?.companyAddress || '',
       companywebsite: currentCompany?.companyUrl || '',
     };

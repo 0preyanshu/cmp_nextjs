@@ -70,7 +70,7 @@ function createCompanies() {
 function fetchCompanies() {
   return createAsyncThunk(`${name}/fetchCompanies`, async (data) => {
     try {
-      const response = await axios.get("https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg/credentials/01J00KX8W7YP5PR7C9P1ZTKHXD");
+      const response = await axios.get("https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg/company/01J1PEXF9318QYVSNCKY8T9GE0");
 
     //   {
         
@@ -96,7 +96,7 @@ function fetchCompanies() {
     //   return newres;
     // }
     //   return {};
-    return res?.data?.credentials?.variables;
+    return res?.data?.data;
     } catch (err) {
       return err;
     }
@@ -136,18 +136,18 @@ function updatecompanies() {
 // companywebsite
 // : 
 // "https:/"
-const newobj={"variables": {
+const newobj={
   "companyUrl": data.companywebsite,
   "companyEmail": data.companyemail,
-  "companyPhoneNumber": data.companyphone,
-  "logoUrl": data.avatar,
+  "companyPhone": data.companyphone,
+  "companyLogo": data.avatar,
   "companyName": data.companyname,
   "companyAddress": data.companyadd
-}}
+}
 
 
     try {
-      const response = await axios.put("https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg/credentials/01J00KX8W7YP5PR7C9P1ZTKHXD", newobj);
+      const response = await axios.put("https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg/company/01J1PEXF9318QYVSNCKY8T9GE0", newobj);
 
       return response;
    
@@ -201,6 +201,7 @@ function createExtraReducers() {
         state.companies = { loading: true, allCompanies: state.companies.allCompanies || [] };
       },
       [fulfilled]: (state, action) => {
+        console.log(action.payload,"action.payload");
         state.companies = {
           allCompanies: action?.payload,
           loading: false,
@@ -256,7 +257,7 @@ function createExtraReducers() {
       },
       [fulfilled]: (state, action) => {
         state.companies = {
-          allCompanies: action.payload.data.data.data.variables,
+          allCompanies: action.payload.data.data.data,
           loading: false,
           totalData: state.companies.totalData,
           toast: { message: 'companies Updated Successfully', variant: 'success' },
