@@ -40,23 +40,30 @@ const schema = zod.object({
   companywebsite: zod.string().min(1, 'Website is required').max(255),
 });
 
-export function CompanyCreateForm({ currentCompany }) {
+export function CompanyCreateForm() {
   const router = useRouter();
   const dispatch = useDispatch();
   const [isImageUploading, setIsImageUploading] = React.useState(false);
+  const [currentCompany, setCurrentCompany] = React.useState({});
 
   const { updatecompanies } = CompanyActions;
+  const allCompanies = useSelector((state) => state?.company?.companies?.allCompanies);
 
-  const defaultValues = React.useMemo(() => {
-    return {
-      avatar: currentCompany?.companyLogo|| '',
-      companyname: currentCompany?.companyName || '',
-      companyemail: currentCompany?.companyEmail || '',
-      companyphone: currentCompany?.companyPhone || '',
-      companyadd: currentCompany?.companyAddress || '',
-      companywebsite: currentCompany?.companyUrl || '',
-    };
-  }, [currentCompany]);
+  React.useEffect(() => {
+    if (allCompanies) {
+      setCurrentCompany(allCompanies); // Assuming you want the first company in the list
+      console.log(allCompanies);
+    }
+  }, [allCompanies]);
+
+  const defaultValues = React.useMemo(() => ({
+    avatar: currentCompany?.companyLogo || '',
+    companyname: currentCompany?.companyName || '',
+    companyemail: currentCompany?.companyEmail || '',
+    companyphone: currentCompany?.companyPhone || '',
+    companyadd: currentCompany?.companyAddress || '',
+    companywebsite: currentCompany?.companyUrl || '',
+  }), [currentCompany]);
 
   const {
     control,
@@ -69,75 +76,91 @@ export function CompanyCreateForm({ currentCompany }) {
 
   React.useEffect(() => {
     reset(defaultValues);
-  }, [currentCompany, reset, defaultValues]);
+  }, [defaultValues, reset]);
 
-  const onSubmit = React.useCallback(
-    async (data) => {
-      try {
-        await dispatch(updatecompanies(data)).then((res) => {
-          console.log(res, 'res');
-          if (res?.payload?.data?.data) {
-            toast.success('Details updated');
-            // router.push(paths.dashboard.companies.list);
-          } else {
-            toast.error(res?.payload?.message || 'Internal Server Error');
-          }
-        });
-      } catch (err) {
-        logger.error(err);
-        // toast.error('Failed to update company details');
+  const fieldMapping = {
+    companyname: 'companyName',
+    companyemail: 'companyEmail',
+    companyphone: 'companyPhone',
+    companyadd: 'companyAddress',
+    companywebsite: 'companyUrl',
+    avatar: 'companyLogo'
+  };
+
+  const getChangedFields = (data) => {
+    const changedFields = {};
+    for (const key in data) {
+      const mKey = fieldMapping[key];
+      if (String(data[key]) !== String(currentCompany[mKey])) {
+        changedFields[mKey] = data[key];
       }
-    },
-    [router, dispatch]
-  );
+    }
+    changedFields.id = currentCompany.id;
+    return changedFields;
+  };
+
+  const onSubmit = async (data) => {
+    console.log(data, 'data');
+    console.log("currentCompany", currentCompany);
+    console.log(getChangedFields(data), 'getChangedFields(data)');
+    try {
+      await dispatch(updatecompanies(getChangedFields(data))).then((res) => {
+        console.log(res, 'res');
+        if (res?.payload?.data?.data) {
+          toast.success('Details updated');
+          // router.push(paths.dashboard.companies.list);
+        } else {
+          toast.error(res?.payload?.message || 'Internal Server Error');
+        }
+      });
+    } catch (err) {
+      logger.error(err);
+      // toast.error('Failed to update company details');
+    }
+  };
 
   const avatarInputRef = React.useRef(null);
   const avatar = watch('avatar');
 
-  const [dataUrl, setDataUrl] = React.useState(""); 
+  const [dataUrl, setDataUrl] = React.useState("");
 
   const getAvatarSrc = (avatar) => {
-    return avatar?.startsWith('http') || avatar?.startsWith('http')   ? avatar : dataUrl|| avatar;
+    return avatar?.startsWith('http') ? avatar : dataUrl || avatar;
   };
 
-  const handleAvatarChange = React.useCallback(
-    async (event) => {
-      const file = event.target.files?.[0];
-
-      if (file) {
-        setIsImageUploading(true);
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = async () => {
-          const dataurl = reader.result;
-          setDataUrl(dataurl);
-          try {
-            const imageId = `image-${Date.now()}`;
-            const { data} = await axios.get(`${S3_URL}/s3-signed-url/upload/${imageId}`);
-            console.log(data,"s3");
-            await axios.put(data?.data?.s3SignedUrl, file, {
-              headers: {
-                'Content-Type': file.type,
-              },
-            });
-            setValue('avatar', imageId);
-            
-            toast.success('Image uploaded successfully');
-          } catch (err) {
-            logger.error(err);
-            toast.error('Failed to upload image');
-          } finally {
-            setIsImageUploading(false);
-          }
-        };
-        reader.onerror = () => {
-          toast.error('Failed to read file');
+  const handleAvatarChange = async (event) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setIsImageUploading(true);
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = async () => {
+        const dataurl = reader.result;
+        setDataUrl(dataurl);
+        try {
+          const imageId = `image-${Date.now()}`;
+          const { data } = await axios.get(`${S3_URL}/s3-signed-url/upload/${imageId}`);
+          console.log(data, "s3");
+          await axios.put(data?.data?.s3SignedUrl, file, {
+            headers: {
+              'Content-Type': file.type,
+            },
+          });
+          setValue('avatar', imageId);
+          toast.success('Image uploaded successfully');
+        } catch (err) {
+          logger.error(err);
+          toast.error('Failed to upload image');
+        } finally {
           setIsImageUploading(false);
-        };
-      }
-    },
-    [setValue]
-  );
+        }
+      };
+      reader.onerror = () => {
+        toast.error('Failed to read file');
+        setIsImageUploading(false);
+      };
+    }
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>

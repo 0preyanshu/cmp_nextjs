@@ -70,7 +70,7 @@ function createCompanies() {
 function fetchCompanies() {
   return createAsyncThunk(`${name}/fetchCompanies`, async (data) => {
     try {
-      const response = await axios.get("https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg/company/01J1PEXF9318QYVSNCKY8T9GE0");
+      const response = await axios.get("https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg/company/01J1PVRA0K4FJ0MMA71VJXSB3E");
 
     //   {
         
@@ -136,18 +136,11 @@ function updatecompanies() {
 // companywebsite
 // : 
 // "https:/"
-const newobj={
-  "companyUrl": data.companywebsite,
-  "companyEmail": data.companyemail,
-  "companyPhone": data.companyphone,
-  "companyLogo": data.avatar,
-  "companyName": data.companyname,
-  "companyAddress": data.companyadd
-}
+
 
 
     try {
-      const response = await axios.put("https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg/company/01J1PEXF9318QYVSNCKY8T9GE0", newobj);
+      const response = await axios.put("https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg/company/01J1PVRA0K4FJ0MMA71VJXSB3E", data);
 
       return response;
    
@@ -256,12 +249,13 @@ function createExtraReducers() {
         state.companies = { loading: true, allCompanies: state.companies.allCompanies || [] };
       },
       [fulfilled]: (state, action) => {
-        state.companies = {
-          allCompanies: action.payload.data.data.data,
-          loading: false,
-          totalData: state.companies.totalData,
-          toast: { message: 'companies Updated Successfully', variant: 'success' },
-        };
+        console.log(action.payload,"action.payload");
+        // state.companies = {
+        //   allCompanies: action.payload?.data?.data?.data || [],
+        //   loading: false,
+        //   totalData: state.companies.totalData,
+        //   toast: { message: 'companies Updated Successfully', variant: 'success' },
+        // };
       },
       [rejected]: (state, action) => {
         state.companies = {
