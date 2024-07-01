@@ -109,6 +109,8 @@ export function CompanyCreateForm({ currentCompany }) {
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = async () => {
+          const dataurl = reader.result;
+          setDataUrl(dataurl);
           try {
             const imageId = `image-${Date.now()}`;
             const { data} = await axios.get(`${S3_URL}/s3-signed-url/upload/${imageId}`);
@@ -119,7 +121,7 @@ export function CompanyCreateForm({ currentCompany }) {
               },
             });
             setValue('avatar', imageId);
-            setDataUrl(reader.result);
+            
             toast.success('Image uploaded successfully');
           } catch (err) {
             logger.error(err);

@@ -22,6 +22,7 @@ import { useDispatch } from 'react-redux';
 import { toast } from '@/components/core/toaster';
 import { useRouter } from 'next/navigation';
 import { InstructorActions } from '@/redux/slices';
+import { Avatar } from '@mui/material';
 
 
 
@@ -35,7 +36,7 @@ export function InstructorsTable({ rows }) {
     {
       formatter: (row) => (
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center',marginLeft:3 }}>
-         {' '}
+           <Avatar src={row.photo} />{' '}
           <div>
             <Link
             

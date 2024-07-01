@@ -66,7 +66,7 @@ const Page = ({ searchParams }) => {
   };
 
   const handlePageChange = (event, newPage) => {
-    setCurrentPage(newPage + 1);
+    setCurrentPage(newPage);
   };
 
   const handleRowsPerPageChange = (event) => {

@@ -21,43 +21,27 @@ import Grid from '@mui/material/Unstable_Grid2';
 import { Camera as CameraIcon } from '@phosphor-icons/react/dist/ssr/Camera';
 import { Controller, useForm } from 'react-hook-form';
 import { z as zod } from 'zod';
+import axios from 'axios';
 
 import { paths } from '@/paths';
 import { logger } from '@/lib/default-logger';
 import { toast } from '@/components/core/toaster';
 import { useDispatch, useSelector } from 'react-redux';
 
-import {InstructorActions} from '@/redux/slices';
+import { InstructorActions } from '@/redux/slices';
 import { LoadingButton } from '@mui/lab';
 
-
-
-function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => {
-      resolve(reader.result);
-    };
-    reader.onerror = () => {
-      reject(new Error('Error converting file to base64'));
-    };
-  });
-}
+const S3_URL = 'https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg';
 
 const schema = zod.object({
   avatar: zod.string().optional(),
   firstname: zod.string().min(1, 'First Name is required').max(255),
   lastname: zod.string().min(1, 'Last Name is required').max(255),
   email: zod.string().email('Invalid email').min(1, 'Email is required').max(255),
-
-  
 });
 
-
-
 export function InstructorsCreateForm() {
-  const [currentInstructor, setcurrentInstructor] = React.useState({});
+  const [currentInstructor, setCurrentInstructor] = React.useState({});
 
   const { allInstructors } = useSelector((state) => state?.instructors?.instructors);
 
@@ -66,7 +50,7 @@ export function InstructorsCreateForm() {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const { fetchInstructor, createInstructor,updateinstructor } = InstructorActions;
+  const { fetchInstructor, createInstructor, updateInstructor } = InstructorActions;
 
   const isEdit = pathname.includes('edit');
 
@@ -75,7 +59,6 @@ export function InstructorsCreateForm() {
     firstname: currentInstructor?.firstname || '',
     lastname: currentInstructor?.lastname || '',
     email: currentInstructor?.email || '',
-
   }), [currentInstructor]);
 
   const {
@@ -91,23 +74,18 @@ export function InstructorsCreateForm() {
     reset(defaultValues);
   }, [currentInstructor, reset, defaultValues]);
 
-
   React.useEffect(() => {
-    console.log("allInstructors",allInstructors);
-    console.log("id",id);
     if (allInstructors?.length && id) {
-      const data = allInstructors.find((allInstructors) => String(allInstructors?.id) === String(id));
-      setcurrentInstructor(data);
-      console.log("currentInstructor",data);
+      const data = allInstructors.find((instructor) => String(instructor?.id) === String(id));
+      setCurrentInstructor(data);
     }
   }, [allInstructors, id]);
 
   const fieldMapping = {
-    avatar : "photo",
-    firstname:"firstname",
-    lastname:"lastname",
-    email:"email",
-
+    avatar: "photo",
+    firstname: "firstname",
+    lastname: "lastname",
+    email: "email",
   };
 
   const getChangedFields = (data) => {
@@ -127,11 +105,9 @@ export function InstructorsCreateForm() {
     async (data) => {
       try {
         const changedData = getChangedFields(data);
-        console.log(data);
-        console.log(changedData);
 
         if (isEdit) {
-          await dispatch(updateinstructor(changedData)).then((res) => {
+          await dispatch(updateInstructor(changedData)).then((res) => {
             if (res?.payload?.data?.data?.data) {
               toast.success('Update success!');
               router.push(paths.dashboard.instructors.list);
@@ -143,7 +119,7 @@ export function InstructorsCreateForm() {
           await dispatch(createInstructor(data)).then((res) => {
             if (res?.payload?.data?.data) {
               toast.success('Create success!');
-              router.push(paths.dashboard.instructors.list); 
+              router.push(paths.dashboard.instructors.list);
             } else {
               toast.error(res?.payload?.data?.error?.message || 'Internal Server Error');
             }
@@ -151,21 +127,51 @@ export function InstructorsCreateForm() {
         }
       } catch (err) {
         logger.error(err);
-       
       }
     },
-    [isEdit, currentInstructor.id, dispatch, router,fetchInstructor,updateinstructor,createInstructor]
+    [isEdit, currentInstructor.id, dispatch, router, fetchInstructor, updateInstructor, createInstructor]
   );
 
   const avatarInputRef = React.useRef(null);
   const avatar = watch('avatar');
 
+  const [dataUrl, setDataUrl] = React.useState("");
+  const [isImageUploading, setIsImageUploading] = React.useState(false);
+
+  const getAvatarSrc = (avatar) => {
+    return avatar?.startsWith('http') || avatar?.startsWith('http') ? avatar : dataUrl || avatar;
+  };
+
   const handleAvatarChange = React.useCallback(
     async (event) => {
       const file = event.target.files?.[0];
       if (file) {
-        const url = await fileToBase64(file);
-        setValue('avatar', url);
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = async () => {
+          const dataurl = reader.result;
+          setDataUrl(dataurl);
+          setIsImageUploading(true);
+          try {
+            const imageId = `image-${Date.now()}`;
+            const { data } = await axios.get(`${S3_URL}/s3-signed-url/upload/${imageId}`);
+            await axios.put(data?.data?.s3SignedUrl, file, {
+              headers: {
+                'Content-Type': file.type,
+              },
+            });
+            setValue('avatar', imageId);
+            toast.success('Image uploaded successfully');
+          } catch (err) {
+            logger.error(err);
+            toast.error('Failed to upload image');
+          } finally {
+            setIsImageUploading(false);
+          }
+        };
+        reader.onerror = () => {
+          toast.error('Failed to read file');
+        };
       }
     },
     [setValue]
@@ -189,7 +195,7 @@ export function InstructorsCreateForm() {
                       }}
                     >
                       <Avatar
-                        src={avatar}
+                        src={getAvatarSrc(avatar)}
                         sx={{
                           '--Avatar-size': '100px',
                           '--Icon-fontSize': 'var(--icon-fontSize-lg)',
@@ -208,9 +214,7 @@ export function InstructorsCreateForm() {
                       <Typography variant="caption">Min 400x400px, PNG or JPEG</Typography>
                       <Button
                         color="secondary"
-                        onClick={() => {
-                          avatarInputRef.current?.click();
-                        }}
+                        onClick={() => avatarInputRef.current?.click()}
                         variant="outlined"
                       >
                         Select
@@ -245,7 +249,6 @@ export function InstructorsCreateForm() {
                     )}
                   />
                 </Grid>
-              
                 <Grid md={6} xs={12}>
                   <Controller
                     control={control}
@@ -267,14 +270,15 @@ export function InstructorsCreateForm() {
           <Button color="secondary" component={RouterLink} href={paths.dashboard.instructors.list}>
             Cancel
           </Button>
-        <LoadingButton
-          color="primary"
-          loading={isSubmitting}
-          type="submit"
-          variant="contained"
-        >
-          {isEdit ? 'Update' : 'Create'}
-        </LoadingButton>
+          <LoadingButton
+            color="primary"
+            loading={isSubmitting || isImageUploading}
+            type="submit"
+            variant="contained"
+            disabled={isImageUploading}
+          >
+            {isEdit ? 'Update' : 'Create'}
+          </LoadingButton>
         </CardActions>
       </Card>
     </form>
