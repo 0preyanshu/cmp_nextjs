@@ -233,7 +233,7 @@ export function StatesCreateForm() {
             style={{ textTransform: 'capitalize' }}
             loading={isSubmitting}
           >
-            {!isEdit ? 'Create Currency' : 'Save Changes'}
+            {!isEdit ? 'Create State' : 'Save Changes'}
           </LoadingButton>
         </CardActions>
       </Card>
