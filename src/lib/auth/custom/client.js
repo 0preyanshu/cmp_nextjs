@@ -1,5 +1,9 @@
 'use client';
 
+import axios from 'axios';
+
+const AUTH_URL = 'https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg';
+
 function generateToken() {
   const arr = new Uint8Array(12);
   window.crypto.getRandomValues(arr);
@@ -32,17 +36,16 @@ class AuthClient {
   async signInWithPassword(params) {
     const { email, password } = params;
 
-    // Make API request
+    try {
+      const response = await axios.post(`${AUTH_URL}/auth/sign-in`, { email, password });
+      const { token } = response.data.data;
 
-    // We do not handle the API, so we'll check if the credentials match with the hardcoded ones.
-    if (email !== 'sofia@devias.io' || password !== 'Secret1') {
-      return { error: 'Invalid credentials' };
+      localStorage.setItem('custom-auth-token', token);
+
+      return { data: token };
+    } catch (error) {
+      return { error: error.response?.data?.error || 'Invalid credentials' };
     }
-
-    const token = generateToken();
-    localStorage.setItem('custom-auth-token', token);
-
-    return {};
   }
 
   async resetPassword(_) {
