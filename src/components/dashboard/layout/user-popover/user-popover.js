@@ -22,15 +22,14 @@ import { CognitoSignOut } from './cognito-sign-out';
 import { CustomSignOut } from './custom-sign-out';
 import { FirebaseSignOut } from './firebase-sign-out';
 import { SupabaseSignOut } from './supabase-sign-out';
+import { useUser } from '@/hooks/use-user';
 
-const user = {
-  id: 'USR-000',
-  name: 'Sofia Rivers',
-  avatar: '/assets/avatar.png',
-  email: 'sofia@devias.io',
-};
+
+
+// const { user, error, isLoading, checkSession } = useUser();
 
 export function UserPopover({ anchorEl, onClose, open }) {
+  const { user, error, isLoading, checkSession } = useUser();
   return (
     <Popover
       anchorEl={anchorEl}
@@ -41,9 +40,9 @@ export function UserPopover({ anchorEl, onClose, open }) {
       transformOrigin={{ horizontal: 'right', vertical: 'top' }}
     >
       <Box sx={{ p: 2 }}>
-        <Typography>{user.name}</Typography>
+        <Typography>{user?.firstName || "N/A"}</Typography>
         <Typography color="text.secondary" variant="body2">
-          {user.email}
+          {user?.email || "N/A"}
         </Typography>
       </Box>
       <Divider />
