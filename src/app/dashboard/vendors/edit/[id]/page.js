@@ -10,7 +10,7 @@ import { ArrowLeft as ArrowLeftIcon } from '@phosphor-icons/react/dist/ssr/Arrow
 import { config } from '@/config';
 import { paths } from '@/paths';
 import { VendorsCreateForm } from '@/components/dashboard/vendors/vendors-create-form';
-import PriviledgeForbidden from '@/components/core/PriviledgeForbidden';
+import PriviledgeForbidden from '@/components/core/priviledgeForbidden';
 import { useUserPrivileges } from '@/hooks/use-privilages';
 
 
