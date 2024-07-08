@@ -14,8 +14,12 @@ export const layoutConfig = {
           icon: 'gauge',
           items: [
             // { key: 'order', title: 'Instructors', href: paths.dashboard.instructors.list },
-            { key: 'Waiting List', title: 'Waiting List', href: paths.dashboard.waitlist.list },
+            { key: 'Dashboard', title: 'Dashboard', href: paths.dashboard.overview },
+            { key: 'Event Registration', title: 'Event Registration', href: paths.dashboard.eventregistration.list },
+            { key: 'Orders', title: 'Orders', href: paths.dashboard.orders.list },
             { key: 'Abandoned Carts', title: 'Abandoned Carts', href: paths.dashboard.abandonedcart.list },
+            { key: 'Waiting List', title: 'Waiting List', href: paths.dashboard.waitlist.list },
+            
 
             
 
@@ -28,11 +32,13 @@ export const layoutConfig = {
           title: 'Operations',
           icon: 'chart-pie',
           items: [
+          
+            { key: 'Event Managment', title: 'Event Managment', href: paths.dashboard.eventmanagement.list },
+            { key: 'Coupons', title: 'Coupons', href: paths.dashboard.coupons.list },
             { key: 'Instructors', title: 'Instructors', href: paths.dashboard.instructors.list },
             { key: 'Vendors', title: 'Vendors', href: paths.dashboard.vendors.list },
-            { key: 'Coupons', title: 'Coupons', href: paths.dashboard.coupons.list },
             { key: 'System Emails', title: 'System Emails', href: paths.dashboard.systememails.list },
-            { key: 'Event Managment', title: 'Event Managment', href: paths.dashboard.eventmanagement.list },
+           
             
 
           
@@ -53,8 +59,10 @@ export const layoutConfig = {
             { key: 'tax', title: 'Tax', href: paths.dashboard.taxes.list  },
             { key: 'currency', title: 'Currency', href: paths.dashboard.currencies.list  },
             { key: 'timezone', title: 'Time Zone', href: paths.dashboard.timezones.list  },
-            { key: 'emailapi', title: 'Email API', href: paths.dashboard.emailapi.list  },
             { key: 'paymentapi', title: 'Payment API', href: paths.dashboard.paymentapi.list  },
+            { key: 'emailapi', title: 'Email API', href: paths.dashboard.emailapi.list  },
+            { key: 'usertype', title: 'User types', href: paths.dashboard.usertype.list  },
+            
 
           
      

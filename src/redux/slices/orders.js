@@ -68,9 +68,8 @@ function fetchOrder() {
     try {
       const response = await axios.get(
         HOST_API.concat(
-          `/order/orders/new?lastOrderId=${data.lastOrderId || ''}&limit=${data.limit || 5}&vendorId=${data.vendorId || ''
-          }&courseId=${data.courseId || ''}&search=${data.name || ''}&startDate=${data.startDate || ''}&endDate=${data.endDate || ''
-          }&eventStatus=${data.eventStatus || ''}&page=${data.page}`
+          `/order?limit=${data.limit || 5}&vendorId=${data.vendorId || ''
+          }&courseId=${data.courseId || ''}&search=${data.name || ''}&startDate=${data.startDate || ''}&endDate=${data.endDate || ''}`
         ),
         {
           headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
@@ -222,7 +221,7 @@ function createExtraReducers() {
       },
       [fulfilled]: (state, action) => {
         state.orders = {
-          allOrders: action?.payload?.orderDTOS,
+          allOrders: action?.payload?.data?.data || [],
           loading: false,
           totalData: action?.payload?.totalElements || 0,
           toast: { message: 'orders Added Successfully', variant: 'success' },

@@ -28,6 +28,7 @@ const storage = typeof window !== 'undefined' ? createWebStorage('local') : crea
 const persistConfig = {
   key: 'root',
   storage:storage,
+  timeout: 1000,
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

@@ -32,7 +32,17 @@ export function DataTable({
         <TableRow>
           {selectable ? (
             <TableCell padding="checkbox" sx={{ width: '40px', minWidth: '40px', maxWidth: '40px' }}>
-             
+              <Checkbox
+                checked={selectedAll}
+                indeterminate={selectedSome}
+                onChange={(event) => {
+                  if (event.target.checked) {
+                    onSelectAll?.();
+                  } else {
+                    onDeselectAll?.();
+                  }
+                }}
+              />
             </TableCell>
           ) : null}
           {columns.map((column) => (
@@ -51,11 +61,7 @@ export function DataTable({
         </TableRow>
       </TableHead>
       <TableBody>
-        { console.log(rows,"rows10")}
-
-       
         {rows.map((row, index) => {
-      
           const rowId = row?.id ? row.id : uniqueRowId?.(row);
           const rowSelected = rowId ? selected?.has(rowId) : false;
 
@@ -72,9 +78,17 @@ export function DataTable({
               sx={{ ...(onClick && { cursor: 'pointer' }) }}
             >
               {selectable ? (
-                <TableCell>
-               
-                
+                <TableCell padding="checkbox">
+                  <Checkbox
+                    checked={rowSelected}
+                    onChange={(event) => {
+                      if (event.target.checked) {
+                        onSelectOne?.(rowId);
+                      } else {
+                        onDeselectOne?.(rowId);
+                      }
+                    }}
+                  />
                 </TableCell>
               ) : null}
               {columns.map((column) => (

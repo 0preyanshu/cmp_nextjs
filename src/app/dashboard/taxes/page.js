@@ -42,7 +42,7 @@ export default function Page({ searchParams }) {
         limit: rowsPerPage,
         name: searchInput || ''
       };
-      if(allTaxes.length === 0 ||!isInitialMount.current) dispatch(fetchTaxes(data));
+      if(allTaxes.length === 0 ||isInitialMount.current) dispatch(fetchTaxes(data));
       updateSearchParams({ searchTerm: searchInput, page: currentPage, limit: rowsPerPage });
     if(isInitialMount.current){
       isInitialMount.current = false;

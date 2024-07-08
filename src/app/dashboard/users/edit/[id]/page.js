@@ -8,8 +8,7 @@ import { ArrowLeft as ArrowLeftIcon } from '@phosphor-icons/react/dist/ssr/Arrow
 
 import { config } from '@/config';
 import { paths } from '@/paths';
-import { CitiesCreateForm } from '@/components/dashboard/cities/cities-create-form';
-import Analytics  from '@/components/dashboard/event-registration/analytics';
+import { StatesCreateForm } from '@/components/dashboard/users/states-create-form';
 
 export const metadata = { title: `Create | Customers | Dashboard | ${config.site.name}` };
 
@@ -29,7 +28,7 @@ export default function Page() {
             <Link
               color="text.primary"
               component={RouterLink}
-              href={paths.dashboard.cities.list}
+              href={paths.dashboard.users.list}
               sx={{ alignItems: 'center', display: 'inline-flex', gap: 1 }}
               variant="subtitle2"
             >
@@ -38,10 +37,10 @@ export default function Page() {
             </Link>
           </div>
           <div>
-            <Typography variant="h5">Analytics</Typography>
+            <Typography variant="h4">Edit State</Typography>
           </div>
         </Stack>
-        <Analytics></Analytics>
+        <StatesCreateForm />
       </Stack>
     </Box>
   );

@@ -59,13 +59,16 @@ export function SignInForm() {
 
     const { error } = await authClient.signInWithOAuth({ provider: providerId });
 
+    setTimeout(() => {
+      setIsPending(false);
+    },[30000])
     if (error) {
       setIsPending(false);
       toast.error(error);
       return;
     }
 
-    setIsPending(false);
+    // setIsPending(false);
 
     // Redirect to OAuth provider
   }, []);
@@ -100,12 +103,12 @@ export function SignInForm() {
         </Box>
       </div>
       <Stack spacing={1}>
-        <Typography variant="h5">Sign in</Typography>
+        <Typography variant="h5">Sign in to Skillbook CMP</Typography>
         <Typography color="text.secondary" variant="body2">
-          Don&apos;t have an account?{' '}
-          <Link component={RouterLink} href={paths.auth.custom.signUp} variant="subtitle2">
+        Enter your details below.
+          {/* <Link component={RouterLink} href={paths.auth.custom.signUp} variant="subtitle2">
             Sign up
-          </Link>
+          </Link> */}
         </Typography>
       </Stack>
       <Stack spacing={3}>
@@ -172,7 +175,7 @@ export function SignInForm() {
           </div>
         </Stack>
       </Stack>
-      <Alert color="warning">
+      {/* <Alert color="warning">
         Use{' '}
         <Typography component="span" sx={{ fontWeight: 700 }} variant="inherit">
           sofia@devias.io
@@ -181,7 +184,7 @@ export function SignInForm() {
         <Typography component="span" sx={{ fontWeight: 700 }} variant="inherit">
           Secret1
         </Typography>
-      </Alert>
+      </Alert> */}
     </Stack>
   );
 }

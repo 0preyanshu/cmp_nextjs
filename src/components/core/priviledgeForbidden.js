@@ -1,6 +1,7 @@
+'use client'
 import React from 'react';
 import { styled } from '@mui/material/styles';
-import { useSelector } from 'react-redux';
+// import { useSelector } from 'react-redux';
 import { Box, CircularProgress, Container } from '@mui/material';
 import Typography from '@mui/material/Typography';
 import ForbiddenIllustration from '@/components/core/illustration403.js';

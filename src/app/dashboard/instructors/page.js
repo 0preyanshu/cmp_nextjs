@@ -20,11 +20,15 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { InstructorActions } from '@/redux/slices';
 import TableSkeleton from '@/components/core/Skeletion';
-import PriviledgeForbidden from '@/components/core/PriviledgeForbidden';
+import { useUserPrivileges } from '@/hooks/use-privilages';
+// import PriviledgeForbidden from '@/components/core/PriviledgeForbidden';
+
 
 
 export default function Page({ searchParams }) {
   const { sortDir,searchTerm, page = 1, limit = 10 } = searchParams;
+  const userPrivileges = useUserPrivileges();
+  console.log("userPrivileges",userPrivileges);
 
   const [currentPage, setCurrentPage] = React.useState(parseInt(page));
   const [rowsPerPage, setRowsPerPage] = React.useState(parseInt(limit));
@@ -108,8 +112,10 @@ export default function Page({ searchParams }) {
         width: 'var(--Content-width)',
       }}
     >
-      {/* <Stack spacing={4}> */}
-        {/* <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} sx={{ alignItems: 'flex-start' }}>
+
+    
+      <Stack spacing={4}>
+        <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} sx={{ alignItems: 'flex-start' }}>
           <Box sx={{ flex: '1 1 auto' }}>
             <Typography variant="h4">Instructors</Typography>
           </Box>
@@ -120,12 +126,12 @@ export default function Page({ searchParams }) {
               Add
             </Button>
           </Box>
-        </Stack> */}
+        </Stack>
 
 
-<PriviledgeForbidden action={'ADD VENDOR'} ></PriviledgeForbidden>
 
-        {/* <Stack direction="row" spacing={2} sx={{ px: 3, py: 2 }}>
+
+        <Stack direction="row" spacing={2} sx={{ px: 3, py: 2 }}>
           <OutlinedInput
             placeholder="Search Instructors"
             startAdornment={
@@ -156,8 +162,8 @@ export default function Page({ searchParams }) {
             onPageChange={handlePageChange}
             onRowsPerPageChange={handleRowsPerPageChange}
           />
-        </Card> */}
-      {/* </Stack> */}
+        </Card>
+      </Stack>
     </Box>
   );
 }

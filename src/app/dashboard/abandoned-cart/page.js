@@ -22,6 +22,8 @@ import Tab from '@mui/material/Tab';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TableSkeleton from '@/components/core/Skeletion';
+import { useUserPrivileges } from '@/hooks/use-privilages';
+
 
 export default function Page({ searchParams }) {
   const {  searchTerm, page = 1, limit = 10,startDate,eventID,courseID,endDate } = searchParams;
@@ -32,6 +34,9 @@ export default function Page({ searchParams }) {
   const [tabValue, setTabValue] = React.useState('1');
 
   const router = useRouter();
+  const userPrivileges = useUserPrivileges();
+
+  console.log("userPrivileges",userPrivileges);
 
 
 
@@ -43,6 +48,10 @@ export default function Page({ searchParams }) {
   const {fetchCourses} = CoursesActions;
   const {fetchAbandonedCart} = OrderActions;
   const { fetchEvents } = EventsActions;
+
+
+
+
 
 
 

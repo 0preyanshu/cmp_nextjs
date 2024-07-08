@@ -53,9 +53,9 @@ export function SideNav({ color = 'evident', items = [] }) {
       <Stack spacing={2} sx={{ p: 2 }}>
         <div>
           <Box component={RouterLink} href={paths.home} sx={{ display: 'inline-flex', height:"32px",width:"122px",alignItems:"center",justifyContent:"center",textDecoration:"none",color:"white"}}>
-            {/* <Logo color={logoColor} height={32} width={122} /> */}
+            <Logo color={logoColor} height={42} width={142} />
 
-            <h3>Skill Book</h3>
+            {/* <h3>Skill Book</h3> */}
 
           </Box>
         </div>
@@ -141,7 +141,10 @@ function NavItem({
   title,
 }) {
   const [open, setOpen] = React.useState(forceOpen);
-  const active = isNavItemActive({ disabled, external, href, matcher, pathname });
+  console.log("pathname", pathname,href)
+  const active = href==="/dashboard"? pathname===href: isNavItemActive({ disabled, external, href, matcher, pathname });
+
+
   const Icon = icon ? icons[icon] : null;
   const ExpandIcon = open ? CaretDownIcon : CaretRightIcon;
   const isBranch = children && !href;

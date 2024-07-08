@@ -6,9 +6,9 @@ import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-import { CitiesFilters } from '@/components/dashboard/abandoned-cart/cities-filters';
+import { CitiesFilters } from '@/components/dashboard/orders/cities-filters';
 import { Pagination } from '@/components/core/pagination';
-import { CitiesTable } from '@/components/dashboard/abandoned-cart/cities-table';
+import { CitiesTable } from '@/components/dashboard/orders/cities-table';
 
 import InputAdornment from '@mui/material/InputAdornment';
 import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass';
@@ -39,10 +39,10 @@ export default function Page({ searchParams }) {
   // const { allInstructors } = useSelector((state) => state?.instructors?.instructors);
   // const {allTimezones}=useSelector((state)=>state?.timezone?.timezones);
   const { allEvents } = useSelector((state) => state?.event?.events);
-  const { allOrders, loading: isLoading, totalData } = useSelector((state) => state?.orders?.abandonedCart);
+  const { allOrders, loading: isLoading, totalData } = useSelector((state) => state?.orders?.orders);
   const { allVendors } = useSelector((state) => state?.vendors?.vendors);
   const {fetchCourses} = CoursesActions;
-  const {fetchAbandonedCart} = OrderActions;
+  const {fetchOrder} = OrderActions;
   const { fetchVendors } = VendorActions;
 
 
@@ -76,7 +76,7 @@ export default function Page({ searchParams }) {
         dispatch(fetchVendors({ limit: "", page: "", search: "" }));
       }
       if(allOrders.length === 0 || !isInitialMount.current){
-        dispatch(fetchAbandonedCart(data));
+        dispatch(fetchOrder(data));
       }
 
       updateSearchParams({ searchTerm: searchInput, page: currentPage, limit: rowsPerPage, startDate:startDate, courseID:courseID, vedorID:vendorID, endDate:endDate});

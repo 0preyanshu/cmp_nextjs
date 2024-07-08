@@ -1,8 +1,9 @@
 'use client';
 
 import axios from 'axios';
+import jwt from 'jsonwebtoken';
 
-const AUTH_URL = 'https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg';
+const AUTH_URL = 'https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg'; //todo get from env
 
 function generateToken() {
   const arr = new Uint8Array(12);
@@ -57,16 +58,25 @@ class AuthClient {
   }
 
   async getUser() {
-    // Make API request
 
-    // We do not handle the API, so just check if we have a token in localStorage.
     const token = localStorage.getItem('custom-auth-token');
 
     if (!token) {
       return { data: null };
     }
 
-    return { data: user };
+
+    const secretKey = 'StagingSecretKey'; // todo: get from env
+    try {
+      const verifiedDecoded = jwt.verify(token, secretKey);
+      console.log("verifiedDecoded", verifiedDecoded)
+      return { data: verifiedDecoded };
+    } catch (err) {
+      return { data: null };
+    }
+
+
+   
   }
 
   async signOut() {
