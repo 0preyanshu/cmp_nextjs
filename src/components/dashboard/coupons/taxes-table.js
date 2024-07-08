@@ -45,7 +45,7 @@ export function TaxesTable({ rows }) {
   function formatDate(dateString) {
     const date = new Date(dateString);
     const options = { day: '2-digit', month: 'long', year: 'numeric' };
-    return new Intl.DateTimeFormat('en-GB', options).format(date);
+    return new Intl.DateTimeFormat('en-GB', options)?.format(date);
   }
 
   const { updateCoupons } = CouponActions;
@@ -88,7 +88,7 @@ export function TaxesTable({ rows }) {
    
     {
       formatter(row) {
-        return formatDate(row.expiryDate);
+        return (row?.expiryDate) ?formatDate(row?.expiryDate):"";
       },
       name: 'Expiry',
       width: '150px',
@@ -102,7 +102,7 @@ export function TaxesTable({ rows }) {
     },
     {
       formatter(row) {
-        return row.course.map(course => course.courseName).join(',\n');
+        return row?.course?.map(course => course.courseName).join(',\n');
       },
       name: 'Courses',
       width: '180px',

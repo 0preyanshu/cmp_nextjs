@@ -1,3 +1,4 @@
+'use client'
 import * as React from 'react';
 import RouterLink from 'next/link';
 import Box from '@mui/material/Box';
@@ -9,10 +10,13 @@ import { ArrowLeft as ArrowLeftIcon } from '@phosphor-icons/react/dist/ssr/Arrow
 import { config } from '@/config';
 import { paths } from '@/paths';
 import { TaxesCreateForm } from '@/components/dashboard/coupons/taxes-create-form';
+import  PriviledgeForbidden  from '@/components/core/PriviledgeForbidden';
+import { useUserPrivileges } from '@/hooks/use-privilages';
 
-export const metadata = { title: `Create | Taxes | Dashboard | ${config.site.name}` };
+// export const metadata = { title: `Create | Taxes | Dashboard | ${config.site.name}` };
 
 export default function Page() {
+  const userPrivileges = useUserPrivileges();
   return (
     <Box
       sx={{
@@ -40,7 +44,8 @@ export default function Page() {
             <Typography variant="h4">Edit Coupon</Typography>
           </div>
         </Stack>
-        <TaxesCreateForm />
+        {!userPrivileges['Edit Coupon'] && <PriviledgeForbidden action={'Edit Coupon'} ></PriviledgeForbidden>}
+        {userPrivileges['Edit Coupon'] && <TaxesCreateForm />}
       </Stack>
     </Box>
   );

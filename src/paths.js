@@ -1,3 +1,5 @@
+import analytics from "./redux/slices/analytics";
+
 export const paths = {
   home: '/',
   checkout: '/checkout',
@@ -200,6 +202,13 @@ export const paths = {
     create: '/dashboard/event-management/create',
     edit : (eventmanagementId) => `/dashboard/event-management/edit/${eventmanagementId}`,
   },
+  eventregistration: {
+    list: '/dashboard/events',
+    create: '/dashboard/events/create',
+    edit : (eventmanagementId) => `/dashboard/event-management/edit/${eventmanagementId}`,
+    analytics : (eventmanagementId) => `/dashboard/events/${eventmanagementId}/analytics`,
+    attendance : (eventmanagementId) => `/dashboard/events/${eventmanagementId}/attendance`,
+  },
   waitlist: {
     list: '/dashboard/waitlist',
     create: '/dashboard/waitlist/create',
@@ -220,6 +229,16 @@ export const paths = {
     invoice : (orderId) => `/dashboard/orders/${orderId}/invoice`,
     history : (orderId) => `/dashboard/orders/${orderId}/history`,
      email : (orderId) => `/dashboard/orders/${orderId}/email`,
+  },
+  usertype: {
+    list: '/dashboard/user-type',
+    create: '/dashboard/user-type/create',
+    edit : (usertypeId) => `/dashboard/user-type/edit/${usertypeId}`,
+  },
+  users: {
+    list: '/dashboard/users',
+    create: '/dashboard/users',
+    edit : (userId) => `/dashboard/user-type/edit/${userId}`,
   },
 
 

@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 
 export default function Layout({ children }) {
   const pathname = usePathname();
-  const condition = /^\/dashboard\/events\/\d+\/attendance$/.test(pathname);
+  const condition = /^\/dashboard\/events\/[A-Za-z0-9]+\/attendance$/.test(pathname);
   
   if (condition) {
     return (

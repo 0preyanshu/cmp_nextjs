@@ -54,11 +54,6 @@ export function ResetPasswordForm() {
 
   return (
     <Stack spacing={4}>
-      <div>
-        <Box component={RouterLink} href={paths.home} sx={{ display: 'inline-block', fontSize: 0 }}>
-          <DynamicLogo colorDark="light" colorLight="dark" height={32} width={122} />
-        </Box>
-      </div>
       <Typography variant="h5">Reset password</Typography>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Stack spacing={2}>

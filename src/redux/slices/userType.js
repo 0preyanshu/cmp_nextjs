@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-import { HOST_API } from '../../config';
+// import { HOST_API } from '../../config';
+
+const HOST_API = 'https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg';
 
 // const initialState = [];
 
@@ -43,7 +45,7 @@ function createExtraActions() {
 function createUserType() {
   return createAsyncThunk(`${name}/createUserType`, async (obj) => {
     try {
-      const response = await axios.post(HOST_API.concat(`/userType/create`), obj, {
+      const response = await axios.post(HOST_API.concat(`/userType`), obj, {
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
       });
       return response;
@@ -55,7 +57,7 @@ function createUserType() {
 function fetchUserType() {
   return createAsyncThunk(`${name}/fetchUserType`, async (data) => {
     try {
-      const response = await axios.get(HOST_API.concat(`/userType/get?page=${data.page}&limit=${data.limit}`), {
+      const response = await axios.get(HOST_API.concat(`/userType?page=${data.page}&limit=${data.limit}`), {
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
       });
       return response.data;
@@ -80,7 +82,7 @@ function fetchUserType() {
 function updateUserType() {
   return createAsyncThunk(`${name}/updateUserType`, async (data) => {
     try {
-      const response = await axios.put(HOST_API.concat(`/userType/update/${data.id}`), data, {
+      const response = await axios.put(HOST_API.concat(`/userType/${data.id}`), data, {
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
       });
       return response;
@@ -109,14 +111,22 @@ function createExtraReducers() {
         };
       },
       [fulfilled]: (state, action) => {
-        console.log(action);
-        state.userType = {
-          userTypes: [...state.userType.userTypes, action?.payload?.data?.userType],
-          loading: false,
-          totalElements: state.userType.totalElements + 1,
-          toast: { message: 'Usertype created Successfully', variant: 'success' },
-        };
-        state.allUserTypeData = [...state?.allUserTypeData, action.payload?.data?.userType];
+        console.log(action.payload?.data,"a");
+        state.userType.loading= false;
+
+        if(action.payload?.data?.data?.data){
+          state.userType = {
+            userTypes: [...state.userType.userTypes, action.payload?.data?.data?.data||[]],
+            loading: false,
+            totalElements: state.userType.totalElements  + 1,
+            toast: { message: 'Usertype created Successfully', variant: 'success' },
+          };
+          state.allUserTypeData = [...state?.allUserTypeData, action.payload?.data?.data?.data||[]];
+
+
+
+        }
+        
       },
       [rejected]: (state, action) => {
         state.userType = {
@@ -136,14 +146,14 @@ function createExtraReducers() {
         state.userType = { loading: true, userTypes: [], totalElements: state.userType.totalElements };
       },
       [fulfilled]: (state, action) => {
-        const { isIndex } = action.meta.arg;
+        // const { isIndex } = action.meta.arg;
         state.userType = {
           loading: false,
-          userTypes: action?.payload?.userTypeDTOS,
-          totalElements: action.payload.totalElements,
+          userTypes: action.payload?.data?.data || [],
+          totalElements: action.payload.totalElements || 0,
           toast: { message: 'UserTypes fetched Successfully', variant: 'success' },
         };
-        state.allUserTypeData = isIndex ? action.payload.userTypeDTOS : state.allUserTypeData;
+        state.allUserTypeData =  action.payload?.data?.data || []
       },
       [rejected]: (state, action) => {
         state.userType = {
@@ -197,19 +207,21 @@ function createExtraReducers() {
         };
       },
       [fulfilled]: (state, action) => {
-        console.log({ action });
+        console.log(action.payload?.data?.data?.data,"bbbbb");
+        state.userType.loading= false;
+       if(action.payload?.data?.data?.data){
         state.userType = {
           userTypes: state?.userType?.userTypes?.map((item) =>
-            item.id === action.payload.data?.userType?.id ? action.payload?.data?.userType : item
+            item.id === action.payload?.data?.data?.data?.id ? action.payload?.data?.data?.data : item
           ),
-          loading: false,
           totalElements: state.userType.totalElements,
           toast: { message: 'User Updated Successfully', variant: 'success' },
         };
         state.allUserTypeData = [
-          ...state?.allUserTypeData?.filter((ele) => ele.id !== action.payload.data.userType?.id),
-          action.payload.data.userType,
+          ...state?.allUserTypeData?.filter((ele) => ele.id !== action.payload?.data?.data?.data?.id),
+          action.payload?.data?.data?.data,
         ];
+       }
       },
       [rejected]: (state, action) => {
         state.userType = {

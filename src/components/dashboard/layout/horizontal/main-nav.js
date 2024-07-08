@@ -289,6 +289,7 @@ function renderNavItems({ items = [], pathname }) {
 }
 
 function NavItem({ disabled, external, items, href, icon, label, matcher, pathname, title }) {
+  // console.log('NavItem /dashboard', pathname)
   const active = isNavItemActive({ disabled, external, href, matcher, pathname });
   const Icon = icon ? icons[icon] : null;
   const isBranch = Boolean(items);

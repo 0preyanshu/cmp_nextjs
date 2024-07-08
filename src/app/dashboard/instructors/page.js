@@ -20,11 +20,15 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { InstructorActions } from '@/redux/slices';
 import TableSkeleton from '@/components/core/Skeletion';
+import { useUserPrivileges } from '@/hooks/use-privilages';
 // import PriviledgeForbidden from '@/components/core/PriviledgeForbidden';
+
 
 
 export default function Page({ searchParams }) {
   const { sortDir,searchTerm, page = 1, limit = 10 } = searchParams;
+  const userPrivileges = useUserPrivileges();
+  console.log("userPrivileges",userPrivileges);
 
   const [currentPage, setCurrentPage] = React.useState(parseInt(page));
   const [rowsPerPage, setRowsPerPage] = React.useState(parseInt(limit));
@@ -108,6 +112,8 @@ export default function Page({ searchParams }) {
         width: 'var(--Content-width)',
       }}
     >
+
+    
       <Stack spacing={4}>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} sx={{ alignItems: 'flex-start' }}>
           <Box sx={{ flex: '1 1 auto' }}>
@@ -123,7 +129,7 @@ export default function Page({ searchParams }) {
         </Stack>
 
 
-{/* <PriviledgeForbidden action={'ADD VENDOR'} ></PriviledgeForbidden> */}
+
 
         <Stack direction="row" spacing={2} sx={{ px: 3, py: 2 }}>
           <OutlinedInput
