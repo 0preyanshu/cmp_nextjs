@@ -246,7 +246,9 @@ function UserButton() {
           }}
           variant="dot"
         >
-          <Avatar src={user.avatar} />
+          <Avatar>
+          {user?.name?.charAt(0)}
+        </Avatar>
         </Badge>
       </Box>
       <UserPopover anchorEl={popover.anchorRef.current} onClose={popover.handleClose} open={popover.open} />
