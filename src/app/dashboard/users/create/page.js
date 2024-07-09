@@ -37,7 +37,7 @@ export default function Page() {
             </Link>
           </div>
           <div>
-            <Typography variant="h4">Create State</Typography>
+            <Typography variant="h4">Create User</Typography>
           </div>
         </Stack>
         <StatesCreateForm />

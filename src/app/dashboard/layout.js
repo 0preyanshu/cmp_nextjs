@@ -15,8 +15,8 @@ export default function Layout({ children }) {
   }
 
   return (
-    <AuthGuard>
+    // <AuthGuard>
       <DynamicLayout>{children}</DynamicLayout>
-    </AuthGuard>
+    // </AuthGuard>
   );
 }

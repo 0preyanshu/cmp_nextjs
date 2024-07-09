@@ -1,9 +1,10 @@
+'use client'
 import * as React from 'react';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
+// import Box from '@mui/material/Box';
+// import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
-import Grid from '@mui/material/Unstable_Grid2';
+// import Typography from '@mui/material/Typography';
+// import Grid from '@mui/material/Unstable_Grid2';
 import { ArrowRight as ArrowRightIcon } from '@phosphor-icons/react/dist/ssr/ArrowRight';
 import { Briefcase as BriefcaseIcon } from '@phosphor-icons/react/dist/ssr/Briefcase';
 import { FileCode as FileCodeIcon } from '@phosphor-icons/react/dist/ssr/FileCode';
@@ -22,10 +23,140 @@ import { Events } from '@/components/dashboard/overview/events';
 import { HelperWidget } from '@/components/dashboard/overview/helper-widget';
 import { Subscriptions } from '@/components/dashboard/overview/subscriptions';
 import { Summary } from '@/components/dashboard/overview/summary';
+// import React from 'react';
+import { Card, CardContent, Grid, Typography, TextField, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,MenuItem, Select, FormControl, InputLabel } from '@mui/material';
+import Chart from 'react-apexcharts';
+import { useState } from 'react';
+import { Tab, Tabs } from '@mui/material';
+import { Divider } from '@mui/material';
+import { AnalyticsFilters } from '@/components/dashboard/overview/analytics-filters';
+import { AnalyticsTable } from '@/components/dashboard/overview/analytics-table';
+import { TableSkeleton } from '@/components/core/Skeletion';
+import { useSelector } from 'react-redux';
+import { useUserPrivileges } from '@/hooks/use-privilages';
+import { Pagination } from '@/components/core/pagination';
 
-export const metadata = { title: `Overview | Dashboard | ${config.site.name}` };
+
+
+// export const metadata = { title: `Overview | Dashboard | ${config.site.name}` };
+const isLoading = false;
+
+const summaryData = [
+  { label: 'Today', orders: 0, internal: 0, vendor: 0, total: '$0' },
+  { label: 'Yesterday', orders: 0, internal: 0, vendor: 0, total: '$0' },
+  { label: 'This Week', orders: 0, internal: 0, vendor: 0, total: '$0' },
+  { label: 'Last Week', orders: 2, internal: 2, vendor: 0, total: '$400' },
+  { label: 'Last Week', orders: 2, internal: 2, vendor: 0, total: '$400' },
+  { label: 'Last Week', orders: 2, internal: 2, vendor: 0, total: '$400' },
+  { label: 'Last Week', orders: 2, internal: 2, vendor: 0, total: '$400' },
+  { label: 'Last Week', orders: 2, internal: 2, vendor: 0, total: '$400' },
+  
+  // Add more data as needed
+];
+
+const analyticsData = [
+  { course: 'React Development 2', orders: 20, internal: 20, vendor: 0, total: '$2700', abandoned: 0, waitlist: 0 },
+  { course: 'Project Management Professional', orders: 17, internal: 14, vendor: 3, total: '$11063', abandoned: 0, waitlist: 0 },
+  // Add more data as needed
+];
+
+// ApexCharts options
+const chartData = {
+  today: {
+    series: [
+      { name: 'Orders', data: [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24] },
+      { name: 'Internal', data: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] },
+      { name: 'Vendor', data: [0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4] },
+      { name: 'Total', data: [0, 3, 6, 10, 13, 16, 20, 23, 26, 30, 33, 36, 40] },
+    ],
+    categories: ['01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00'],
+  },
+  yesterday: {
+    series: [
+      { name: 'Orders', data: [0, 1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23] },
+      { name: 'Internal', data: [0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] },
+      { name: 'Vendor', data: [0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3] },
+      { name: 'Total', data: [0, 1, 4, 7, 11, 14, 17, 20, 24, 27, 30, 33, 37] },
+    ],
+    categories: ['01:00', '02:00', '03:00', '04:00', '05:00', '06:00', '07:00', '08:00', '09:00', '10:00', '11:00', '12:00'],
+  },
+  thisWeek: {
+    series: [
+      { name: 'Orders', data: [0, 10, 20, 30, 40, 50, 60] },
+      { name: 'Internal', data: [0, 5, 10, 15, 20, 25, 30] },
+      { name: 'Vendor', data: [0, 1, 2, 3, 4, 5, 6] },
+      { name: 'Total', data: [0, 16, 32, 48, 64, 80, 96] },
+    ],
+    categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+  },
+  lastWeek: {
+    series: [
+      { name: 'Orders', data: [0, 8, 16, 24, 32, 40, 48] },
+      { name: 'Internal', data: [0, 4, 8, 12, 16, 20, 24] },
+      { name: 'Vendor', data: [0, 1, 1, 2, 2, 3, 3] },
+      { name: 'Total', data: [0, 13, 25, 38, 50, 63, 75] },
+    ],
+    categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+  },
+  thisMonth: {
+    series: [
+      { name: 'Orders', data: [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330, 360] },
+      { name: 'Internal', data: [0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180] },
+      { name: 'Vendor', data: [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24] },
+      { name: 'Total', data: [0, 47, 94, 141, 188, 235, 282, 329, 376, 423, 470, 517, 564] },
+    ],
+    categories: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13'],
+  },
+  lastMonth: {
+    series: [
+      { name: 'Orders', data: [0, 25, 50, 75, 100, 125, 150, 175, 200, 225, 250, 275, 300] },
+      { name: 'Internal', data: [0, 12, 24, 36, 48, 60, 72, 84, 96, 108, 120, 132, 144] },
+      { name: 'Vendor', data: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] },
+      { name: 'Total', data: [0, 38, 76, 114, 152, 190, 228, 266, 304, 342, 380, 418, 456] },
+    ],
+    categories: ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12', '13'],
+  },
+  last12Months: {
+    series: [
+      { name: 'Orders', data: [0, 300, 600, 900, 1200, 1500, 1800, 2100, 2400, 2700, 3000, 3300] },
+      { name: 'Internal', data: [0, 150, 300, 450, 600, 750, 900, 1050, 1200, 1350, 1500, 1650] },
+      { name: 'Vendor', data: [0, 12, 24, 36, 48, 60, 72, 84, 96, 108, 120, 132] },
+      { name: 'Total', data: [0, 462, 924, 1386, 1848, 2310, 2772, 3234, 3696, 4158, 4620, 5082] },
+    ],
+    categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+  },
+};
+
+// ApexCharts options
+const chartOptions = {
+  chart: {
+    type: 'line',
+    toolbar: {
+      show: false,
+    },
+  },
+  stroke: {
+    curve: 'smooth',
+  },
+  xaxis: {
+    categories: [],
+  },
+  yaxis: {
+    show: true,
+  },
+  grid: {
+    show: false,
+  },
+};
 
 export default function Page() {
+  const [timeline, setTimeline] = useState('today');
+
+  const handleTimelineChange = (event, newValue) => {
+    setTimeline(newValue);
+  };
+
+  const currentChartData = chartData[timeline];
   return (
     <Box
       sx={{
@@ -40,196 +171,73 @@ export default function Page() {
           <Box sx={{ flex: '1 1 auto' }}>
             <Typography variant="h4">Overview</Typography>
           </Box>
-          <div>
-            <Button startIcon={<PlusIcon />} variant="contained">
-              Dashboard
-            </Button>
-          </div>
         </Stack>
-        <Grid container spacing={4}>
-          <Grid md={4} xs={12}>
-            <Summary amount={31} diff={15} icon={ListChecksIcon} title="Tickets" trend="up" />
+        <Box sx={{ padding: 2 }}>
+        <Grid container spacing={2}>
+        {summaryData.map((item, index) => (
+          <Grid item xs={12} sm={6} md={3} key={index}>
+            <Card sx={{ minHeight: 150 }}>
+              <CardContent>
+                <Typography variant="h6" fontWeight="bold" gutterBottom>
+                  {item.label}
+                </Typography>
+                <Row title="Orders" label={item.orders} value={item.total} />
+                <Row title="Internal" label={item.internal} value={item.total} />
+                <Row title="Vendor" label={item.vendor} value={item.total} />
+                <Row title="Total" label={item.orders} value={item.total} fontWeight="bold" />
+              </CardContent>
+            </Card>
           </Grid>
-          <Grid md={4} xs={12}>
-            <Summary amount={240} diff={5} icon={UsersIcon} title="Sign ups" trend="down" />
-          </Grid>
-          <Grid md={4} xs={12}>
-            <Summary amount={21} diff={12} icon={WarningIcon} title="Open issues" trend="up" />
-          </Grid>
-          <Grid md={8} xs={12}>
-            <AppUsage
-              data={[
-                { name: 'Jan', v1: 36, v2: 19 },
-                { name: 'Feb', v1: 45, v2: 23 },
-                { name: 'Mar', v1: 26, v2: 12 },
-                { name: 'Apr', v1: 39, v2: 20 },
-                { name: 'May', v1: 26, v2: 12 },
-                { name: 'Jun', v1: 42, v2: 31 },
-                { name: 'Jul', v1: 38, v2: 19 },
-                { name: 'Aug', v1: 39, v2: 20 },
-                { name: 'Sep', v1: 37, v2: 18 },
-                { name: 'Oct', v1: 41, v2: 22 },
-                { name: 'Nov', v1: 45, v2: 24 },
-                { name: 'Dec', v1: 23, v2: 17 },
-              ]}
-            />
-          </Grid>
-          <Grid md={4} xs={12}>
-            <Subscriptions
-              subscriptions={[
-                {
-                  id: 'supabase',
-                  title: 'Supabase',
-                  icon: '/assets/company-avatar-5.png',
-                  costs: '$599',
-                  billingCycle: 'year',
-                  status: 'paid',
-                },
-                {
-                  id: 'vercel',
-                  title: 'Vercel',
-                  icon: '/assets/company-avatar-4.png',
-                  costs: '$20',
-                  billingCycle: 'month',
-                  status: 'expiring',
-                },
-                {
-                  id: 'auth0',
-                  title: 'Auth0',
-                  icon: '/assets/company-avatar-3.png',
-                  costs: '$20-80',
-                  billingCycle: 'month',
-                  status: 'canceled',
-                },
-                {
-                  id: 'google_cloud',
-                  title: 'Google Cloud',
-                  icon: '/assets/company-avatar-2.png',
-                  costs: '$100-200',
-                  billingCycle: 'month',
-                  status: 'paid',
-                },
-                {
-                  id: 'stripe',
-                  title: 'Stripe',
-                  icon: '/assets/company-avatar-1.png',
-                  costs: '$70',
-                  billingCycle: 'month',
-                  status: 'paid',
-                },
-              ]}
-            />
-          </Grid>
-          <Grid md={4} xs={12}>
-            <AppChat
-              messages={[
-                {
-                  id: 'MSG-001',
-                  content: 'Hello, we spoke earlier on the phone',
-                  author: { name: 'Alcides Antonio', avatar: '/assets/avatar-10.png', status: 'online' },
-                  createdAt: dayjs().subtract(2, 'minute').toDate(),
-                },
-                {
-                  id: 'MSG-002',
-                  content: 'Is the job still available?',
-                  author: { name: 'Marcus Finn', avatar: '/assets/avatar-9.png', status: 'offline' },
-                  createdAt: dayjs().subtract(56, 'minute').toDate(),
-                },
-                {
-                  id: 'MSG-003',
-                  content: "What is a screening task? I'd like to",
-                  author: { name: 'Carson Darrin', avatar: '/assets/avatar-3.png', status: 'online' },
-                  createdAt: dayjs().subtract(3, 'hour').subtract(23, 'minute').toDate(),
-                },
-                {
-                  id: 'MSG-004',
-                  content: 'Still waiting for feedback',
-                  author: { name: 'Fran Perez', avatar: '/assets/avatar-5.png', status: 'online' },
-                  createdAt: dayjs().subtract(8, 'hour').subtract(6, 'minute').toDate(),
-                },
-                {
-                  id: 'MSG-005',
-                  content: 'Need more information about campaigns',
-                  author: { name: 'Jie Yan', avatar: '/assets/avatar-8.png', status: 'offline' },
-                  createdAt: dayjs().subtract(10, 'hour').subtract(18, 'minute').toDate(),
-                },
-              ]}
-            />
-          </Grid>
-          <Grid md={4} xs={12}>
-            <Events
-              events={[
-                {
-                  id: 'EV-004',
-                  title: 'Meeting with partners',
-                  description: '17:00 to 18:00',
-                  createdAt: dayjs().add(1, 'day').toDate(),
-                },
-                {
-                  id: 'EV-003',
-                  title: 'Interview with Jonas',
-                  description: '15:30 to 16:45',
-                  createdAt: dayjs().add(4, 'day').toDate(),
-                },
-                {
-                  id: 'EV-002',
-                  title: "Doctor's appointment",
-                  description: '12:30 to 15:30',
-                  createdAt: dayjs().add(4, 'day').toDate(),
-                },
-                {
-                  id: 'EV-001',
-                  title: 'Weekly meeting',
-                  description: '09:00 to 09:30',
-                  createdAt: dayjs().add(7, 'day').toDate(),
-                },
-              ]}
-            />
-          </Grid>
-          <Grid md={4} xs={12}>
-            <AppLimits usage={80} />
-          </Grid>
-          <Grid md={4} xs={12}>
-            <HelperWidget
-              action={
-                <Button color="secondary" endIcon={<ArrowRightIcon />} size="small">
-                  Search jobs
-                </Button>
-              }
-              description="Search for jobs that match your skills and apply to them directly."
-              icon={BriefcaseIcon}
-              label="Jobs"
-              title="Find your dream job"
-            />
-          </Grid>
-          <Grid md={4} xs={12}>
-            <HelperWidget
-              action={
-                <Button color="secondary" endIcon={<ArrowRightIcon />} size="small">
-                  Help center
-                </Button>
-              }
-              description="Find answers to your questions and get in touch with our team."
-              icon={InfoIcon}
-              label="Help center"
-              title="Need help figuring things out?"
-            />
-          </Grid>
-          <Grid md={4} xs={12}>
-            <HelperWidget
-              action={
-                <Button color="secondary" endIcon={<ArrowRightIcon />} size="small">
-                  Documentation
-                </Button>
-              }
-              description="Learn how to get started with our product and make the most of it."
-              icon={FileCodeIcon}
-              label="Documentation"
-              title="Explore documentation"
-            />
-          </Grid>
-        </Grid>
+        ))}
+      </Grid>
+
+      <Box sx={{ my: 4 }}>
+        <Typography variant="h5" mb={3}>Analytics</Typography>
+        <Card>
+          <AnalyticsFilters filters={{  }} />
+          <Divider />
+          <Box sx={{ overflowX: 'auto' }}>
+            {isLoading ? (
+              <TableSkeleton />
+            ) : (
+              <AnalyticsTable rows={[{}]} />
+            )}
+          </Box>
+          <Divider />
+          <Pagination page={1} rowsPerPage={5}  />
+        </Card>
+        </Box>
+
+      <Box>
+        <Typography variant="h5" mb={3}>Orders Count Graph</Typography>
+        <Tabs value={timeline} onChange={handleTimelineChange} variant="fullWidth">
+          <Tab label="Today" value="today" />
+          <Tab label="Yesterday" value="yesterday" />
+          <Tab label="This Week" value="thisWeek" />
+          <Tab label="Last Week" value="lastWeek" />
+          <Tab label="This Month" value="thisMonth" />
+          <Tab label="Last Month" value="lastMonth" />
+          <Tab label="Last 12 Months" value="last12Months" />
+        </Tabs>
+        <Chart options={{ ...chartOptions, xaxis: { categories: currentChartData.categories } }} series={currentChartData.series} type="line" height={350} />
+      </Box>
+    </Box>
+       
       </Stack>
     </Box>
   );
 }
+
+const Row = ({ title, label, value, fontWeight = 500, margin = '8px 0', color = '#212B36' }) => (
+  <div style={{ display: 'flex', justifyContent: 'space-between', margin, color, alignItems: 'stretch' }}>
+    <Typography variant="body2" sx={{ fontWeight, width: '60px' }}>
+      {title}
+    </Typography>
+    <Typography variant="body2" sx={{ fontWeight, width: '30px' }}>
+      {label}
+    </Typography>
+    <Typography variant="body2" sx={{ fontWeight, width: '65px', textAlign: 'right', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+      {value}
+    </Typography>
+  </div>
+);

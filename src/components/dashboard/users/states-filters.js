@@ -13,11 +13,13 @@ import Typography from '@mui/material/Typography';
 import { paths } from '@/paths';
 import {  FilterPopover, useFilterContext } from '@/components/core/filter-button';
 import { Option } from '@/components/core/option';
+import { useSelector } from 'react-redux';
 
 
 
-export function StatesFilters({ filters = {}, sortDir = 'desc', Countries }) {
-  const {  countryID , searchTerm } = filters;
+export function StatesFilters({ filters = {}, sortDir = 'desc' }) {
+  const {  userTypeID , searchTerm } = filters;
+  const { userTypes } = useSelector((state) => state.userType.userType);
 
   const router = useRouter();
 
@@ -26,8 +28,8 @@ export function StatesFilters({ filters = {}, sortDir = 'desc', Countries }) {
     (newFilters, newSortDir) => {
       const searchParams = new URLSearchParams();
 
-      if (newFilters.countryID) {
-        searchParams.set('countryID', newFilters.countryID);
+      if (newFilters.userTypeID) {
+        searchParams.set('userTypeID', newFilters.userTypeID);
       }
       if(newFilters.searchTerm){
         searchParams.set('searchTerm', newFilters.searchTerm);
@@ -49,14 +51,14 @@ export function StatesFilters({ filters = {}, sortDir = 'desc', Countries }) {
   }, [updateSearchParams, sortDir]);
 
 
-  const handleCountryChange = React.useCallback(
+  const handleUserTypeChange = React.useCallback(
     (event) => {
-      updateSearchParams({ ...filters, countryID: event.target.value }, sortDir);
+      updateSearchParams({ ...filters, userTypeID: event.target.value }, sortDir);
     },
     [updateSearchParams, filters, sortDir]
   );
 
-  const hasFilters =  countryID || searchTerm 
+  const hasFilters =  userTypeID || searchTerm 
   
 
   return (
@@ -70,15 +72,15 @@ export function StatesFilters({ filters = {}, sortDir = 'desc', Countries }) {
 
         <Select
           sx={{ maxWidth: '100%', width: '165px' }}
-          value={countryID || ''}
-          onChange={handleCountryChange}
+          value={userTypeID || ''}
+          onChange={handleUserTypeChange}
         >
 
-          {console.log('Countrieids', countryID)}
-          <Option value="">Select Country</Option>
-          {Countries.map((country) => (
-            <Option key={country.id} value={country.id}>
-              {country.countryName}
+          {/* {console.log('Countrieids', userTypeID)} */}
+          <Option value="">Select User Type</Option>
+          {userTypes.map((e) => (
+            <Option key={e.id} value={e.id}>
+              {e.userTypeName}
             </Option>
           ))}
         </Select>

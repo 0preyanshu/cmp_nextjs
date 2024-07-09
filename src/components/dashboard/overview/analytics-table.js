@@ -17,66 +17,69 @@ import { PencilSimple as PencilSimpleIcon } from '@phosphor-icons/react/dist/ssr
 import {TrashSimple as TrashSimpleIcon} from '@phosphor-icons/react/dist/ssr/TrashSimple';
 
 import { paths } from '@/paths';
-
+import { dayjs } from '@/lib/dayjs';
 import { DataTable } from '@/components/core/data-table';
 
 
 import { useDispatch } from 'react-redux';
-import { UserActions } from '@/redux/slices';
+
 import { toast } from '@/components/core/toaster';
 import { useRouter } from 'next/navigation';
-import { MuiAvatar } from '@/styles/theme/components/avatar';
+import { CoursesActions } from '@/redux/slices';
+
+
+// import RouterLink from 'next/link';
 
 
 
-export function StatesTable({ rows }) {
+
+
+
+
+
+
+
+
+export function AnalyticsTable({ rows }) {
 
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const {updateUser } = UserActions;
+  const { updateCourses} = CoursesActions;
 
   const columns = [
     {
       formatter: (row) => (
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center',marginLeft:3 }}>
-           {' '}
+          <Avatar src={row.courseLogo} />{' '}
           <div>
             <Link
             
             >
-              {row.firstname}
+              {row.courseName}
             </Link>
         
           </div>
         </Stack>
       ),
-      name: 'First Name',
+      name: 'Category Name',
       width: '250px',
     },
    
     {
       formatter(row) {
-        return row.lastname;
+        return row.courseShortName;
       },
-      name: 'Last Name',
+      name: 'Short Name',
       width: '200px',
     },
     {
       formatter(row) {
-        return row.userType || 'ADMIN';
+        return row.courseUrl;
       },
-      name: 'Role',
+      name: 'Course URL',
       width: '200px',
     },
-    {
-      formatter(row) {
-        return row.email;
-      },
-      name: 'Email',
-      width: '200px',
-    },
-
     
     {
       formatter: (row) => {
@@ -97,7 +100,7 @@ export function StatesTable({ rows }) {
     {
       formatter: (row) => (<div style={{display:"flex"}}>
   
-      <IconButton component={RouterLink} href={paths.dashboard.users.edit(row.id)}>
+      <IconButton component={RouterLink} href={paths.dashboard.courses.edit(row.id)}>
           <PencilSimpleIcon />
         </IconButton>
         
@@ -107,14 +110,14 @@ export function StatesTable({ rows }) {
             status_ :status_==="ACTIVE"?"INACTIVE":"ACTIVE",
             id : row.id
           }
-          await dispatch(updateUser(data)).then((res) => {
-            if (res?.payload?.data?.data) {
-              
+          await dispatch(updateCourses(data)).then((res) => {
+            console.log(res,"reso");
+            if (res?.payload?.data) {
+              // console.log(data,"data");
                   toast.success('Details updated');
-                  router.push(paths.dashboard.users.list);
-                  
+                  router.push(paths.dashboard.courses.list);
             } else {
-              toast.error(res?.payload?.data?.error?.message  || 'Internal Server Error');
+              toast.error(res?.payload?.message || 'Internal Server Error');
             }
           })
   
@@ -132,12 +135,17 @@ export function StatesTable({ rows }) {
   ];
 
 
-  console.log(rows,"rows"); 
+ 
+
   return (
     <React.Fragment>
       <DataTable
         columns={columns}
+
+        
         rows={rows}
+      
+       
       />
       {!rows.length ? (
         <Box sx={{ p: 3 }}>

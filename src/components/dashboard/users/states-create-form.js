@@ -2,76 +2,64 @@
 
 import * as React from 'react';
 import RouterLink from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams, usePathname } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import Avatar from '@mui/material/Avatar';
-import Box from '@mui/material/Box';
+import { Controller, useForm } from 'react-hook-form';
+import { z as zod } from 'zod';
+
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
-import Checkbox from '@mui/material/Checkbox';
 import Divider from '@mui/material/Divider';
 import FormControl from '@mui/material/FormControl';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import FormHelperText from '@mui/material/FormHelperText';
 import InputLabel from '@mui/material/InputLabel';
 import OutlinedInput from '@mui/material/OutlinedInput';
-import Select from '@mui/material/Select';
 import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
 import Grid from '@mui/material/Unstable_Grid2';
-import { Camera as CameraIcon } from '@phosphor-icons/react/dist/ssr/Camera';
-import { Controller, useForm } from 'react-hook-form';
-import { z as zod } from 'zod';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 
 import { paths } from '@/paths';
 import { logger } from '@/lib/default-logger';
-import { Option } from '@/components/core/option';
 import { toast } from '@/components/core/toaster';
-
 import { useDispatch, useSelector } from 'react-redux';
-import { StateActions } from '@/redux/slices';
-import { countryActions } from '@/redux/slices';
+import { UserActions } from '@/redux/slices';
+import PrivilegesForm from '@/components/core/privilegesAccordian';
 
-import { LoadingButton } from '@mui/lab';
-import { MenuItem } from '@mui/material';
-import { useParams, usePathname } from 'next/navigation';
-
-
-
-
-
-const schema = zod.object({
-  
-  stateName: zod.string().min(1, 'Name is required').max(255),
-  stateShortName: zod.string().min(1, 'Short Name is required').max(255),
-  countryID: zod.string().min(1, 'Country is required').max(255)
-
-
-
+const getSchema = (isEdit) => zod.object({
+  firstname: zod.string().min(1, 'First Name is required'),
+  lastname: zod.string().min(1, 'Last Name is required'),
+  email: zod.string().email('Invalid email address'),
+  userTypeID: zod.string().min(1, 'User Type is required'),
+  defaultPrivileges: zod.array(zod.string()).min(1, 'Please select at least one privilege'),
+  password: !isEdit ? zod.string().min(4, 'Password must be at least 4 characters long') : zod.string().min(0, '0'),
 });
 
 export function StatesCreateForm() {
-  const [currentState, setcurrentState] = React.useState({});
-  const { allCountries } = useSelector((state) => state?.countries.country);
-  const { allState, loading: isLoading, totalData } = useSelector((state) => state?.states?.state);
-
+  const [currentUser, setcurrentUser] = React.useState({});
+  const { userTypes } = useSelector((state) => state.userType.userType);
+  const { allUsers, loading: isLoading, totalData } = useSelector((state) => state.users.users);
   const { id } = useParams();
   const pathname = usePathname();
   const dispatch = useDispatch();
   const router = useRouter();
-  const {fetchCountries } = countryActions;
 
-  const { deletestate, fetchState,updatestate,createstate } = StateActions;
+  const { updateUser, createUser } = UserActions;
 
   const isEdit = pathname.includes('edit');
 
+  const schema = React.useMemo(() => getSchema(isEdit), [isEdit]);
+
   const defaultValues = React.useMemo(() => ({
-    stateName : currentState?.stateName || '',
-    stateShortName : currentState?.stateShortName || '',
-    countryID : currentState?.countryID || ''
-  }), [currentState]);
+    firstname: currentUser?.firstname || "",
+    lastname: currentUser?.lastname || "",
+    email: currentUser?.email || "",
+    userTypeID: currentUser?.userTypeID || "",
+    defaultPrivileges: currentUser?.defaultPrivileges || [],
+    password: "",
+  }), [currentUser]);
 
   const {
     control,
@@ -84,35 +72,23 @@ export function StatesCreateForm() {
 
   React.useEffect(() => {
     reset(defaultValues);
-  }, [currentState, reset, defaultValues]);
-
+  }, [currentUser, reset, defaultValues]);
 
   React.useEffect(() => {
-
-    if (allState?.length && id) {
-      const data = allState.find((allState) => String(allState?.id) === String(id));
-      setcurrentState(data);
-      console.log("currentState",data);
+    if (allUsers?.length && id) {
+      const data = allUsers.find((allUsers) => String(allUsers?.id) === String(id));
+      setcurrentUser(data);
     }
-  }, [allState, id]);
-
-  const fieldMapping = {
-    stateName: 'stateName',
-    stateShortName: 'stateShortName',
-    countryID: 'countryID'
-  
-  };
+  }, [allUsers, id]);
 
   const getChangedFields = (data) => {
     const changedFields = {};
     for (const key in data) {
-      const mappedKey = fieldMapping[key];
-      if (data[key] !== currentState[mappedKey]) {
-        changedFields[mappedKey] = data[key];
+      if (String(data[key]) !== String(currentUser[key])) {
+        changedFields[key] = data[key];
       }
     }
-    // Add the id to the changed fields
-    changedFields.id = currentState.id;
+    changedFields.id = currentUser.id;
     return changedFields;
   };
 
@@ -120,26 +96,22 @@ export function StatesCreateForm() {
     async (data) => {
       try {
         const changedData = getChangedFields(data);
-        console.log(data);
-        console.log(changedData);
+        console.log(changedData, "cd");
 
         if (isEdit) {
-          await dispatch(updatestate(changedData)).then((res) => {
+          await dispatch(updateUser(changedData)).then((res) => {
             if (res?.payload?.data?.data) {
               toast.success('Update success!');
               router.push(paths.dashboard.users.list);
-        
             } else {
-              toast.error(res?.payload?.data?.error?.message  || 'Internal Server Error');
+              toast.error(res?.payload?.data?.error?.message || 'Internal Server Error');
             }
           });
         } else {
-          await dispatch(createstate(data)).then((res) => {
+          await dispatch(createUser(data)).then((res) => {
             if (res?.payload?.data?.data) {
               toast.success('Create success!');
               router.push(paths.dashboard.users.list);
-          
-             
             } else {
               toast.error(res?.payload?.data?.error?.message || 'Internal Server Error');
             }
@@ -147,13 +119,16 @@ export function StatesCreateForm() {
         }
       } catch (err) {
         logger.error(err);
-       
       }
     },
-    [isEdit, currentState.id, dispatch, router, fetchState, updatestate,createstate]
+    [isEdit, currentUser.id, dispatch, router, updateUser, createUser]
   );
 
-
+  const handleUserTypeChange = (event) => {
+    const selectedUserType = userTypes.find((type) => type.id === event.target.value);
+    setValue('userTypeID', selectedUserType.id);
+    setValue('defaultPrivileges', selectedUserType.defaultPrivileges);
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -161,20 +136,17 @@ export function StatesCreateForm() {
         <CardContent>
           <Stack divider={<Divider />} spacing={4}>
             <Stack spacing={3}>
-            
               <Grid container spacing={3}>
-                <Grid xs={12}>
-                
-                </Grid>
+                <Grid xs={12} />
                 <Grid md={6} xs={12}>
                   <Controller
                     control={control}
-                    name="stateName"
+                    name="firstname"
                     render={({ field }) => (
-                      <FormControl error={Boolean(errors.stateName)} fullWidth>
-                        <InputLabel required>State Name</InputLabel>
+                      <FormControl error={Boolean(errors.firstname)} fullWidth>
+                        <InputLabel required>First Name</InputLabel>
                         <OutlinedInput {...field} />
-                        {errors.stateName ? <FormHelperText>{errors.stateName.message}</FormHelperText> : null}
+                        {errors.firstname ? <FormHelperText>{errors.firstname.message}</FormHelperText> : null}
                       </FormControl>
                     )}
                   />
@@ -182,59 +154,97 @@ export function StatesCreateForm() {
                 <Grid md={6} xs={12}>
                   <Controller
                     control={control}
-                    name="stateShortName"
+                    name="lastname"
                     render={({ field }) => (
-                      <FormControl error={Boolean(errors.stateShortName)} fullWidth>
-                        <InputLabel required>State ShortName</InputLabel>
-                        <OutlinedInput {...field} type="stateShortName" />
-                        {errors.stateShortName ? <FormHelperText>{errors.stateShortName.message}</FormHelperText> : null}
+                      <FormControl error={Boolean(errors.lastname)} fullWidth>
+                        <InputLabel required>Last Name</InputLabel>
+                        <OutlinedInput {...field} />
+                        {errors.lastname ? <FormHelperText>{errors.lastname.message}</FormHelperText> : null}
                       </FormControl>
                     )}
                   />
                 </Grid>
                 <Grid md={6} xs={12}>
-                <Controller
+                  <Controller
                     control={control}
-                    name="countryID"
+                    name="email"
                     render={({ field }) => (
-                      <FormControl error={Boolean(errors.countryID)} fullWidth>
-                        <InputLabel required>country</InputLabel>
-                        <Select {...field}>
-                          <MenuItem value="">
-                            <>Select country</>
-                          </MenuItem>
-                          {
-                           allCountries?.map((country) => (
-                              <MenuItem key={country.id} value={country.id}>
-                                {country.countryName}
-                              </MenuItem>
-                            ))
-                          }
-                        </Select>
-                        {errors.countryID ? <FormHelperText>{errors.countryID.message}</FormHelperText> : null}
+                      <FormControl error={Boolean(errors.email)} fullWidth>
+                        <InputLabel required>Email</InputLabel>
+                        <OutlinedInput {...field} />
+                        {errors.email ? <FormHelperText>{errors.email.message}</FormHelperText> : null}
                       </FormControl>
                     )}
                   />
                 </Grid>
-           
+                <Grid md={6} xs={12}>
+                  <Controller
+                    control={control}
+                    name="userTypeID"
+                    render={({ field }) => (
+                      <FormControl error={Boolean(errors.userTypeID)} fullWidth>
+                        <InputLabel required>User Type</InputLabel>
+                        <Select
+                          {...field}
+                          onChange={(event) => {
+                            field.onChange(event);
+                            handleUserTypeChange(event);
+                          }}
+                        >
+                          <MenuItem key="" value="">
+                              Select User Type
+                            </MenuItem>
+                          {userTypes.map((type) => (
+                            <MenuItem key={type.id} value={type.id}>
+                              {type.userTypeName}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                        {errors.userTypeID ? <FormHelperText>{errors.userTypeID.message}</FormHelperText> : null}
+                      </FormControl>
+                    )}
+                  />
+                  
+                </Grid>
+                {!isEdit && (
+                  <Grid md={6} xs={12}>
+                    <Controller
+                      control={control}
+                      name="password"
+                      render={({ field }) => (
+                        <FormControl error={Boolean(errors.password)} fullWidth>
+                          <InputLabel required>Password</InputLabel>
+                          <OutlinedInput {...field} type="password" />
+                          {errors.password ? <FormHelperText>{errors.password.message}</FormHelperText> : null}
+                        </FormControl>
+                      )}
+                    />
+                  </Grid>
+                )}
+                <Grid md={12} xs={12}>
+                  <Controller
+                    control={control}
+                    name="defaultPrivileges"
+                    render={({ field }) => (
+                      <PrivilegesForm
+                        selectedPrivileges={field.value}
+                        onChange={field.onChange}
+                      />
+                    )}
+                  />
+                </Grid>
+               
               </Grid>
             </Stack>
-
-    
           </Stack>
         </CardContent>
         <CardActions sx={{ justifyContent: 'flex-end' }}>
           <Button color="secondary" component={RouterLink} href={paths.dashboard.users.list}>
             Cancel
           </Button>
-          <LoadingButton
-            type="submit"
-            variant="contained"
-            style={{ textTransform: 'capitalize' }}
-            loading={isSubmitting}
-          >
-            {!isEdit ? 'Create State' : 'Save Changes'}
-          </LoadingButton>
+          <Button type="submit" variant="contained">
+            Save Changes
+          </Button>
         </CardActions>
       </Card>
     </form>
