@@ -55,8 +55,8 @@ function createOrder() {
   return createAsyncThunk(`${name}/createOrder`, async (obj) => {
     try {
       const response = await axios.post(HOST_API.concat(`/order/create/admin`), obj, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-      });
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+    });
       return response;
     } catch (err) {
       return err;
@@ -72,8 +72,8 @@ function fetchOrder() {
           }&courseId=${data.courseId || ''}&search=${data.name || ''}&startDate=${data.startDate || ''}&endDate=${data.endDate || ''}`
         ),
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-        }
+          headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+      }
       );
       console.log(response.data);
       return response.data;
@@ -90,8 +90,8 @@ function fetchAbandonedCart() {
           `/abandoned-cart?limit=${data.limit}&courseID=${data.courseID}&eventID=${data.eventID}&search=${data.name}&startDate=${data.startDate}&endDate=${data.endDate}`
         ),
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-        }
+          headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+      }
       );
       return response.data;
     } catch (err) {
@@ -103,7 +103,7 @@ function transferParticipants() {
   return createAsyncThunk(`${name}/transferParticipants`, async (data) => {
     try {
       const response = await axios.put(HOST_API.concat(`/order/transferParticipants`), data, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
       });
       return response;
     } catch (err) {
@@ -116,7 +116,7 @@ function cancelOrder() {
     console.log(data);
     try {
       const response = await axios.put(HOST_API.concat(`/order/cancel`), data, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
       });
       return response;
     } catch (err) {
@@ -129,7 +129,7 @@ function deleteorder() {
   return createAsyncThunk(`${name}/deleteorder`, async (id) => {
     try {
       const response = await axios.delete(HOST_API.concat(`/order/delete/${id}`), {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` }
       });
       return response;
     } catch (err) {
@@ -142,8 +142,8 @@ function updateorder() {
   return createAsyncThunk(`${name}/updateorder`, async (data) => {
     try {
       const response = await axios.put(HOST_API.concat(`/order/edit/${data.id}`), data, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-      });
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+    });
       return response;
     } catch (err) {
       return err;
@@ -155,7 +155,7 @@ function refundOrder() {
   return createAsyncThunk(`${name}/refundOrder`, async (obj) => {
     try {
       const response = await axios.post(HOST_API.concat(`/order/refund?orderId=${obj?.id}`), obj?.data, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
       });
       return response;
     } catch (err) {
@@ -168,7 +168,7 @@ function sendEmail() {
   return createAsyncThunk(`${name}/sendEmail`, async (obj) => {
     try {
       const response = await axios.post(HOST_API.concat(`/order/sendOrderEmail`), obj, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
       });
       return response;
     } catch (err) {

@@ -46,7 +46,7 @@ function createUserType() {
   return createAsyncThunk(`${name}/createUserType`, async (obj) => {
     try {
       const response = await axios.post(HOST_API.concat(`/userType`), obj, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
       });
       return response;
     } catch (err) {
@@ -58,7 +58,7 @@ function fetchUserType() {
   return createAsyncThunk(`${name}/fetchUserType`, async (data) => {
     try {
       const response = await axios.get(HOST_API.concat(`/userType?page=${data.page}&limit=${data.limit}`), {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
       });
       return response.data;
     } catch (err) {
@@ -71,7 +71,7 @@ function fetchUserType() {
 //   return createAsyncThunk(`${name}/deleteUser`, async (id) => {
 //     try {
 //       const response = await axios.delete(HOST_API.concat(`/user/delete/${id}`), {
-//         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+//         headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
 //       });
 //       return response.data;
 //     } catch (err) {
@@ -83,7 +83,7 @@ function updateUserType() {
   return createAsyncThunk(`${name}/updateUserType`, async (data) => {
     try {
       const response = await axios.put(HOST_API.concat(`/userType/${data.id}`), data, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
       });
       return response;
     } catch (err) {

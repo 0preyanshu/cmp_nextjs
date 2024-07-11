@@ -22,3 +22,4 @@ export { EmailLogsActions } from './emailLogs';
 export { WaitlistActions } from './waitlist';
 export { PaymentActions } from './payment';
 export { UserTypeActions } from './userType';
+export { AnalyticsActions } from './analytics';

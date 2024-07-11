@@ -50,95 +50,93 @@ export function AnalyticsTable({ rows }) {
   const columns = [
     {
       formatter: (row) => (
-        <Stack direction="row" spacing={1} sx={{ alignItems: 'center',marginLeft:3 }}>
-          <Avatar src={row.courseLogo} />{' '}
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center', marginLeft: 1 }}>
           <div>
-            <Link
-            
-            >
+            <Link>
               {row.courseName}
             </Link>
-        
           </div>
         </Stack>
       ),
-      name: 'Category Name',
+      name: 'Course',
       width: '250px',
     },
-   
     {
       formatter(row) {
-        return row.courseShortName;
+        return (
+          <div style={{ marginLeft: 3 }}>
+            {row.orders}
+          </div>
+        );
       },
-      name: 'Short Name',
-      width: '200px',
+      name: 'Orders',
+      width: '100px',
     },
     {
       formatter(row) {
-        return row.courseUrl;
+        return (
+          <div style={{ marginLeft: 3 }}>
+            {row.internalOrder}
+          </div>
+        );
       },
-      name: 'Course URL',
-      width: '200px',
+      name: 'Internal',
+      width: '100px',
     },
-    
     {
-      formatter: (row) => {
-        const mapping = {
-          active: { label: 'Active', icon: <CheckCircleIcon color="var(--mui-palette-success-main)" weight="fill" /> },
-          blocked: { label: 'Blocked', icon: <MinusIcon color="var(--mui-palette-error-main)" /> }
-          
-        };
-        const value=(row.status_==="ACTIVE")?'active':'blocked';
-        console.log(value);
-        const { label, icon } = mapping[value] ?? { label: 'Unknown', icon: null };
-  
-        return <Chip icon={icon} label={label} size="small" variant="outlined" />;
+      formatter(row) {
+        return (
+          <div style={{ marginLeft: 3 }}>
+            {row.vendorOrder}
+          </div>
+        );
       },
-      name: 'Status',
+      name: 'Vendor',
+      width: '100px',
+    },
+    {
+      formatter(row) {
+        return (
+          <div style={{ marginLeft: 3, fontWeight: 'bold' }}>
+            {'$' + (row.orderTotal || '0')}
+          </div>
+        );
+      },
+      name: 'Total',
       width: '150px',
     },
     {
-      formatter: (row) => (<div style={{display:"flex"}}>
-  
-      <IconButton component={RouterLink} href={paths.dashboard.courses.edit(row.id)}>
-          <PencilSimpleIcon />
-        </IconButton>
-        
-        <IconButton onClick={async ()=>{
-          const {status_} = row;
-          const data ={
-            status_ :status_==="ACTIVE"?"INACTIVE":"ACTIVE",
-            id : row.id
-          }
-          await dispatch(updateCourses(data)).then((res) => {
-            console.log(res,"reso");
-            if (res?.payload?.data) {
-              // console.log(data,"data");
-                  toast.success('Details updated');
-                  router.push(paths.dashboard.courses.list);
-            } else {
-              toast.error(res?.payload?.message || 'Internal Server Error');
-            }
-          })
-  
-        }}>
-          <TrashSimpleIcon />
-        </IconButton>
-  
-        
-        </div>),
-      name: 'Actions',
-  
+      formatter(row) {
+        return (
+          <div style={{ marginLeft: 3 }}>
+            {row.abandons}
+          </div>
+        );
+      },
+      name: 'Abandoned',
       width: '100px',
-      
+    },
+    {
+      formatter(row) {
+        return (
+          <div style={{ marginLeft: 3 }}>
+            {row.waiting}
+          </div>
+        );
+      },
+      name: 'Waitlist',
+      width: '100px',
     },
   ];
+  
+  
 
 
  
 
   return (
     <React.Fragment>
+      {console.log(rows,"rows")}
       <DataTable
         columns={columns}
 

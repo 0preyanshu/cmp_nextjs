@@ -50,7 +50,7 @@ function createInstructor() {
         }
         try {
             const response = await axios.post(HOST_API.concat(`/instructor`), newobj, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+                headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
             });
             return response;
         } catch (err) {
@@ -62,7 +62,7 @@ function fetchInstructor() {
     return createAsyncThunk(`${name}/fetchInstructor`, async (data) => {
         try {
             const response = await axios.get(HOST_API.concat(`/instructor?page=${data.page}&limit=${data.limit}&search=${data.name || " "}`), {
-                headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+                headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
             });
             return response.data;
         } catch (err) {
@@ -75,7 +75,7 @@ function deleteinstructor() {
     return createAsyncThunk(`${name}/deleteinstructor`, async (id) => {
         try {
             const response = await axios.delete(HOST_API.concat(`/instructor/${id}`), {
-                headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+                headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
             });
             return response.data;
         } catch (err) {
@@ -87,7 +87,7 @@ function updateinstructor() {
     return createAsyncThunk(`${name}/updateinstructor`, async (data) => {
         try {
             const response = await axios.put(HOST_API.concat(`/instructor/${data.id}`), data, {
-                headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+                headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
             });
             return response;
         } catch (err) {

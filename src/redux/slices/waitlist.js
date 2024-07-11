@@ -23,7 +23,7 @@ function getWaitlistData() {
           }&eventID=${data?.eventId || ''}&startDate=${data?.startDate || ''}`
         ),
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+          headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
         }
       );
       return response.data;

@@ -1,22 +1,25 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { HOST_API } from '../../config';
+// import { HOST_API } from '../../config';
+
+const HOST_API = 'https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg';
+
 import axios from 'axios';
 
 const name = 'Analytics';
 const initialState = {
     dataLoading: true,
     analyticsLoading: true,
-    analyticsData: {},
-    graphData: {},
-    overviewdata: {},
+    analyticsData: [],
+    graphData: [],
+    overviewdata: [],
 };
 
 // For Actions
 function getAnalyticsData() {
-    return createAsyncThunk(`${name}/getAnalyticsData`, async ({ filterStartDate, filterEndDate }) => {
+    return createAsyncThunk(`${name}/getAnalyticsData`, async ({ startDate, endDate ,page,limit}) => {
         try {
-            const response = await axios.get(HOST_API.concat(`/dashboard/data?startDate=${filterStartDate}&endDate=${filterEndDate}`), {
-                headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+            const response = await axios.get(HOST_API.concat(`/dashboard/analytics?page=${page}&limit=${limit}&startDate=${startDate}&endDate=${endDate}`), {
+                headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
             });
             return response.data;
         } catch (err) {
@@ -29,8 +32,8 @@ function getAnalyticsData() {
 function getData() {
     return createAsyncThunk(`${name}/getData`, async () => {
         try {
-            const response = await axios.get(HOST_API.concat(`/dashboard/lineGraph`), {
-                headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+            const response = await axios.get(HOST_API.concat(`/dashboard/graph`), {
+                headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
             });
             return response.data;
         } catch (err) {
@@ -55,10 +58,12 @@ const createExtraReducers = () => {
         return {
             [pending]: (state) => {
                 state.analyticsLoading = true;
-                state.analyticsData = {};
+                state.analyticsData = [];
             },
             [fulfilled]: (state, actions) => {
-                state.analyticsData = actions?.payload?.dashBoardAnalyticsDTOList;
+                console.log(actions.payload?.data?.data)
+                if(actions.payload?.data?.data)
+                state.analyticsData = actions.payload?.data?.data || [];
                 state.analyticsLoading = false;
             },
             [rejected]: (state, actions) => {
@@ -72,18 +77,19 @@ const createExtraReducers = () => {
         return {
             [pending]: (state) => {
                 state.dataLoading = true;
-                state.graphData = {};
-                state.overviewdata = {};
+                state.graphData = [];
+                state.overviewdata = [];
             },
             [fulfilled]: (state, actions) => {
-                state.graphData = actions.payload.lineGraphDataMap;
-                state.overviewdata = actions.payload.dashBoardDataMap;
+                if(actions?.payload?.data?.data)
+                state.graphData = actions.payload.data.data || [];
+                state.overviewdata = actions.payload.dashBoardDataMap || [];
                 state.dataLoading = false;
             },
             [rejected]: (state, actions) => {
                 state.dataLoading = false;
-                state.graphData = {};
-                state.overviewdata = {};
+                state.graphData = [];
+                state.overviewdata = [];
             },
         };
     }

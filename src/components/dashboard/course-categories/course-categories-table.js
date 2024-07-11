@@ -52,7 +52,7 @@ export function CourseCategoriesTable({ rows }) {
     {
       formatter: (row) => (
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center',marginLeft:3 }}>
-          <Avatar src={row.categoryLogo} />{' '}
+          <Avatar src={row.categoryLogo} alt={row.courseCategoryName}/>{' '}
           <div>
             <Link
             

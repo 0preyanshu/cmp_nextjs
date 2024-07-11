@@ -9,8 +9,11 @@ import Typography from '@mui/material/Typography';
 import TextField from '@mui/material/TextField';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 
 import { paths } from '@/paths';
+
+dayjs.extend(utc);
 
 export function AnalyticsFilters({ filters = {}, sortDir = 'desc' }) {
   const { startDate, endDate, limit, page } = filters;
@@ -31,7 +34,7 @@ export function AnalyticsFilters({ filters = {}, sortDir = 'desc' }) {
         searchParams.set('sortDir', newSortDir);
       }
 
-      router.push(`${paths.dashboard.cities.list}?${searchParams.toString()}`);
+      router.push(`${paths.dashboard.overview}?${searchParams.toString()}`, { scroll: false });
     },
     [router, filters]
   );
@@ -47,14 +50,16 @@ export function AnalyticsFilters({ filters = {}, sortDir = 'desc' }) {
 
   const handleStartDateChange = React.useCallback(
     (newDate) => {
-      updateSearchParams({ startDate: newDate ? newDate.format('YYYY-MM-DD') : '' }, sortDir);
+      const utcDate = newDate ? dayjs(newDate).utc() : '';
+      updateSearchParams({ startDate: utcDate }, sortDir);
     },
     [updateSearchParams, sortDir]
   );
 
   const handleEndDateChange = React.useCallback(
     (newDate) => {
-      updateSearchParams({ endDate: newDate ? newDate.format('YYYY-MM-DD') : '' }, sortDir);
+      const utcDate = newDate ? dayjs(newDate).utc() : '';
+      updateSearchParams({ endDate: utcDate }, sortDir);
     },
     [updateSearchParams, sortDir]
   );
@@ -70,7 +75,7 @@ export function AnalyticsFilters({ filters = {}, sortDir = 'desc' }) {
         </Stack>
 
         <DatePicker
-          value={startDate ? dayjs(startDate) : null}
+          value={startDate ? dayjs(startDate).utc() : null}
           onChange={handleStartDateChange}
           inputFormat="MM/DD/YYYY"
           slotProps={{ textField: { placeholder: 'Start Date' } }}
@@ -83,7 +88,7 @@ export function AnalyticsFilters({ filters = {}, sortDir = 'desc' }) {
         />
 
         <DatePicker
-          value={endDate ? dayjs(endDate) : null}
+          value={endDate ? dayjs(endDate).utc() : null}
           onChange={handleEndDateChange}
           inputFormat="MM/DD/YYYY"
           slotProps={{ textField: { placeholder: 'End Date' } }}

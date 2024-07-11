@@ -49,7 +49,9 @@ function createCategories() {
       "categoryLogo" : data.avatar || "  ",
     }   
     try {
-      const response = await axios.post(HOST_API.concat(`/course-category`),newobj);
+      const response = await axios.post(HOST_API.concat(`/course-category`),newobj,{
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+    });
       return response;
     } catch (err) {
       return err;
@@ -58,9 +60,13 @@ function createCategories() {
 }
 function fetchcategories() {
   return createAsyncThunk(`${name}/fetchcategories`, async (data) => {
+    console.log("dsd",data.name);
     try {
       const response = await axios.get(
-        HOST_API.concat(`/course-category?page=${data.page}&limit=${data.limit}&search=${data.name?data.name:''}`)
+        HOST_API.concat(`/course-category?page=${data.page}&limit=${data.limit}&search=${data.name}`),
+          {
+          headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+      }
       );
       console.log(response.data);
       const res = response.data;
@@ -85,8 +91,8 @@ function deletecategories() {
   return createAsyncThunk(`${name}/deletecategories`, async (id) => {
     try {
       const response = await axios.delete(HOST_API.concat(`/course-category/${id}`), {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-      });
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+    });
       return response.data;
     } catch (err) {
       return err;
@@ -100,8 +106,8 @@ function updatecategories() {
     ;  
     try {
       const response = await axios.put(HOST_API.concat(`/course-category/${data.id}`), data, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-      });
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+    });
       return response;
     } catch (err) {
       return err;

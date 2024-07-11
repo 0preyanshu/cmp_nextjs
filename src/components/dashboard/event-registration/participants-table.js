@@ -32,50 +32,66 @@ import { useRouter } from 'next/navigation';
 
 export function ParticipantsTable({ rows }) {
 
-  const dispatch = useDispatch();
-  const router = useRouter();
-
-  const { deleteCities, fetchCities,createCity, updateCity } = cityActions;
+ 
 
   const columns = [
     {
-      formatter: (row) => (
+      formatter: (_,index) => (
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center' ,marginLeft:3}}>
          {' '}
           <div>
-            <Link
-            
-            >
-              {row.cityName}
-            </Link>
+           
+             {index+1} 
+         
         
           </div>
         </Stack>
       ),
-      name: 'First Name',
-      width: '250px',
+      name: 'S.No',
+      width: '50px',
     },
    
     {
       formatter(row) {
-        return row.cityShortName;
+        return row.orderID;
+      },
+      name: 'Order ID',
+      width: '250px',
+    },
+    {
+      formatter(row) {
+        return row.firstName;
+      },
+      name: 'First Name',
+      width: '100px',
+    },
+    {
+      formatter(row) {
+        return row.lastName;
       },
       name: 'Last Name',
-      width: '200px',
+      width: '100px',
     },
     {
       formatter(row) {
-        return row.cityShortName;
+        return row.email;
       },
       name: 'Email',
-      width: '200px',
+      width: '100px',
     },
     {
       formatter(row) {
-        return row.cityShortName;
+        return row.phone;
       },
       name: 'Phone',
-      width: '200px',
+      width: '100px',
+    },
+    {
+      formatter(row) {
+        return '-';
+      },
+      name: 'Vendor',
+      width: '100px',
     },
   
   ];

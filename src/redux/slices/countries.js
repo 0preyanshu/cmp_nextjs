@@ -55,8 +55,8 @@ function fetchCountries() {
           `/country/?page=${data.page}&limit=${data.limit}&search=${data.name||""}&state_id=${data?.stateId || ""}`
         ),
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-        }
+          headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+      }
       );
       console.log(response.data);
       const res =response.data;
@@ -79,9 +79,9 @@ function fetchCountries() {
 function searchDevices() {
   return createAsyncThunk(`${name}/searchDevices`, async (name) => {
     try {
-      const response = await axios.get(HOST_API.concat(`/device/search?device=${name}`), {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-      });
+      const response = await axios.get(HOST_API.concat(`/device/search?device=${name}`),{
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+    });
       return response.data;
     } catch (err) {
       if (!err.response) {
@@ -95,8 +95,8 @@ function fetchDeviceById() {
   return createAsyncThunk(`${name}/fetchDeviceById`, async (id) => {
     try {
       const response = await axios.get(HOST_API.concat(`/device/${id}`), {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-      });
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+    });
       return response.data;
     } catch (err) {
       if (!err.response) {
@@ -121,8 +121,8 @@ function createCountry() {
         HOST_API.concat(`/country`),
         newobj,
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-        }
+          headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+      }
       );
       return response;
     } catch (error) {
@@ -136,8 +136,8 @@ function deleteCountry() {
   return createAsyncThunk(`${name}/deleteCountry`, async (Id) => {
     try {
       const response = await axios.delete(HOST_API.concat(`/country/${Id}`), {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-      });
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+    });
       return response;
     } catch (err) {
       return err;
@@ -154,8 +154,8 @@ function updateCountry() {
         ),
         data,
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-        }
+          headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+      }
       );
       return response;
     } catch (error) {
