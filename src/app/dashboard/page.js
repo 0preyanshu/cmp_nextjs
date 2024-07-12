@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import * as React from 'react';
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -22,10 +22,9 @@ import { useTheme } from '@mui/material/styles';
 const HOST_API = "https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg";
 
 const transformGraphData = (newGraphData, period) => {
-  console.log("n",newGraphData);
-  if (!newGraphData ||!period || newGraphData.length===0 ) return { series: [], categories: [] };
+  if (!newGraphData || !period || newGraphData.length === 0) return { series: [], categories: [] };
   
-  const periodData = newGraphData?.find(data => data?.period === period);
+  const periodData = newGraphData.find(data => data.period === period);
   const categories = periodData?.data?.map(point => point?.x);
   const series = [
     {
@@ -45,10 +44,7 @@ const transformGraphData = (newGraphData, period) => {
   return { series, categories };
 };
 
-// ApexCharts options
-
-
-export default function Page({ searchParams}) {
+export default function Page({ searchParams }) {
   const theme = useTheme();
   const [timeline, setTimeline] = useState('today');
   const { dataLoading, analyticsData, graphData, analyticsLoading } = useSelector((state) => state.analytics);
@@ -57,12 +53,10 @@ export default function Page({ searchParams}) {
   const [summaryData, setSummaryData] = useState([]);
   const [summaryLoading, setSummaryLoading] = useState(false);
   const router = useRouter();
+  const { page = 1, limit = 10, startDate, endDate } = searchParams;
 
-  const {  page = 1, limit = 10,startDate,endDate } = searchParams;
-
-  const [currentPage, setCurrentPage] = React.useState(parseInt(page));
-  const [rowsPerPage, setRowsPerPage] = React.useState(parseInt(limit));
-
+  const [currentPage, setCurrentPage] = useState(parseInt(page));
+  const [rowsPerPage, setRowsPerPage] = useState(parseInt(limit));
 
   const chartOptions = {
     chart: {
@@ -75,7 +69,7 @@ export default function Page({ searchParams}) {
       curve: 'smooth',
     },
     tooltip: {
-      theme: theme.palette.mode, // Ensure the theme is set to 'light' or 'dark' as per your requirement
+      theme: theme.palette.mode,
     },
     xaxis: {
       categories: [],
@@ -89,18 +83,20 @@ export default function Page({ searchParams}) {
   };
 
   const fetchSummaryData = async () => {
-    setSummaryLoading(true);
-    try {
-      const response = await axios.get(`${HOST_API}/dashboard/data`, {
-        headers: {
-          Authorization: typeof window !== 'undefined' ? `Bearer ${localStorage.getItem('custom-auth-token')}` : '',
-        },
-      });
-      setSummaryData(response.data?.data?.data || []);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    } finally {
-      setSummaryLoading(false);
+    if (typeof window !== 'undefined') {
+      setSummaryLoading(true);
+      try {
+        const response = await axios.get(`${HOST_API}/dashboard/data`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}`,
+          },
+        });
+        setSummaryData(response.data?.data?.data || []);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setSummaryLoading(false);
+      }
     }
   };
 
@@ -113,20 +109,16 @@ export default function Page({ searchParams}) {
       startDate: startDate || "",
       endDate: endDate || "",
     };
-  
+
     if (isInitialMount.current) {
-      console.log('Initial mount');
-     dispatch(getData());
-     
+       dispatch(getData());
       fetchSummaryData();
       isInitialMount.current = false;
     } else {
-      console.log('Subsequent update');
       dispatch(getAnalyticsData(data));
       updateSearchParams({ page: currentPage, limit: rowsPerPage, startDate, endDate });
     }
   }, [currentPage, rowsPerPage, startDate, endDate]);
-  
 
   const handleTimelineChange = (event, newValue) => {
     setTimeline(newValue);
@@ -146,7 +138,6 @@ export default function Page({ searchParams}) {
   const updateSearchParams = (newFilters, newSortDir) => {
     const searchParams = new URLSearchParams();
 
-
     if (newFilters.searchTerm) {
       searchParams.set('searchTerm', newFilters.searchTerm);
     }
@@ -158,23 +149,19 @@ export default function Page({ searchParams}) {
     if (newFilters.limit) {
       searchParams.set('limit', newFilters.limit);
     }
-    if(newFilters.startDate){
+    if (newFilters.startDate) {
       searchParams.set('startDate', newFilters.startDate);
     }
-    if(newFilters.endDate){
+    if (newFilters.endDate) {
       searchParams.set('endDate', newFilters.endDate);
     }
-
-
 
     router.push(`${paths.dashboard.overview}?${searchParams.toString()}`, { scroll: false });
   };
 
   const currentChartData = useMemo(() => transformGraphData(graphData, timeline), [graphData, timeline]);
 
-  const isLoading = dataLoading || summaryLoading ;
-  
-
+  const isLoading = dataLoading || summaryLoading;
 
   if (isLoading) {
     return (
@@ -215,10 +202,10 @@ export default function Page({ searchParams}) {
                     <Typography variant="h6" fontWeight="bold" gutterBottom>
                       {item.period.charAt(0).toUpperCase() + item.period.slice(1)}
                     </Typography>
-                    <Row title="Orders" label={item.totalOrders} value={"$"+ item.totalMoney} color = {theme.palette.mode === 'dark' ? '#FFFFFF' : '#212B36'}/>
-                    <Row title="Internal" label={item.internalOrders} value={"$"+ item.internalMoney} color = {theme.palette.mode === 'dark' ? '#FFFFFF' : '#212B36'} />
-                    <Row title="Vendor" label={item.vendorOrders} value={"$"+ item.totalMoney } color = {theme.palette.mode === 'dark' ? '#FFFFFF' : '#212B36'} />
-                    <Row title="Total" label={item.totalOrders} value={"$"+ item.totalMoney} fontWeight="bold" color = {theme.palette.mode === 'dark' ? '#FFFFFF' : '#212B36'} />
+                    <Row title="Orders" label={item.totalOrders} value={"$" + item.totalMoney} color={theme.palette.mode === 'dark' ? '#FFFFFF' : '#212B36'} />
+                    <Row title="Internal" label={item.internalOrders} value={"$" + item.internalMoney} color={theme.palette.mode === 'dark' ? '#FFFFFF' : '#212B36'} />
+                    <Row title="Vendor" label={item.vendorOrders} value={"$" + item.totalMoney} color={theme.palette.mode === 'dark' ? '#FFFFFF' : '#212B36'} />
+                    <Row title="Total" label={item.totalOrders} value={"$" + item.totalMoney} fontWeight="bold" color={theme.palette.mode === 'dark' ? '#FFFFFF' : '#212B36'} />
                   </CardContent>
                 </Card>
               </Grid>
@@ -228,15 +215,14 @@ export default function Page({ searchParams}) {
           <Box sx={{ my: 4 }}>
             <Typography variant="h5" mb={3}>Analytics</Typography>
             <Card>
-              <AnalyticsFilters filters={{startDate,endDate}} />
+              <AnalyticsFilters filters={{ startDate, endDate }} />
               <Divider />
               <Box sx={{ overflowX: 'auto' }}>
                 {analyticsLoading && <TableSkeleton />}
-                { !analyticsLoading && <AnalyticsTable rows={analyticsData} />}
-               
+                {!analyticsLoading && <AnalyticsTable rows={analyticsData} />}
               </Box>
               <Divider />
-              <Pagination page={currentPage-1} rowsPerPage={rowsPerPage} onPageChange={handlePageChange} onRowsPerPageChange={handleRowsPerPageChange} />
+              <Pagination page={currentPage - 1} rowsPerPage={rowsPerPage} onPageChange={handlePageChange} onRowsPerPageChange={handleRowsPerPageChange} />
             </Card>
           </Box>
 
@@ -259,7 +245,7 @@ export default function Page({ searchParams}) {
   );
 }
 
-const Row = ({ title, label, value, fontWeight = 500, margin = '8px 0',  color = '#212B36'}) => (
+const Row = ({ title, label, value, fontWeight = 500, margin = '8px 0', color = '#212B36' }) => (
   <div style={{ display: 'flex', justifyContent: 'space-between', margin, color, alignItems: 'stretch' }}>
     <Typography variant="body2" sx={{ fontWeight, width: '60px' }}>
       {title}
