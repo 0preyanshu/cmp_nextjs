@@ -18,7 +18,6 @@ import { useRouter } from 'next/navigation';
 import TableSkeleton from '@/components/core/Skeletion';
 import { useTheme } from '@mui/material/styles';
 
-
 const HOST_API = "https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg";
 
 const transformGraphData = (newGraphData, period) => {
@@ -52,35 +51,29 @@ export default function Page({ searchParams }) {
   const dispatch = useDispatch();
   const [summaryData, setSummaryData] = useState([]);
   const [summaryLoading, setSummaryLoading] = useState(false);
-  const router = useRouter();
-  const { page = 1, limit = 10, startDate, endDate } = searchParams;
+  const [currentPage, setCurrentPage] = useState(parseInt(searchParams.page) || 1);
+  const [rowsPerPage, setRowsPerPage] = useState(parseInt(searchParams.limit) || 10);
+  const [isClient, setIsClient] = useState(false);
+  const isInitialMount = React.useRef(true);
 
-  const [currentPage, setCurrentPage] = useState(parseInt(page));
-  const [rowsPerPage, setRowsPerPage] = useState(parseInt(limit));
+  useEffect(() => {
+    setIsClient(true);
+    const data = {
+      page: currentPage,
+      limit: rowsPerPage,
+      startDate: searchParams.startDate || "",
+      endDate: searchParams.endDate || "",
+    };
 
-  const chartOptions = {
-    chart: {
-      type: 'line',
-      toolbar: {
-        show: false,
-      },
-    },
-    stroke: {
-      curve: 'smooth',
-    },
-    tooltip: {
-      theme: theme.palette.mode,
-    },
-    xaxis: {
-      categories: [],
-    },
-    yaxis: {
-      show: true,
-    },
-    grid: {
-      show: false,
-    },
-  };
+    if (isInitialMount.current) {
+      if (graphData.length === 0) dispatch(getData());
+      fetchSummaryData();
+      isInitialMount.current = false;
+    } else {
+      dispatch(getAnalyticsData(data));
+      updateSearchParams({ page: currentPage, limit: rowsPerPage, startDate: searchParams.startDate, endDate: searchParams.endDate });
+    }
+  }, [currentPage, rowsPerPage, searchParams.startDate, searchParams.endDate]);
 
   const fetchSummaryData = async () => {
     if (typeof window !== 'undefined') {
@@ -100,63 +93,48 @@ export default function Page({ searchParams }) {
     }
   };
 
-  const isInitialMount = React.useRef(true);
-
-  useEffect(() => {
-    const data = {
-      page: currentPage,
-      limit: rowsPerPage,
-      startDate: startDate || "",
-      endDate: endDate || "",
-    };
-
-    if (isInitialMount.current) {
-       dispatch(getData());
-      fetchSummaryData();
-      isInitialMount.current = false;
-    } else {
-      dispatch(getAnalyticsData(data));
-      updateSearchParams({ page: currentPage, limit: rowsPerPage, startDate, endDate });
-    }
-  }, [currentPage, rowsPerPage, startDate, endDate]);
-
   const handleTimelineChange = (event, newValue) => {
     setTimeline(newValue);
   };
 
   const handlePageChange = (event, newPage) => {
     setCurrentPage(newPage);
-    ({ ...searchParams, page: newPage });
+    updateSearchParams({ ...searchParams, page: newPage });
   };
 
   const handleRowsPerPageChange = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setCurrentPage(1);
-    ({ ...searchParams, limit: parseInt(event.target.value, 10), page: 1 });
+    updateSearchParams({ ...searchParams, limit: parseInt(event.target.value, 10), page: 1 });
   };
 
-  const updateSearchParams = (newFilters, newSortDir) => {
-    const searchParams = new URLSearchParams();
+  const updateSearchParams = (newFilters) => {
+    if (isClient) {
+      const router = useRouter();
+      const searchParams = new URLSearchParams();
 
-    if (newFilters.searchTerm) {
-      searchParams.set('searchTerm', newFilters.searchTerm);
-    }
+      if (newFilters.searchTerm) {
+        searchParams.set('searchTerm', newFilters.searchTerm);
+      }
 
-    if (newFilters.page) {
-      searchParams.set('page', newFilters.page);
-    }
+      if (newFilters.page) {
+        searchParams.set('page', newFilters.page);
+      }
 
-    if (newFilters.limit) {
-      searchParams.set('limit', newFilters.limit);
-    }
-    if (newFilters.startDate) {
-      searchParams.set('startDate', newFilters.startDate);
-    }
-    if (newFilters.endDate) {
-      searchParams.set('endDate', newFilters.endDate);
-    }
+      if (newFilters.limit) {
+        searchParams.set('limit', newFilters.limit);
+      }
 
-    router.push(`${paths.dashboard.overview}?${searchParams.toString()}`, { scroll: false });
+      if (newFilters.startDate) {
+        searchParams.set('startDate', newFilters.startDate);
+      }
+
+      if (newFilters.endDate) {
+        searchParams.set('endDate', newFilters.endDate);
+      }
+
+      router.push(`${paths.dashboard.overview}?${searchParams.toString()}`, { scroll: false });
+    }
   };
 
   const currentChartData = useMemo(() => transformGraphData(graphData, timeline), [graphData, timeline]);
@@ -215,7 +193,7 @@ export default function Page({ searchParams }) {
           <Box sx={{ my: 4 }}>
             <Typography variant="h5" mb={3}>Analytics</Typography>
             <Card>
-              <AnalyticsFilters filters={{ startDate, endDate }} />
+              <AnalyticsFilters filters={{ startDate: searchParams.startDate, endDate: searchParams.endDate }} />
               <Divider />
               <Box sx={{ overflowX: 'auto' }}>
                 {analyticsLoading && <TableSkeleton />}
