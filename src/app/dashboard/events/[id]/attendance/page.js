@@ -10,22 +10,28 @@ import { Pagination } from '@/components/core/pagination';
 import { useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import TableSkeleton from '@/components/core/Skeletion';
-import AttendanceTable from '@/components/dashboard/event-registration/attendance-table';
+import {AttendanceTable} from '@/components/dashboard/event-registration/attendance-table';
 import axios from 'axios';
-import { useParams } from 'next/navigation';
 
+import { useParams } from 'next/navigation';
+import { LoadingButton } from '@mui/lab';
+import { useRef } from 'react';
 
 const HOST_API = "https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg";
 
 export default function Page({ searchParams }) {
+  const attendanceTableRef = React.useRef();
+
   const { searchTerm, page = 1, limit = 10 } = searchParams;
   const [currentPage, setCurrentPage] = React.useState(parseInt(page));
   const [rowsPerPage, setRowsPerPage] = React.useState(parseInt(limit));
   const [searchInput, setSearchInput] = React.useState(searchTerm || '');
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const [eventData, setEventData] = React.useState(null);
-  const [attendanceData, setAttendanceData] = React.useState([]);
+  const [attendanceData, setAttendanceData] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
+  const [buttonLoading, setButtonLoading] = React.useState(false);
 
   const router = useRouter();
   const dispatch = useDispatch();
@@ -47,7 +53,6 @@ export default function Page({ searchParams }) {
 
         console.log('eventResponse', eventResponse?.data?.data);
         console.log('attendanceResponse', attendanceResponse?.data?.data);
-
 
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -91,9 +96,15 @@ export default function Page({ searchParams }) {
       searchParams.set('limit', newFilters.limit);
     }
 
-   console.log('searchParams', router.pathname);
+    console.log('searchParams', router.pathname);
 
     // router.push(`${router.pathname}?${searchParams.toString()}`);
+  };
+
+  const handleParentSubmit = () => {
+    if (attendanceTableRef.current) {
+      attendanceTableRef.current.submit();
+    }
   };
 
   return (
@@ -124,11 +135,11 @@ export default function Page({ searchParams }) {
             </Box>
             <Box sx={{ maxWidth: '230px', textAlign: 'left' }}>
               <Typography variant="subtitle1"><b>• Start Date</b></Typography>
-              <Typography variant="subtitle2" ml={1.5}>{eventData?.eventStartDate}</Typography>
+              <Typography variant="subtitle2" ml={1.5}>{eventData?.eventStartDate || "-"}</Typography>
             </Box>
             <Box sx={{ maxWidth: '180px', textAlign: 'left', mr: 3 }}>
               <Typography variant="subtitle1"><b>• Instructor</b></Typography>
-              <Typography variant="subtitle2" ml={1.5}>{eventData?.instructor || "-"}</Typography>
+              <Typography variant="subtitle2" ml={1.5}>{eventData?.instructor[0]?.firstname || "-"}</Typography>
             </Box>
           </Box>
         </Card>
@@ -138,7 +149,7 @@ export default function Page({ searchParams }) {
             {loading ? (
               <TableSkeleton />
             ) : (
-              <AttendanceTable attendanceData={attendanceData} />
+              <AttendanceTable ref={attendanceTableRef} eventData={eventData} attendance={attendanceData} setParentIsSubmitting={setIsSubmitting} currentPage={currentPage} currentLimit={rowsPerPage}/>
             )}
           </Box>
           <Divider />
@@ -149,6 +160,18 @@ export default function Page({ searchParams }) {
             onRowsPerPageChange={handleRowsPerPageChange}
           />
         </Card>
+
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: -1,mr:2 }}>
+          <LoadingButton
+            onClick={handleParentSubmit}
+            loading={isSubmitting}
+            variant="contained"
+            color="primary"
+          >
+            Save Attendance
+          </LoadingButton>
+        </Box>
+        
       </Stack>
     </Box>
   );
