@@ -64,7 +64,7 @@ export function StatesTable({ rows }) {
     },
     {
       formatter(row) {
-        return row.userType || 'ADMIN';
+        return row?.userType?.userTypeName || 'N/A';
       },
       name: 'Role',
       width: '200px',

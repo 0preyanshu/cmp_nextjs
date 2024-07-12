@@ -80,7 +80,7 @@ export function StatesFilters({ filters = {}, sortDir = 'desc' }) {
           <Option value="">Select User Type</Option>
           {userTypes.map((e) => (
             <Option key={e.id} value={e.id}>
-              {e.userTypeName}
+              {e.userTypeName || "No User Type"}
             </Option>
           ))}
         </Select>

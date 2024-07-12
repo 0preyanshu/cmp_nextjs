@@ -3,7 +3,7 @@ import * as React from 'react';
 import Stack from '@mui/material/Stack';
 import CircularProgress from '@mui/material/CircularProgress';
 import { Card, CardContent, Grid, Typography, Box, Tab, Tabs, Divider } from '@mui/material';
-import Chart from 'react-apexcharts';
+import Chart from "react-apexcharts";
 import { useState, useMemo, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
@@ -93,7 +93,7 @@ export default function Page({ searchParams}) {
     try {
       const response = await axios.get(`${HOST_API}/dashboard/data`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}`,
+          Authorization: typeof window !== 'undefined' ? `Bearer ${localStorage.getItem('custom-auth-token')}` : '',
         },
       });
       setSummaryData(response.data?.data?.data || []);
@@ -116,8 +116,7 @@ export default function Page({ searchParams}) {
   
     if (isInitialMount.current) {
       console.log('Initial mount');
-      
-      if(graphData.length === 0) dispatch(getData());
+     dispatch(getData());
      
       fetchSummaryData();
       isInitialMount.current = false;
