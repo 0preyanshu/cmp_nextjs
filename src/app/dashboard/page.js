@@ -23,7 +23,7 @@ const HOST_API = "https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg";
 
 const transformGraphData = (newGraphData, period) => {
   console.log("n",newGraphData);
-  if (!newGraphData ||!period ) return { series: [], categories: [] };
+  if (!newGraphData ||!period || newGraphData.length===0 ) return { series: [], categories: [] };
   
   const periodData = newGraphData?.find(data => data?.period === period);
   const categories = periodData?.data?.map(point => point?.x);
