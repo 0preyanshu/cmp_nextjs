@@ -346,7 +346,11 @@ export function WelcomeEmails({ filteredEvents = [], sendTestEmail, sendTestEmai
     try {
       const data = await axios.put(
         HOST_API.concat(`/email-template?templateName=welcome-email`),
-        dataToSubmit
+        dataToSubmit,{
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}`,
+          },
+        }
       );
 
       if(data?.data){
@@ -365,7 +369,11 @@ export function WelcomeEmails({ filteredEvents = [], sendTestEmail, sendTestEmai
   const fetchEmailTemplateDetails = async () => {
     try {
       const response = await axios.get(
-        HOST_API.concat(`/email-template?templateName=welcome-email`),
+        HOST_API.concat(`/email-template?templateName=welcome-email`),{
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}`,
+          },
+        }
       );
       console.log(response.data, 'response.data');
       return response.data;

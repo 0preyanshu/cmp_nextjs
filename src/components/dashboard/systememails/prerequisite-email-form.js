@@ -132,7 +132,7 @@ export function PreRequisiteEmails({  sendTestEmail, sendTestEmailLoading = 0 })
         dataToSubmit
         ,
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+          headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
         }
       );
       if(data.data){
@@ -153,7 +153,7 @@ export function PreRequisiteEmails({  sendTestEmail, sendTestEmailLoading = 0 })
       const response = await axios.get(
         HOST_API.concat(`/email-template?templateName=prerequisite-email`),
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+          headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
         }
       );
       return response.data;

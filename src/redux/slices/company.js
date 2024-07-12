@@ -59,8 +59,8 @@ function createCompanies() {
   return createAsyncThunk(`${name}/createCompanies`, async (obj) => {
     try {
       const response = await axios.post(HOST_API.concat(`/companies/create`), obj, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-      });
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+    });
       return response;
     } catch (err) {
       return err.response.data;
@@ -70,7 +70,9 @@ function createCompanies() {
 function fetchCompanies() {
   return createAsyncThunk(`${name}/fetchCompanies`, async (data) => {
     try {
-      const response = await axios.get("https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg/company/01J1PVRA0K4FJ0MMA71VJXSB3E");
+      const response = await axios.get("https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg/company/01J1PVRA0K4FJ0MMA71VJXSB3E",{
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+    });
 
     //   {
         
@@ -107,8 +109,8 @@ function deletecompanies() {
   return createAsyncThunk(`${name}/deletecompanies`, async (id) => {
     try {
       const response = await axios.delete(HOST_API.concat(`/companies/delete/${id}`), {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-      });
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+    });
       return response.data;
     } catch (err) {
       return err;
@@ -140,7 +142,9 @@ function updatecompanies() {
 
 
     try {
-      const response = await axios.put("https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg/company/01J1PVRA0K4FJ0MMA71VJXSB3E", data);
+      const response = await axios.put("https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg/company/01J1PVRA0K4FJ0MMA71VJXSB3E",data,{
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+    });
 
       return response;
    

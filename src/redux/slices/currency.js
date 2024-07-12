@@ -48,8 +48,8 @@ function createCurrency() {
     }
     try {
       const response = await axios.post(HOST_API.concat(`/currency`), newobj, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-      });
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+    });
       return response;
     } catch (err) {
       return err;
@@ -62,8 +62,8 @@ function fetchCurrency() {
       const response = await axios.get(
         HOST_API.concat(`/currency?page=${data.page}&limit=${data.limit}&search=${data.name||""}`),
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-        }
+          headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+      }
       );
       console.log(response.data);
       const res = response.data;
@@ -91,8 +91,8 @@ function deleteCurrency() {
   return createAsyncThunk(`${name}/deleteCurrency`, async (id) => {
     try {
       const response = await axios.delete(HOST_API.concat(`/currency/${id}`), {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-      });
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+    });
       return response.data;
     } catch (err) {
       return err;
@@ -115,8 +115,8 @@ function updateCurrency() {
 // "countryShortName": data.currencyType
 // }
       const response = await axios.put(HOST_API.concat(`/currency/${data.id}/`), data, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-      });
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+    });
       return response;
     } catch (err) {
       return err;

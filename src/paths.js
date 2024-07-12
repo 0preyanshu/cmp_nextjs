@@ -237,8 +237,8 @@ export const paths = {
   },
   users: {
     list: '/dashboard/users',
-    create: '/dashboard/users',
-    edit : (userId) => `/dashboard/user-type/edit/${userId}`,
+    create: '/dashboard/users/create',
+    edit : (userId) => `/dashboard/users/edit/${userId}`,
   },
 
 

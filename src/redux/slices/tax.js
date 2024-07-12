@@ -48,7 +48,9 @@ function createTax() {
     try {
       console.log(data, 'd');
       const response = await axios.post(HOST_API.concat(`/tax`), newobj, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}`,
+        },
       });
       return response;
     } catch (err) {
@@ -62,7 +64,7 @@ function fetchTaxes() {
       const response = await axios.get(
         HOST_API.concat(`/tax?page=${data.page}&limit=${data.limit}&search=${data.name || ""}`),
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+          headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
         }
       );
       console.log('response', response.data);
@@ -86,7 +88,7 @@ function deleteTax() {
   return createAsyncThunk(`${name}/deleteTax`, async (id) => {
     try {
       const response = await axios.delete(HOST_API.concat(`/tax/${id}`), {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
       });
       return response.data;
     } catch (err) {
@@ -102,7 +104,7 @@ function updateTax() {
       
   
       const response = await axios.put(HOST_API.concat(`/tax/${data.id}`), data , {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
       });
       return response;
     } catch (err) {

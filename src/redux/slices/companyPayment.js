@@ -39,7 +39,7 @@ function getCompanyPaymentDetails() {
   return createAsyncThunk(`${name}/getCompanyPaymentDetails`, async () => {
     try {
       const response = await axios.get(HOST_API.concat(`/credentials/01J00AT4C1V8YCD9HGVE9935JH`), {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
       });
       return response.data;
     } catch (error) {
@@ -57,7 +57,7 @@ function updateStripeCompanyPaymentDetails() {
         updatedStripeCompanyPaymentDetail,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+            Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}`,
           },
         }
       );
@@ -77,7 +77,7 @@ function updatePaypalCompanyPaymentDetails() {
         updatedPaypalCompanyPaymentDetail,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+            Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}`,
           },
         }
       );

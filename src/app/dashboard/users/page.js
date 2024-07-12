@@ -19,12 +19,12 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import { useRouter } from 'next/navigation';
 import { paths } from '@/paths';
 import { useDispatch, useSelector } from 'react-redux';
-import { StateActions } from '@/redux/slices';
-import { countryActions } from '@/redux/slices';
+import { UserActions } from '@/redux/slices';
+import { UserTypeActions } from '@/redux/slices';
 import TableSkeleton from '@/components/core/Skeletion';
 
 export default function Page({ searchParams }) {
-  const { sortDir, page = 1, limit = 10, searchTerm = '', countryID = '' } = searchParams;
+  const { sortDir, page = 1, limit = 10, searchTerm = '', userTypeID = '' } = searchParams;
 
   const [currentPage, setCurrentPage] = React.useState(parseInt(page));
   const [rowsPerPage, setRowsPerPage] = React.useState(parseInt(limit));
@@ -32,12 +32,12 @@ export default function Page({ searchParams }) {
 
   const router = useRouter();
 
-  const { allCountries } = useSelector((state) => state?.countries?.country);
-  const { allState, loading: isLoading, } = useSelector((state) => state?.states?.state);
-  const dispatch = useDispatch();
-  const { fetchState } = StateActions;
-  const { fetchCountries } = countryActions;
+  const { userTypes } = useSelector((state) => state.userType.userType);
+  const { allUsers, loading: isLoading, totalData } = useSelector((state) => state.users.users);
+  const {  fetchUser } = UserActions;
+  const { fetchUserType } = UserTypeActions ;
   const isInitialMount = React.useRef(true);
+  const dispatch = useDispatch();
 
   React.useEffect(() => {
     if (!isInitialMount.current) {
@@ -45,13 +45,13 @@ export default function Page({ searchParams }) {
         page: currentPage,
         limit: rowsPerPage,
         name: searchInput || '',
-        countryId: countryID || '',
+        userTypeID: userTypeID || '',
       };
-      if(allCountries.length === 0){
-        dispatch(fetchCountries({ limit: "", page: "", search: "" }));
+      if(userTypes.length === 0){
+        dispatch(fetchUserType({ limit: "", page: "", search: "" }));
       }
-      if(allState.length === 0 || !isInitialMount.current){
-       dispatch(fetchState(data));}
+      if(allUsers.length === 0 || !isInitialMount.current){
+       dispatch(fetchUser(data));}
 
       
     }
@@ -62,7 +62,7 @@ export default function Page({ searchParams }) {
       isInitialMount.current = false;
     }
   
-  },[searchInput, currentPage, rowsPerPage, countryID]);
+  },[searchInput, currentPage, rowsPerPage, userTypeID]);
 
 
 
@@ -106,10 +106,10 @@ export default function Page({ searchParams }) {
       searchParams.set('limit', rowsPerPage);
     }
 
-    if (newParams.countryID) {
-      searchParams.set('countryID', newParams.countryID);
-    } else if (countryID) {
-      searchParams.set('countryID', countryID);
+    if (newParams.userTypeID) {
+      searchParams.set('userTypeID', newParams.userTypeID);
+    } else if (userTypeID) {
+      searchParams.set('userTypeID', userTypeID);
     }
 
     router.push(`${paths.dashboard.users.list}?${searchParams.toString()}`);
@@ -127,10 +127,11 @@ export default function Page({ searchParams }) {
       <Stack spacing={4}>
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} sx={{ alignItems: 'flex-start' }}>
           <Box sx={{ flex: '1 1 auto' }}>
-            <Typography variant="h4">States</Typography>
+            <Typography variant="h4">Users</Typography>
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Button startIcon={<PlusIcon />} variant="contained" onClick={() => {
+              console.log("clicked")
               router.push(paths.dashboard.users.create);
             }}>
               Add
@@ -151,11 +152,11 @@ export default function Page({ searchParams }) {
           />
         </Stack>
         <Card>
-          <StatesFilters filters={{  searchTerm, limit, page ,countryID}} sortDir={sortDir} Countries={allCountries} />
+          <StatesFilters filters={{  searchTerm, limit, page ,userTypeID}} sortDir={sortDir} />
           <Divider />
           <Box sx={{ overflowX: 'auto' }}>
             {isLoading && <TableSkeleton />}
-            {!isLoading && <StatesTable rows={allState} />}
+            {!isLoading && <StatesTable rows={ allUsers} />}
           </Box>
           <Divider />
           <Pagination

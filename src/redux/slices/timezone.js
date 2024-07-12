@@ -46,7 +46,7 @@ function createTimezones() {
         gmtOffset:data.gmtOffset,
       }
       const response = await axios.post(HOST_API.concat(`/timezone`), newobj, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
       });
    
       return response.data;
@@ -61,7 +61,7 @@ function fetchTimezones() {
       const response = await axios.get(
         HOST_API.concat(`/timezone?page=${data.page}&limit=${data.limit}&search=${data.name || ""}`),
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+          headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
         }
       );
       console.log(response.data);
@@ -87,7 +87,7 @@ function deleteTimezones() {
 
     try {
       const response = await axios.delete(HOST_API.concat(`/timezone/${id}`), {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
       });
       return response.data;
     } catch (err) {
@@ -102,7 +102,7 @@ function updateTimezones() {
       
     try {
       const response = await axios.put(HOST_API.concat(`/timezone/${data.id}/`), data, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
       });
       return response.data;
     } catch (err) {

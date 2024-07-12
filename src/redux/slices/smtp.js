@@ -35,7 +35,7 @@ function getSmtpDetails() {
   return createAsyncThunk(`${name}/getSmtpData`, async () => {
     try {
       const response = await axios.get(HOST_API.concat(`/credentials/01HZZ3TZQQP5Q337WHXY4WHHAT`), {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
       });
       console.log(response);
       return response.data;
@@ -51,7 +51,9 @@ function updateSmtpDetails() {
     console.log(updatedSmtpData,"updatedSmtpData");
 
     try {
-      const response = await axios.put(HOST_API.concat('/credentials/01HZZ3TZQQP5Q337WHXY4WHHAT'),updatedSmtpData);
+      const response = await axios.put(HOST_API.concat('/credentials/01HZZ3TZQQP5Q337WHXY4WHHAT'),updatedSmtpData,{
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+      });
       return response;
     } catch (err) {
       return err.response.data;

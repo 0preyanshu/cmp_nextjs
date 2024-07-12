@@ -19,8 +19,8 @@ function getEventRegistrationData() {
           `/event/eventRegistration?page=${data?.page}&limit=${data?.limit}&courseId=${data?.courseId}&instructorId=${data?.instructorId}&countryId=${data?.countryId}&timeZoneName=${data?.timezone}&status=${data?.status}`
         ),
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-        }
+          headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+      }
       );
       return response;
     } catch (error) {
@@ -32,9 +32,9 @@ function getEventRegistrationData() {
 function deleteEventData() {
   return createAsyncThunk(`${name}/delete/eventRegistration`, async (data) => {
     try {
-      const response = await axios.delete(HOST_API.concat(`/event/delete/${data.eventId}`), {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-      });
+      const response = await axios.delete(HOST_API.concat(`/event/delete/${data.eventId}`),{
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+    });
       return { eventId: data?.eventId, res: response.data };
     } catch (error) {
       return error.response.data;

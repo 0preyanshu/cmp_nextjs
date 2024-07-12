@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-import { HOST_API } from '../../config';
+// import { HOST_API } from '../../config';
+
+const HOST_API = 'https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg';
 
 // const initialState = [];
 
@@ -40,8 +42,8 @@ function createExtraActions() {
 function createUser() {
   return createAsyncThunk(`${name}/createUser`, async (obj) => {
     try {
-      const response = await axios.post(HOST_API.concat(`/user/create`), obj, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+      const response = await axios.post(HOST_API.concat(`/user`), obj, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
       });
       return response;
     } catch (err) {
@@ -54,10 +56,10 @@ function fetchUser() {
     try {
       const response = await axios.get(
         HOST_API.concat(
-          `/user/users?page=${data.page}&limit=${data.limit}&search=${data.name}&active=${data.status}&role=${data.role}`
+          `/user?page=${data.page}&limit=${data.limit}&search=${data.name}&userTypeID=${data.userTypeID}`
         ),
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+          headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
         }
       );
       return response.data;
@@ -71,7 +73,8 @@ function deleteUser() {
   return createAsyncThunk(`${name}/deleteUser`, async (id) => {
     try {
       const response = await axios.delete(HOST_API.concat(`/user/delete/${id}`), {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` 
+      },
       });
       return response.data;
     } catch (err) {
@@ -82,8 +85,8 @@ function deleteUser() {
 function updateUser() {
   return createAsyncThunk(`${name}/updateUser`, async (data) => {
     try {
-      const response = await axios.put(HOST_API.concat(`/user/${data.id}/profile/update`), data, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+      const response = await axios.put(HOST_API.concat(`/user/${data.id}`), data, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
       });
       return response;
     } catch (err) {
@@ -107,12 +110,16 @@ function createExtraReducers() {
         state.users = { loading: true, allUsers: state.users.allUsers || [], totalData: state.users.totalData };
       },
       [fulfilled]: (state, action) => {
-        state.users = {
-          allUsers: [...state.users.allUsers, action?.payload?.data?.user],
-          loading: false,
-          totalData: state.users.totalData + 1,
-          toast: { message: 'User Added Successfully', variant: 'success' },
-        };
+        state.users.loading = false;
+        if (action?.payload?.data?.data?.data) {
+          state.users = {
+            allUsers: [...state.users.allUsers, action?.payload?.data?.data?.data ],
+            totalData: state.users.totalData + 1,
+            toast: { message: 'User Added Successfully', variant: 'success' },
+          };
+
+        }
+       
       },
       [rejected]: (state, action) => {
         state.users = {
@@ -134,16 +141,16 @@ function createExtraReducers() {
       [fulfilled]: (state, action) => {
         state.users = {
           loading: false,
-          allUsers: action?.payload?.users,
+          allUsers: action?.payload?.data?.data || [],
           totalData: action.payload.totalElements,
           toast: { message: 'User Added Successfully', variant: 'success' },
         };
-        // TODO: Confirm whether we're allowing multiple ids with same emailID or not
-        const userEmailStoredInLocalStorage = JSON.parse(localStorage.getItem('user'))?.emailId;
-        const currUser = action?.payload?.users?.find((user) => user?.emailId === userEmailStoredInLocalStorage);
-        if (currUser) {
-          state.currentUser = currUser;
-        }
+       
+        // const userEmailStoredInLocalStorage = JSON.parse(localStorage.getItem('user'))?.emailId;
+        // const currUser = action?.payload?.users?.find((user) => user?.emailId === userEmailStoredInLocalStorage);
+        // if (currUser) {
+        //   state.currentUser = currUser;
+        // }
       },
       [rejected]: (state, action) => {
         state.users = {
@@ -194,19 +201,24 @@ function createExtraReducers() {
         state.users = { loading: true, allUsers: state.users.allUsers, totalData: state.users.totalData };
       },
       [fulfilled]: (state, action) => {
-        state.users = {
-          allUsers: state?.users?.allUsers?.map((item) =>
-            item.id === action.payload.data?.user?.id ? action.payload?.data?.user : item
-          ),
-          loading: false,
-          totalData: state.users.totalData,
-          toast: { message: 'User Updated Successfully', variant: 'success' },
-        };
-        // TODO: Confirm whether we're allowing multiple ids with same emailID or not
-        const userEmailStoredInLocalStorage = JSON.parse(localStorage.getItem('user'))?.emailId;
-        if (action.payload?.data?.user?.emailId === userEmailStoredInLocalStorage) {
-          state.currentUser = action.payload?.data?.user;
+
+        state.users.loading = false;
+        if(action?.payload?.data?.data?.data){
+          state.users = {
+            allUsers: state?.users?.allUsers?.map((item) =>
+              item.id === action?.payload?.data?.data?.data.id ? action?.payload?.data?.data?.data : item
+            ),
+            totalData: state.users.totalData || 0,
+            toast: { message: 'User Updated Successfully', variant: 'success' },
+          };
+
         }
+        
+        // TODO: Confirm whether we're allowing multiple ids with same emailID or not
+        // const userEmailStoredInLocalStorage = JSON.parse(localStorage.getItem('user'))?.emailId;
+        // if (action.payload?.data?.user?.emailId === userEmailStoredInLocalStorage) {
+        //   state.currentUser = action.payload?.data?.user;
+        // }
       },
       [rejected]: (state, action) => {
         state.users = {

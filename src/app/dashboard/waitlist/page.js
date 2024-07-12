@@ -74,7 +74,7 @@ export default function Page({ searchParams }) {
         dispatch(getWaitlistData(data));
       }
 
-      updateSearchParams({ searchTerm: searchInput, page: currentPage, limit: rowsPerPage, startDate:startDate, courseID:courseID, eventID:eventID });
+      ({ searchTerm: searchInput, page: currentPage, limit: rowsPerPage, startDate:startDate, courseID:courseID, eventID:eventID });
      
     
     if(isInitialMount.current){
@@ -85,18 +85,18 @@ export default function Page({ searchParams }) {
 
   const handleSearchChange = (event) => {
     setSearchInput(event.target.value);
-    updateSearchParams({ ...searchParams, searchTerm: event.target.value, page: 1 });
+    ({ ...searchParams, searchTerm: event.target.value, page: 1 });
   };
 
   const handlePageChange = (event, newPage) => {
     setCurrentPage(newPage);
-    updateSearchParams({ ...searchParams, page: newPage });
+    ({ ...searchParams, page: newPage });
   };
 
   const handleRowsPerPageChange = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setCurrentPage(1);
-    updateSearchParams({ ...searchParams, limit: parseInt(event.target.value, 10), page: 1 });
+    ({ ...searchParams, limit: parseInt(event.target.value, 10), page: 1 });
   };
 
   const updateSearchParams = (newFilters, newSortDir) => {

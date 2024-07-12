@@ -1,74 +1,78 @@
 'use client';
+
 import * as React from 'react';
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
 import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
-import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
-
-import { CitiesFilters } from '@/components/dashboard/waitlist/cities-filters';
 import { Pagination } from '@/components/core/pagination';
-import { CitiesTable } from '@/components/dashboard/waitlist/cities-table';
-
-import InputAdornment from '@mui/material/InputAdornment';
-import { MagnifyingGlass as MagnifyingGlassIcon } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass';
-import OutlinedInput from '@mui/material/OutlinedInput';
 import { useRouter } from 'next/navigation';
-import { paths } from '@/paths';
 import { useDispatch, useSelector } from 'react-redux';
-
 import TableSkeleton from '@/components/core/Skeletion';
-import Attendance from '@/redux/slices/attendance';
-import  AttendanceTable  from '@/components/dashboard/event-registration/attendance-table';
-import Grid from '@mui/material/Grid';
+import {AttendanceTable} from '@/components/dashboard/event-registration/attendance-table';
+import axios from 'axios';
+
+import { useParams } from 'next/navigation';
+import { LoadingButton } from '@mui/lab';
+import { useRef } from 'react';
+
+const HOST_API = "https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg";
 
 export default function Page({ searchParams }) {
-  const {  searchTerm, page = 1, limit = 10, } = searchParams;
+  const attendanceTableRef = React.useRef();
 
+  const { searchTerm, page = 1, limit = 10 } = searchParams;
   const [currentPage, setCurrentPage] = React.useState(parseInt(page));
   const [rowsPerPage, setRowsPerPage] = React.useState(parseInt(limit));
   const [searchInput, setSearchInput] = React.useState(searchTerm || '');
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
+  const [eventData, setEventData] = React.useState(null);
+  const [attendanceData, setAttendanceData] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+  const [buttonLoading, setButtonLoading] = React.useState(false);
 
   const router = useRouter();
-
-
-
-
-
-
-
-
   const dispatch = useDispatch();
-
-
-
   const isInitialMount = React.useRef(true);
 
+  const {id} = useParams(); // Adjust this line as needed to get the event ID
+
   React.useEffect(() => {
-   
-     
-  
-      // if(allCourses.length === 0 ){
-      //   dispatch(fetchCourses({ limit: "", page: "", search: "" }));
-      // }
-      // if(allEvents.length === 0){
-      //   dispatch(fetchEvents({ limit: "", page: "", search: "" }));
-      // }
-      // if(waitlistData.length === 0 || !isInitialMount.current){
-      //   dispatch(getWaitlistData(data));
-      // }
+    const fetchData = async () => {
+      console.log('fetching data',id);
+      try {
+        const [eventResponse, attendanceResponse] = await Promise.all([
+          axios.get(`${HOST_API}/event/${id}`),
+          axios.get(`${HOST_API}/event/attendance/${id}`)
+        ]);
+        
+        setEventData(eventResponse.data?.data?.event||null);
+        setAttendanceData(attendanceResponse.data?.data?.data||null);
 
-      updateSearchParams({  page: currentPage, limit: rowsPerPage });
-     
-    
-    if(isInitialMount.current){
-      isInitialMount.current = false;
+        console.log('eventResponse', eventResponse?.data?.data);
+        console.log('attendanceResponse', attendanceResponse?.data?.data);
 
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchData();
     }
-  }, [ currentPage, rowsPerPage]);
+  }, [id]);
 
+  React.useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+    } else {
+      updateSearchParams({ page: currentPage, limit: rowsPerPage });
+    }
+  }, [currentPage, rowsPerPage]);
 
   const handlePageChange = (event, newPage) => {
     setCurrentPage(newPage);
@@ -81,11 +85,8 @@ export default function Page({ searchParams }) {
     updateSearchParams({ ...searchParams, limit: parseInt(event.target.value, 10), page: 1 });
   };
 
-  const updateSearchParams = (newFilters, newSortDir) => {
+  const updateSearchParams = (newFilters) => {
     const searchParams = new URLSearchParams();
-
-
-
 
     if (newFilters.page) {
       searchParams.set('page', newFilters.page);
@@ -95,9 +96,15 @@ export default function Page({ searchParams }) {
       searchParams.set('limit', newFilters.limit);
     }
 
+    console.log('searchParams', router.pathname);
 
+    // router.push(`${router.pathname}?${searchParams.toString()}`);
+  };
 
-
+  const handleParentSubmit = () => {
+    if (attendanceTableRef.current) {
+      attendanceTableRef.current.submit();
+    }
   };
 
   return (
@@ -115,44 +122,56 @@ export default function Page({ searchParams }) {
             <Typography variant="h4">Attendance</Typography>
           </Box>
         </Stack>
-  
-        <Card sx={{ padding: 2, position: 'relative',paddingY:3 }}>
-      {/* <Typography variant="h6" sx={{ position: 'absolute', top: 20, left: 30,mb :3}}>
-        Event Info
-      </Typography> */}
-      <Box sx={{  display: 'flex', justifyContent: 'space-between' }}>
-        <Box sx={{ maxWidth: '180px',textAlign:"left",ml:3  }}>
-          <Typography variant="subtitle1"><b>• Course Name</b></Typography>
-          <Typography variant="subtitle2" ml={1.5}>palash</Typography>
-        </Box>
-        <Box sx={{ maxWidth: '180px',textAlign:"left"  }}>
-          <Typography variant="subtitle1"><b>• Event Name</b></Typography>
-          <Typography variant="subtitle2"ml={1.5}>palash</Typography>
-        </Box>
-        <Box sx={{ maxWidth: '180px',textAlign:"left"  }}>
-          <Typography variant="subtitle1"><b>• Start Date</b></Typography>
-          <Typography variant="subtitle2"ml={1.5}>19 June 2024</Typography>
-        </Box>
-        <Box sx={{ maxWidth: '180px',textAlign:"left",mr:3 }}>
-          <Typography variant="subtitle1"><b>• Instructor</b>r</Typography>
-          <Typography variant="subtitle2"ml={1.5}>Sourab Jain</Typography>
-        </Box>
-      </Box>
-    </Card>
 
+        <Card sx={{ padding: 2, position: 'relative', paddingY: 3 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Box sx={{ maxWidth: '180px', textAlign: 'left', ml: 3 }}>
+              <Typography variant="subtitle1"><b>• Course Name</b></Typography>
+              <Typography variant="subtitle2" ml={1.5}>{eventData?.course?.courseName ||"-"}</Typography>
+            </Box>
+            <Box sx={{ maxWidth: '180px', textAlign: 'left' }}>
+              <Typography variant="subtitle1"><b>• Event Name</b></Typography>
+              <Typography variant="subtitle2" ml={1.5}>{eventData?.eventName || "-"}</Typography>
+            </Box>
+            <Box sx={{ maxWidth: '230px', textAlign: 'left' }}>
+              <Typography variant="subtitle1"><b>• Start Date</b></Typography>
+              <Typography variant="subtitle2" ml={1.5}>{eventData?.eventStartDate || "-"}</Typography>
+            </Box>
+            <Box sx={{ maxWidth: '180px', textAlign: 'left', mr: 3 }}>
+              <Typography variant="subtitle1"><b>• Instructor</b></Typography>
+              <Typography variant="subtitle2" ml={1.5}>{eventData?.instructor[0]?.firstname || "-"}</Typography>
+            </Box>
+          </Box>
+        </Card>
 
         <Card>
           <Box sx={{ overflowX: 'auto' }}>
-            {0 ? (
+            {loading ? (
               <TableSkeleton />
             ) : (
-              <AttendanceTable />
+              <AttendanceTable ref={attendanceTableRef} eventData={eventData} attendance={attendanceData} setParentIsSubmitting={setIsSubmitting} currentPage={currentPage} currentLimit={rowsPerPage}/>
             )}
           </Box>
           <Divider />
-          <Pagination page={currentPage-1} rowsPerPage={rowsPerPage} onPageChange={handlePageChange} onRowsPerPageChange={handleRowsPerPageChange} />
+          <Pagination
+            page={currentPage - 1}
+            rowsPerPage={rowsPerPage}
+            onPageChange={handlePageChange}
+            onRowsPerPageChange={handleRowsPerPageChange}
+          />
         </Card>
-      
+
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: -1,mr:2 }}>
+          <LoadingButton
+            onClick={handleParentSubmit}
+            loading={isSubmitting}
+            variant="contained"
+            color="primary"
+          >
+            Save Attendance
+          </LoadingButton>
+        </Box>
+        
       </Stack>
     </Box>
   );

@@ -52,7 +52,9 @@ function fetchCities() {
     try {
       const response = await customAxios.get(
         HOST_API.concat(
-          `/city?page=${data.page}&limit=${data.limit}&search=${data.name || ""}&stateID=${data.stateId|| ""}&countryID=${data.countryId|| ""}`
+          `/city?page=${data.page}&limit=${data.limit}&search=${data.name || ""}&stateID=${data.stateId|| ""}&countryID=${data.countryId|| ""}`,{
+            headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+        }
         )
       );
       console.log (response.data, 'response');
@@ -114,9 +116,9 @@ function createCity() {
       "stateID" : data.stateID,
       "countryID" : data.countryID
     }
-      const response = await customAxios.post(HOST_API.concat(`/city`), newobj, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-      });
+      const response = await customAxios.post(HOST_API.concat(`/city`), newobj,{
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+    });
       return response;
     } catch (error) {
       console.log(error);
@@ -130,8 +132,8 @@ function deleteCities() {
   return createAsyncThunk(`${name}/deleteCities`, async (Id) => {
     try {
       const response = await customAxios.delete(HOST_API.concat(`/city/${Id}`), {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-      });
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+    });
       return response;
     } catch (err) {
       return err;
@@ -143,8 +145,8 @@ function updateCity() {
    
     try {
       const response = await customAxios.put(HOST_API.concat(`/city/${data?.id}`), data, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-      });
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+    });
       return response;
     } catch (error) {
       return error;

@@ -62,6 +62,7 @@ export const layoutConfig = {
             { key: 'paymentapi', title: 'Payment API', href: paths.dashboard.paymentapi.list  },
             { key: 'emailapi', title: 'Email API', href: paths.dashboard.emailapi.list  },
             { key: 'usertype', title: 'User types', href: paths.dashboard.usertype.list  },
+            { key: 'users', title: 'Users', href: paths.dashboard.users.list  },
             
 
           

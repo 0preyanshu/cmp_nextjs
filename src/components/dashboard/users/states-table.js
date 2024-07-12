@@ -22,9 +22,11 @@ import { DataTable } from '@/components/core/data-table';
 
 
 import { useDispatch } from 'react-redux';
-import { StateActions } from '@/redux/slices';
+import { UserActions } from '@/redux/slices';
 import { toast } from '@/components/core/toaster';
 import { useRouter } from 'next/navigation';
+import { MuiAvatar } from '@/styles/theme/components/avatar';
+
 
 
 export function StatesTable({ rows }) {
@@ -32,7 +34,7 @@ export function StatesTable({ rows }) {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const {updatestate } = StateActions;
+  const {updateUser } = UserActions;
 
   const columns = [
     {
@@ -43,21 +45,35 @@ export function StatesTable({ rows }) {
             <Link
             
             >
-              {row.stateName}
+              {row.firstname}
             </Link>
         
           </div>
         </Stack>
       ),
-      name: 'State Name',
+      name: 'First Name',
       width: '250px',
     },
    
     {
       formatter(row) {
-        return row.stateShortName;
+        return row.lastname;
       },
-      name: 'Short Name',
+      name: 'Last Name',
+      width: '200px',
+    },
+    {
+      formatter(row) {
+        return row.userType || 'ADMIN';
+      },
+      name: 'Role',
+      width: '200px',
+    },
+    {
+      formatter(row) {
+        return row.email;
+      },
+      name: 'Email',
       width: '200px',
     },
 
@@ -91,7 +107,7 @@ export function StatesTable({ rows }) {
             status_ :status_==="ACTIVE"?"INACTIVE":"ACTIVE",
             id : row.id
           }
-          await dispatch(updatestate(data)).then((res) => {
+          await dispatch(updateUser(data)).then((res) => {
             if (res?.payload?.data?.data) {
               
                   toast.success('Details updated');

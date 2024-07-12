@@ -58,8 +58,8 @@ function createCourses() {
   }  
     try {
       const response = await axios.post(HOST_API.concat(`/course`), newobj, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-      });
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+    });
       return response;
     } catch (err) {
       return err;
@@ -76,8 +76,8 @@ function fetchCourses() {
           } `
         ),
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-        }
+          headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+      }
       );
       console.log(response.data);
       const res = response.data;
@@ -103,8 +103,8 @@ function deleteCourses() {
   return createAsyncThunk(`${name}/deleteCourses`, async (id) => {
     try {
       const response = await axios.delete(HOST_API.concat(`/course/${id}`), {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-      });
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+    });
       return response.data;
     } catch (err) {
       return err;
@@ -117,8 +117,8 @@ function updateCourses() {
     try {
 
       const response = await axios.put(HOST_API.concat(`/course/${data.id}`), data, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-      });
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+    });
       return response;
     } catch (err) {
       return err;

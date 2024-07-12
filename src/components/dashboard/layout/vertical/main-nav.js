@@ -186,7 +186,9 @@ function UserButton() {
         sx={{ border: 'none', background: 'transparent', cursor: 'pointer', p: 0 }}
       >
         
-          <Avatar src={user.avatar} />
+        <Avatar>
+          {user?.name?.charAt(0)}
+        </Avatar>
       
       </Box>
       <UserPopover anchorEl={popover.anchorRef.current} onClose={popover.handleClose} open={popover.open} />

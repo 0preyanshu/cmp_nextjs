@@ -44,8 +44,8 @@ function creataCoupons() {
   return createAsyncThunk(`${name}/creataCoupons`, async (obj) => {
     try {
       const response = await axios.post(HOST_API.concat('/coupon'), obj, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-      });
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+    });
       return response;
     } catch (err) {
       return err;
@@ -58,8 +58,8 @@ function fetchCoupons() {
       const response = await axios.get(
         HOST_API.concat(`/coupon?page=${data.page}&limit=${data.limit}&search=${data.name}`),
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-        }
+          headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+      }
       );
       return response.data;
     } catch (err) {
@@ -72,8 +72,8 @@ function deletecoupons() {
   return createAsyncThunk(`${name}/deletecoupons`, async (id) => {
     try {
       const response = await axios.delete(HOST_API.concat(`/coupon/${id}`), {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-      });
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+    });
       return response.data;
     } catch (err) {
       return err;
@@ -84,8 +84,8 @@ function updateCoupons() {
   return createAsyncThunk(`${name}/updateCoupons`, async (data) => {
     try {
       const response = await axios.put(HOST_API.concat(`/coupon/${data.id}`), data, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-      });
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+    });
       return response;
     } catch (err) {
       return err;

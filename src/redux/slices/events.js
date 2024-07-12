@@ -199,8 +199,8 @@ function createEvents() {
   return createAsyncThunk(`${name}/createEvents`, async (obj) => {
     try {
       const response = await axios.post(HOST_API.concat(`/event`), obj, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-      });
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+    });
       return response;
     } catch (err) {
       return err;
@@ -215,8 +215,8 @@ function fetchEvents() {
           `/event?page=${data.page}&limit=${data.limit}&search=${data.name}&courseID=${data.courseId}&instructorID=${data.instructorId}&courseCategoryID=${data.courseCategoryId}&countryID=${data.countryId}&timezone=${data.timezone}&status=${data.status}`
         ),
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-        }
+          headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+      }
       );
       return response.data;
     } catch (err) {
@@ -229,8 +229,8 @@ function fetchEventById() {
   return createAsyncThunk(`${name}/fetchEventById`, async (id) => {
     try {
       const response = await axios.get(HOST_API.concat(`/event/${id}`), {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-      });
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+    });
       return response.data;
     } catch (err) {
       return err.response.data;
@@ -242,8 +242,8 @@ function fetchEventsAnalytics() {
   return createAsyncThunk(`${name}/fetchEventsAnalytics`, async (eventId) => {
     try {
       const response = await axios.get(HOST_API.concat(`/event/analytics/${eventId}`), {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-      });
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+    });
       return response.data;
     } catch (err) {
       return err;
@@ -255,8 +255,8 @@ function deleteEvents() {
   return createAsyncThunk(`${name}/deleteEvents`, async (id) => {
     try {
       const response = await axios.delete(HOST_API.concat(`/event/${id}`), {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-      });
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+    });
       return response.data;
     } catch (err) {
       return err;
@@ -267,8 +267,8 @@ function updateEvents() {
   return createAsyncThunk(`${name}/updateEvents`, async (data) => {
     try {
       const response = await axios.put(HOST_API.concat(`/event/${data.id}`), data, {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
-      });
+        headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+    });
       return response;
     } catch (err) {
       return err;

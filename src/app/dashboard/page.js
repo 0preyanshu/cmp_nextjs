@@ -1,31 +1,197 @@
+'use client'
 import * as React from 'react';
-import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
 import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
-import Grid from '@mui/material/Unstable_Grid2';
-import { ArrowRight as ArrowRightIcon } from '@phosphor-icons/react/dist/ssr/ArrowRight';
-import { Briefcase as BriefcaseIcon } from '@phosphor-icons/react/dist/ssr/Briefcase';
-import { FileCode as FileCodeIcon } from '@phosphor-icons/react/dist/ssr/FileCode';
-import { Info as InfoIcon } from '@phosphor-icons/react/dist/ssr/Info';
-import { ListChecks as ListChecksIcon } from '@phosphor-icons/react/dist/ssr/ListChecks';
-import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
-import { Users as UsersIcon } from '@phosphor-icons/react/dist/ssr/Users';
-import { Warning as WarningIcon } from '@phosphor-icons/react/dist/ssr/Warning';
+import CircularProgress from '@mui/material/CircularProgress';
+import { Card, CardContent, Grid, Typography, Box, Tab, Tabs, Divider } from '@mui/material';
+import Chart from 'react-apexcharts';
+import { useState, useMemo, useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import axios from 'axios';
 
-import { config } from '@/config';
-import { dayjs } from '@/lib/dayjs';
-import { AppChat } from '@/components/dashboard/overview/app-chat';
-import { AppLimits } from '@/components/dashboard/overview/app-limits';
-import { AppUsage } from '@/components/dashboard/overview/app-usage';
-import { Events } from '@/components/dashboard/overview/events';
-import { HelperWidget } from '@/components/dashboard/overview/helper-widget';
-import { Subscriptions } from '@/components/dashboard/overview/subscriptions';
-import { Summary } from '@/components/dashboard/overview/summary';
+import { AnalyticsFilters } from '@/components/dashboard/overview/analytics-filters';
+import { AnalyticsTable } from '@/components/dashboard/overview/analytics-table';
+import { useUserPrivileges } from '@/hooks/use-privilages';
+import { Pagination } from '@/components/core/pagination';
+import { AnalyticsActions } from '@/redux/slices';
+import { paths } from '@/paths';
+import { useRouter } from 'next/navigation';
+import TableSkeleton from '@/components/core/Skeletion';
+import { useTheme } from '@mui/material/styles';
 
-export const metadata = { title: `Overview | Dashboard | ${config.site.name}` };
 
-export default function Page() {
+const HOST_API = "https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg";
+
+const transformGraphData = (newGraphData, period) => {
+  console.log("n",newGraphData);
+  if (!newGraphData ||!period || newGraphData.length===0 ) return { series: [], categories: [] };
+  
+  const periodData = newGraphData?.find(data => data?.period === period);
+  const categories = periodData?.data?.map(point => point?.x);
+  const series = [
+    {
+      name: 'Orders',
+      data: periodData?.data?.map(point => point.orders),
+    },
+    {
+      name: 'Vendors',
+      data: periodData?.data?.map(point => point.vendors),
+    },
+    {
+      name: 'Internal',
+      data: periodData?.data?.map(point => point.internal),
+    }
+  ];
+
+  return { series, categories };
+};
+
+// ApexCharts options
+
+
+export default function Page({ searchParams}) {
+  const theme = useTheme();
+  const [timeline, setTimeline] = useState('today');
+  const { dataLoading, analyticsData, graphData, analyticsLoading } = useSelector((state) => state.analytics);
+  const { getAnalyticsData, getData } = AnalyticsActions;
+  const dispatch = useDispatch();
+  const [summaryData, setSummaryData] = useState([]);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const router = useRouter();
+
+  const {  page = 1, limit = 10,startDate,endDate } = searchParams;
+
+  const [currentPage, setCurrentPage] = React.useState(parseInt(page));
+  const [rowsPerPage, setRowsPerPage] = React.useState(parseInt(limit));
+
+
+  const chartOptions = {
+    chart: {
+      type: 'line',
+      toolbar: {
+        show: false,
+      },
+    },
+    stroke: {
+      curve: 'smooth',
+    },
+    tooltip: {
+      theme: theme.palette.mode, // Ensure the theme is set to 'light' or 'dark' as per your requirement
+    },
+    xaxis: {
+      categories: [],
+    },
+    yaxis: {
+      show: true,
+    },
+    grid: {
+      show: false,
+    },
+  };
+
+  const fetchSummaryData = async () => {
+    setSummaryLoading(true);
+    try {
+      const response = await axios.get(`${HOST_API}/dashboard/data`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}`,
+        },
+      });
+      setSummaryData(response.data?.data?.data || []);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setSummaryLoading(false);
+    }
+  };
+
+  const isInitialMount = React.useRef(true);
+
+  useEffect(() => {
+    const data = {
+      page: currentPage,
+      limit: rowsPerPage,
+      startDate: startDate || "",
+      endDate: endDate || "",
+    };
+  
+    if (isInitialMount.current) {
+      console.log('Initial mount');
+      
+      if(graphData.length === 0) dispatch(getData());
+     
+      fetchSummaryData();
+      isInitialMount.current = false;
+    } else {
+      console.log('Subsequent update');
+      dispatch(getAnalyticsData(data));
+      updateSearchParams({ page: currentPage, limit: rowsPerPage, startDate, endDate });
+    }
+  }, [currentPage, rowsPerPage, startDate, endDate]);
+  
+
+  const handleTimelineChange = (event, newValue) => {
+    setTimeline(newValue);
+  };
+
+  const handlePageChange = (event, newPage) => {
+    setCurrentPage(newPage);
+    ({ ...searchParams, page: newPage });
+  };
+
+  const handleRowsPerPageChange = (event) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setCurrentPage(1);
+    ({ ...searchParams, limit: parseInt(event.target.value, 10), page: 1 });
+  };
+
+  const updateSearchParams = (newFilters, newSortDir) => {
+    const searchParams = new URLSearchParams();
+
+
+    if (newFilters.searchTerm) {
+      searchParams.set('searchTerm', newFilters.searchTerm);
+    }
+
+    if (newFilters.page) {
+      searchParams.set('page', newFilters.page);
+    }
+
+    if (newFilters.limit) {
+      searchParams.set('limit', newFilters.limit);
+    }
+    if(newFilters.startDate){
+      searchParams.set('startDate', newFilters.startDate);
+    }
+    if(newFilters.endDate){
+      searchParams.set('endDate', newFilters.endDate);
+    }
+
+
+
+    router.push(`${paths.dashboard.overview}?${searchParams.toString()}`, { scroll: false });
+  };
+
+  const currentChartData = useMemo(() => transformGraphData(graphData, timeline), [graphData, timeline]);
+
+  const isLoading = dataLoading || summaryLoading ;
+  
+
+
+  if (isLoading) {
+    return (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
     <Box
       sx={{
@@ -40,196 +206,70 @@ export default function Page() {
           <Box sx={{ flex: '1 1 auto' }}>
             <Typography variant="h4">Overview</Typography>
           </Box>
-          <div>
-            <Button startIcon={<PlusIcon />} variant="contained">
-              Dashboard
-            </Button>
-          </div>
         </Stack>
-        <Grid container spacing={4}>
-          <Grid md={4} xs={12}>
-            <Summary amount={31} diff={15} icon={ListChecksIcon} title="Tickets" trend="up" />
+        <Box sx={{ padding: 2 }}>
+          <Grid container spacing={2}>
+            {summaryData.map((item, index) => (
+              <Grid item xs={12} sm={6} md={3} key={index}>
+                <Card sx={{ minHeight: 150 }}>
+                  <CardContent>
+                    <Typography variant="h6" fontWeight="bold" gutterBottom>
+                      {item.period.charAt(0).toUpperCase() + item.period.slice(1)}
+                    </Typography>
+                    <Row title="Orders" label={item.totalOrders} value={"$"+ item.totalMoney} color = {theme.palette.mode === 'dark' ? '#FFFFFF' : '#212B36'}/>
+                    <Row title="Internal" label={item.internalOrders} value={"$"+ item.internalMoney} color = {theme.palette.mode === 'dark' ? '#FFFFFF' : '#212B36'} />
+                    <Row title="Vendor" label={item.vendorOrders} value={"$"+ item.totalMoney } color = {theme.palette.mode === 'dark' ? '#FFFFFF' : '#212B36'} />
+                    <Row title="Total" label={item.totalOrders} value={"$"+ item.totalMoney} fontWeight="bold" color = {theme.palette.mode === 'dark' ? '#FFFFFF' : '#212B36'} />
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
           </Grid>
-          <Grid md={4} xs={12}>
-            <Summary amount={240} diff={5} icon={UsersIcon} title="Sign ups" trend="down" />
-          </Grid>
-          <Grid md={4} xs={12}>
-            <Summary amount={21} diff={12} icon={WarningIcon} title="Open issues" trend="up" />
-          </Grid>
-          <Grid md={8} xs={12}>
-            <AppUsage
-              data={[
-                { name: 'Jan', v1: 36, v2: 19 },
-                { name: 'Feb', v1: 45, v2: 23 },
-                { name: 'Mar', v1: 26, v2: 12 },
-                { name: 'Apr', v1: 39, v2: 20 },
-                { name: 'May', v1: 26, v2: 12 },
-                { name: 'Jun', v1: 42, v2: 31 },
-                { name: 'Jul', v1: 38, v2: 19 },
-                { name: 'Aug', v1: 39, v2: 20 },
-                { name: 'Sep', v1: 37, v2: 18 },
-                { name: 'Oct', v1: 41, v2: 22 },
-                { name: 'Nov', v1: 45, v2: 24 },
-                { name: 'Dec', v1: 23, v2: 17 },
-              ]}
-            />
-          </Grid>
-          <Grid md={4} xs={12}>
-            <Subscriptions
-              subscriptions={[
-                {
-                  id: 'supabase',
-                  title: 'Supabase',
-                  icon: '/assets/company-avatar-5.png',
-                  costs: '$599',
-                  billingCycle: 'year',
-                  status: 'paid',
-                },
-                {
-                  id: 'vercel',
-                  title: 'Vercel',
-                  icon: '/assets/company-avatar-4.png',
-                  costs: '$20',
-                  billingCycle: 'month',
-                  status: 'expiring',
-                },
-                {
-                  id: 'auth0',
-                  title: 'Auth0',
-                  icon: '/assets/company-avatar-3.png',
-                  costs: '$20-80',
-                  billingCycle: 'month',
-                  status: 'canceled',
-                },
-                {
-                  id: 'google_cloud',
-                  title: 'Google Cloud',
-                  icon: '/assets/company-avatar-2.png',
-                  costs: '$100-200',
-                  billingCycle: 'month',
-                  status: 'paid',
-                },
-                {
-                  id: 'stripe',
-                  title: 'Stripe',
-                  icon: '/assets/company-avatar-1.png',
-                  costs: '$70',
-                  billingCycle: 'month',
-                  status: 'paid',
-                },
-              ]}
-            />
-          </Grid>
-          <Grid md={4} xs={12}>
-            <AppChat
-              messages={[
-                {
-                  id: 'MSG-001',
-                  content: 'Hello, we spoke earlier on the phone',
-                  author: { name: 'Alcides Antonio', avatar: '/assets/avatar-10.png', status: 'online' },
-                  createdAt: dayjs().subtract(2, 'minute').toDate(),
-                },
-                {
-                  id: 'MSG-002',
-                  content: 'Is the job still available?',
-                  author: { name: 'Marcus Finn', avatar: '/assets/avatar-9.png', status: 'offline' },
-                  createdAt: dayjs().subtract(56, 'minute').toDate(),
-                },
-                {
-                  id: 'MSG-003',
-                  content: "What is a screening task? I'd like to",
-                  author: { name: 'Carson Darrin', avatar: '/assets/avatar-3.png', status: 'online' },
-                  createdAt: dayjs().subtract(3, 'hour').subtract(23, 'minute').toDate(),
-                },
-                {
-                  id: 'MSG-004',
-                  content: 'Still waiting for feedback',
-                  author: { name: 'Fran Perez', avatar: '/assets/avatar-5.png', status: 'online' },
-                  createdAt: dayjs().subtract(8, 'hour').subtract(6, 'minute').toDate(),
-                },
-                {
-                  id: 'MSG-005',
-                  content: 'Need more information about campaigns',
-                  author: { name: 'Jie Yan', avatar: '/assets/avatar-8.png', status: 'offline' },
-                  createdAt: dayjs().subtract(10, 'hour').subtract(18, 'minute').toDate(),
-                },
-              ]}
-            />
-          </Grid>
-          <Grid md={4} xs={12}>
-            <Events
-              events={[
-                {
-                  id: 'EV-004',
-                  title: 'Meeting with partners',
-                  description: '17:00 to 18:00',
-                  createdAt: dayjs().add(1, 'day').toDate(),
-                },
-                {
-                  id: 'EV-003',
-                  title: 'Interview with Jonas',
-                  description: '15:30 to 16:45',
-                  createdAt: dayjs().add(4, 'day').toDate(),
-                },
-                {
-                  id: 'EV-002',
-                  title: "Doctor's appointment",
-                  description: '12:30 to 15:30',
-                  createdAt: dayjs().add(4, 'day').toDate(),
-                },
-                {
-                  id: 'EV-001',
-                  title: 'Weekly meeting',
-                  description: '09:00 to 09:30',
-                  createdAt: dayjs().add(7, 'day').toDate(),
-                },
-              ]}
-            />
-          </Grid>
-          <Grid md={4} xs={12}>
-            <AppLimits usage={80} />
-          </Grid>
-          <Grid md={4} xs={12}>
-            <HelperWidget
-              action={
-                <Button color="secondary" endIcon={<ArrowRightIcon />} size="small">
-                  Search jobs
-                </Button>
-              }
-              description="Search for jobs that match your skills and apply to them directly."
-              icon={BriefcaseIcon}
-              label="Jobs"
-              title="Find your dream job"
-            />
-          </Grid>
-          <Grid md={4} xs={12}>
-            <HelperWidget
-              action={
-                <Button color="secondary" endIcon={<ArrowRightIcon />} size="small">
-                  Help center
-                </Button>
-              }
-              description="Find answers to your questions and get in touch with our team."
-              icon={InfoIcon}
-              label="Help center"
-              title="Need help figuring things out?"
-            />
-          </Grid>
-          <Grid md={4} xs={12}>
-            <HelperWidget
-              action={
-                <Button color="secondary" endIcon={<ArrowRightIcon />} size="small">
-                  Documentation
-                </Button>
-              }
-              description="Learn how to get started with our product and make the most of it."
-              icon={FileCodeIcon}
-              label="Documentation"
-              title="Explore documentation"
-            />
-          </Grid>
-        </Grid>
+
+          <Box sx={{ my: 4 }}>
+            <Typography variant="h5" mb={3}>Analytics</Typography>
+            <Card>
+              <AnalyticsFilters filters={{startDate,endDate}} />
+              <Divider />
+              <Box sx={{ overflowX: 'auto' }}>
+                {analyticsLoading && <TableSkeleton />}
+                { !analyticsLoading && <AnalyticsTable rows={analyticsData} />}
+               
+              </Box>
+              <Divider />
+              <Pagination page={currentPage-1} rowsPerPage={rowsPerPage} onPageChange={handlePageChange} onRowsPerPageChange={handleRowsPerPageChange} />
+            </Card>
+          </Box>
+
+          <Box>
+            <Typography variant="h5" mb={3}>Orders Count Graph</Typography>
+            <Tabs value={timeline} onChange={handleTimelineChange} variant="fullWidth">
+              <Tab label="Today" value="today" />
+              <Tab label="Yesterday" value="yesterday" />
+              <Tab label="This Week" value="thisWeek" />
+              <Tab label="Last Week" value="lastWeek" />
+              <Tab label="This Month" value="thisMonth" />
+              <Tab label="Last Month" value="lastMonth" />
+              <Tab label="Last 12 Months" value="lastYear" />
+            </Tabs>
+            <Chart options={{ ...chartOptions, xaxis: { categories: currentChartData.categories } }} series={currentChartData.series} type="line" height={350} />
+          </Box>
+        </Box>
       </Stack>
     </Box>
   );
 }
+
+const Row = ({ title, label, value, fontWeight = 500, margin = '8px 0',  color = '#212B36'}) => (
+  <div style={{ display: 'flex', justifyContent: 'space-between', margin, color, alignItems: 'stretch' }}>
+    <Typography variant="body2" sx={{ fontWeight, width: '60px' }}>
+      {title}
+    </Typography>
+    <Typography variant="body2" sx={{ fontWeight, width: '30px' }}>
+      {label}
+    </Typography>
+    <Typography variant="body2" sx={{ fontWeight, width: '65px', textAlign: 'right', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+      {value}
+    </Typography>
+  </div>
+);

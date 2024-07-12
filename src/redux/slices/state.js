@@ -55,7 +55,9 @@ function fetchState() {
           `/state?page=${data.page}&limit=${data.limit}&search=${data.name || ""}&countryID=${data.countryId?data.countryId:""}`
         ),
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}`,
+          },
         }
       );
      
@@ -80,7 +82,9 @@ function searchDevices() {
   return createAsyncThunk(`${name}/searchDevices`, async (name) => {
     try {
       const response = await axios.get(HOST_API.concat(`/device/search?device=${name}`), {
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}`,
+        },
       });
       return response.data;
     } catch (err) {
@@ -126,7 +130,9 @@ function createstate() {
         ),
         newobj,
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}`,
+          },
         }
       );
       return response;
@@ -162,7 +168,9 @@ function updatestate() {
         ),
         data,
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}`,
+          },
         }
       );
       return response;
