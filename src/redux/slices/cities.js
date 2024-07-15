@@ -52,10 +52,11 @@ function fetchCities() {
     try {
       const response = await customAxios.get(
         HOST_API.concat(
-          `/city?page=${data.page}&limit=${data.limit}&search=${data.name || ""}&stateID=${data.stateId|| ""}&countryID=${data.countryId|| ""}`,{
-            headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
-        }
+          `/city?page=${data.page}&limit=${data.limit}&search=${data.name || ""}&stateID=${data.stateId|| ""}&countryID=${data.countryId|| ""}`
         )
+        ,{
+          headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+      }
       );
       console.log (response.data, 'response');
       const res = response.data;

@@ -206,10 +206,10 @@ const DashboardPage = ({ searchParams }) => {
                     <Typography variant="h6" fontWeight="bold" gutterBottom>
                       {item.period.charAt(0).toUpperCase() + item.period.slice(1)}
                     </Typography>
-                    <Row title="Orders" label={item.totalOrders} value={"$" + item.totalMoney} color={theme.palette.mode === 'dark' ? '#FFFFFF' : '#212B36'} />
-                    <Row title="Internal" label={item.internalOrders} value={"$" + item.internalMoney} color={theme.palette.mode === 'dark' ? '#FFFFFF' : '#212B36'} />
-                    <Row title="Vendor" label={item.vendorOrders} value={"$" + item.totalMoney} color={theme.palette.mode === 'dark' ? '#FFFFFF' : '#212B36'} />
-                    <Row title="Total" label={item.totalOrders} value={"$" + item.totalMoney} fontWeight="bold" color={theme.palette.mode === 'dark' ? '#FFFFFF' : '#212B36'} />
+                    <Row title="Orders" label={item.totalOrders} value={"$" + item.totalOrders} color={theme.palette.mode === 'dark' ? '#FFFFFF' : '#212B36'} />
+                    <Row title="Internal" label={item.internalOrders} value={"$" + item.internalOrders} color={theme.palette.mode === 'dark' ? '#FFFFFF' : '#212B36'} />
+                    <Row title="Vendor" label={item.vendorOrders} value={"$" + item.vendorOrders} color={theme.palette.mode === 'dark' ? '#FFFFFF' : '#212B36'} />
+                    <Row title="Total" label={item.totalOrders} value={"$" + item.totalProfit} fontWeight="bold" color={theme.palette.mode === 'dark' ? '#FFFFFF' : '#212B36'} />
                   </CardContent>
                 </Card>
               </Grid>

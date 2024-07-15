@@ -16,6 +16,7 @@ import axios from 'axios';
 import { useParams } from 'next/navigation';
 import { LoadingButton } from '@mui/lab';
 import { useRef } from 'react';
+import { Button } from '@mui/material';
 
 const HOST_API = "https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg";
 
@@ -106,6 +107,23 @@ export default function Page({ searchParams }) {
       attendanceTableRef.current.submit();
     }
   };
+  const handleDownloadCSV = () => {
+    if (attendanceTableRef.current) {
+      attendanceTableRef.current.downloadCSV();
+    }
+  };
+
+  const handleDownloadRosterCSV = () => {
+    if (attendanceTableRef.current) {
+      attendanceTableRef.current.downloadRosterCSV();
+    }
+  };
+
+  const handleDownloadAgileRosterCSV = () => {
+    if (attendanceTableRef.current) {
+      attendanceTableRef.current.downloadAgileRosterCSV();
+    }
+  };
 
   return (
     <Box
@@ -143,6 +161,31 @@ export default function Page({ searchParams }) {
             </Box>
           </Box>
         </Card>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 4,mr:2 }}>
+        <Button
+        onClick={handleDownloadCSV}
+        variant="contained"
+        color="primary"
+        sx={{ mr: 2 }}
+      >
+        Download CSV
+      </Button>
+      <Button
+        onClick={handleDownloadRosterCSV}
+        variant="contained"
+        color="primary"
+        sx={{ mr: 2 }}
+      >
+        Download Roster CSV
+      </Button>
+      <Button
+        onClick={handleDownloadAgileRosterCSV}
+        variant="contained"
+        color="primary"
+      >
+        Download Agile Roster CSV
+      </Button>
+        </Box>
 
         <Card>
           <Box sx={{ overflowX: 'auto' }}>

@@ -94,15 +94,7 @@ function OrderDetails() {
             </Button>
           </Tooltip>
         </Grid>
-        <Grid item md={3} lg={1.3}>
-          <Tooltip title="Transfer">
-            <Button variant="outlined" startIcon={<Icon icon="solar:card-transfer-bold" />} onClick={()=>{
-                router.push(paths.dashboard.orders.transfer(currentOrder.id));
-            }}>
-              Transfer
-            </Button>
-          </Tooltip>
-        </Grid>
+    
         <Grid item md={3} lg={1.3}>
           <Tooltip title="Cancel">
             <Button variant="outlined" startIcon={<Icon icon="line-md:cancel-twotone" />} onClick={()=>{
@@ -225,7 +217,13 @@ function OrderDetails() {
         </Card>
       </TabPanel>
       <TabPanel value={tabValue} index={1}>
-        <ParticipantsTable rows={currentOrder?.participants||[]} />
+       
+        <Card>
+          <Box sx={{ overflowX: "auto" }}>
+          <ParticipantsTable rows={currentOrder?.participants||[]} />
+          </Box>
+        </Card>
+
       </TabPanel>
       <TabPanel value={tabValue} index={2}>
         <Card>
