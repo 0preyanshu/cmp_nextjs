@@ -41,7 +41,7 @@ export default function Page({ searchParams }) {
 
   React.useEffect(() => {
     console.log("useEffect called");
-    if (!isInitialMount.current) {
+  
       const data = {
         page: currentPage,
         limit: rowsPerPage,
@@ -52,10 +52,10 @@ export default function Page({ searchParams }) {
       if(userTypes.length === 0){
         dispatch(fetchUserType({ limit: "", page: "", search: "" }));
       }
-      if(allUsers.length === 0 || !isInitialMount.current){
+      if(allUsers.length === 0 || isInitialMount.current){
         dispatch(fetchUser(data));
       }
-    }
+    
     updateSearchParams({ searchTerm: searchInput, page: currentPage, limit: rowsPerPage });
     
    
