@@ -111,8 +111,8 @@ const DashboardPage = ({ searchParams }) => {
     if (isInitialMount.current) {
       console.log('Initial mount');
 
-      if (graphData.length === 0) dispatch(getData());
-
+      dispatch(getData());
+      dispatch(getAnalyticsData(data));
       fetchSummaryData();
       isInitialMount.current = false;
     } else {
