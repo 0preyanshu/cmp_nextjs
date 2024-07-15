@@ -40,6 +40,7 @@ export default function Page({ searchParams }) {
   const dispatch = useDispatch();
 
   React.useEffect(() => {
+    console.log("useEffect called");
     if (!isInitialMount.current) {
       const data = {
         page: currentPage,
@@ -47,13 +48,13 @@ export default function Page({ searchParams }) {
         name: searchInput || '',
         userTypeID: userTypeID || '',
       };
+      console.log("Dispatching fetchUser with data:", data);
       if(userTypes.length === 0){
         dispatch(fetchUserType({ limit: "", page: "", search: "" }));
       }
       if(allUsers.length === 0 || !isInitialMount.current){
-       dispatch(fetchUser(data));}
-
-      
+        dispatch(fetchUser(data));
+      }
     }
     updateSearchParams({ searchTerm: searchInput, page: currentPage, limit: rowsPerPage });
     

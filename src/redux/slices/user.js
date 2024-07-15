@@ -52,7 +52,9 @@ function createUser() {
   });
 }
 function fetchUser() {
+
   return createAsyncThunk(`${name}/fetchUser`, async (data) => {
+    console.log("fetchUser called",data);
     try {
       const response = await axios.get(
         HOST_API.concat(
@@ -134,6 +136,7 @@ function createExtraReducers() {
   }
   function fetchUser() {
     const { pending, fulfilled, rejected } = extraActions.fetchUser;
+
     return {
       [pending]: (state) => {
         state.users = { loading: true, allUsers: [], totalData: state.users.totalData };
