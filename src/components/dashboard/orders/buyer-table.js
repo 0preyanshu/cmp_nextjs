@@ -46,7 +46,7 @@ export function BuyerTable({ rows }) {
             <Link
             
             >
-              {row.cityName}
+              {row.participantFirstName || ""}
             </Link>
         
           </div>
@@ -58,21 +58,21 @@ export function BuyerTable({ rows }) {
    
     {
       formatter(row) {
-        return row.cityShortName;
+        return row.participantFirstName;
       },
       name: 'Last Name',
       width: '200px',
     },
     {
       formatter(row) {
-        return row.cityShortName;
+        return row.participantEmail;
       },
       name: 'Email',
       width: '200px',
     },
     {
       formatter(row) {
-        return row.cityShortName;
+        return row.participantPhone;
       },
       name: 'Phone',
       width: '200px',

@@ -1,34 +1,54 @@
 'use client';
-import React, { useState } from 'react';
+import React, { use, useState } from 'react';
 import { 
   Box, Button, Tooltip, Typography, Stack, Tab, Tabs, Table, TableBody, TableCell, TableHead, TableRow, Divider, Card, CardContent, Dialog, DialogActions, DialogContent, DialogTitle, TextField, FormControl, Select, MenuItem, Grid, InputLabel 
 } from '@mui/material';
 import { Icon } from '@iconify/react';
-import PropTypes from 'prop-types';
 import { BuyerTable } from '@/components/dashboard/orders/buyer-table';
 import { ParticipantsTable } from '@/components/dashboard/orders/participants-table';
 import { PaymentDetailsTable } from '@/components/dashboard/orders/payment-details-table';
 import { paths } from '@/paths';
 import { useRouter } from 'next/navigation';
+import { useSelector } from 'react-redux';
+import { useParams } from 'next/navigation';
+import { current } from '@reduxjs/toolkit';
+import  {formatDateTime} from '@/utils/formatTime';
 
 function OrderDetails() {
     const router = useRouter();
+    const { allOrders} = useSelector((state) => state?.orders?.orders);
+  
+    const[currentOrder,setCurrentOrder]=useState(null); 
+
+    const {Id} = useParams();
+
+    React.useEffect(()=>{
+      console.log("allOrders",allOrders);
+      console.log("id",Id);
+        if(allOrders && Id){
+            const details=allOrders.find((order)=>order.id===Id);
+            console.log("order",details);
+            setCurrentOrder(details);
+
+        }
+    }
+    ,[allOrders,Id]);
+
+
+
+
+
+
   const order = {
-    id: 188,
-    eventName: 'Certified Scrum Master',
-    course: 'cc',
-    startDate: '20 June 2024',
-    totalParticipants: 1,
-    subTotal: '211,212',
-    fees: '0',
-    tax: '0',
-    total: '211,212',
-    buyer: {
-      firstName: 'drfsdfdsf',
-      lastName: '23234',
-      email: '2342342@gmail.com',
-      phone: '9643775010',
-    },
+    id: currentOrder?.id.slice(-3)||"-",
+    eventName: currentOrder?.event?.eventName||"-",
+    course: currentOrder?.course?.courseName||"-",
+    startDate: formatDateTime(currentOrder?.event?.eventStartDate)||"-",
+    totalParticipants: currentOrder?.participants?.length||"-",
+    subTotal: currentOrder?.orderInfo?.totalAmount-(currentOrder?.orderInfo?.feesAmount+currentOrder?.orderInfo?.taxAmount),
+    fees: currentOrder?.orderInfo?.feesAmount,
+    tax: currentOrder?.orderInfo?.taxAmount,
+    total: currentOrder?.orderInfo?.totalAmount,
   };
 
   const [tabValue, setTabValue] = useState(0);
@@ -68,7 +88,7 @@ function OrderDetails() {
         <Grid item md={3} lg={1}>
           <Tooltip title="Edit">
             <Button variant="outlined" startIcon={<Icon icon="eva:edit-fill" />} onClick={()=>{
-                router.push(paths.dashboard.orders.edit(order.id));
+                router.push(paths.dashboard.orders.edit(currentOrder.id));
             }}>
               Edit
             </Button>
@@ -77,7 +97,7 @@ function OrderDetails() {
         <Grid item md={3} lg={1.3}>
           <Tooltip title="Transfer">
             <Button variant="outlined" startIcon={<Icon icon="solar:card-transfer-bold" />} onClick={()=>{
-                router.push(paths.dashboard.orders.transfer(order.id));
+                router.push(paths.dashboard.orders.transfer(currentOrder.id));
             }}>
               Transfer
             </Button>
@@ -86,7 +106,7 @@ function OrderDetails() {
         <Grid item md={3} lg={1.3}>
           <Tooltip title="Cancel">
             <Button variant="outlined" startIcon={<Icon icon="line-md:cancel-twotone" />} onClick={()=>{
-                router.push(paths.dashboard.orders.cancel(order.id));
+                router.push(paths.dashboard.orders.cancel(currentOrder.id));
             }}>
               Cancel
             </Button>
@@ -95,7 +115,7 @@ function OrderDetails() {
         <Grid item md={3} lg={1.3}>
           <Tooltip title="Invoice">
             <Button variant="outlined" startIcon={<Icon icon="la:file-invoice" />} onClick={()=>{
-                router.push(paths.dashboard.orders.invoice(order.id));
+                router.push(paths.dashboard.orders.invoice(currentOrder.id));
             }}>
               Invoice
             </Button>
@@ -104,7 +124,7 @@ function OrderDetails() {
         <Grid item md={3} lg={1.3}>
           <Tooltip title="History">
             <Button variant="outlined" startIcon={<Icon icon="material-symbols:history" />} onClick={()=>{
-                router.push(paths.dashboard.orders.history(order.id));
+                router.push(paths.dashboard.orders.history(currentOrder.id));
             
             }}>
               History
@@ -114,7 +134,7 @@ function OrderDetails() {
         <Grid item md={3} lg={1.3}>
           <Tooltip title="Emails">
             <Button variant="outlined" startIcon={<Icon icon="eva:email-outline" />} onClick={()=>{
-                router.push(paths.dashboard.orders.email(order.id));
+                router.push(paths.dashboard.orders.email(currentOrder.id));
             }}>
               Emails
             </Button>
@@ -200,17 +220,17 @@ function OrderDetails() {
       <TabPanel value={tabValue} index={0}>
         <Card>
           <Box sx={{ overflowX: "auto" }}>
-            <BuyerTable rows={[order?.buyer] || []}></BuyerTable>
+            <BuyerTable rows={currentOrder?.participants[0] ?[currentOrder?.participants[0]] : []}></BuyerTable>
           </Box>
         </Card>
       </TabPanel>
       <TabPanel value={tabValue} index={1}>
-        <ParticipantsTable rows={[]} />
+        <ParticipantsTable rows={currentOrder?.participants||[]} />
       </TabPanel>
       <TabPanel value={tabValue} index={2}>
         <Card>
           <Box sx={{ overflowX: "auto" }}>
-            <PaymentDetailsTable rows={[]} />
+            <PaymentDetailsTable rows={currentOrder?.orderInfo ?[currentOrder?.orderInfo]:[]} paymentDate = {currentOrder?.createdAt||"-"}/>
           </Box>
         </Card>
       </TabPanel>
@@ -288,11 +308,7 @@ function OrderDetails() {
   );
 }
 
-OrderDetails.propTypes = {
-  children: PropTypes.node,
-  index: PropTypes.any.isRequired,
-  value: PropTypes.any.isRequired,
-};
+
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -314,11 +330,7 @@ function TabPanel(props) {
   );
 }
 
-TabPanel.propTypes = {
-  children: PropTypes.node,
-  index: PropTypes.any.isRequired,
-  value: PropTypes.any.isRequired,
-};
+
 
 export default OrderDetails;
 

@@ -179,22 +179,22 @@ export default function Page({ searchParams }) {
     router.push(`${paths.dashboard.eventmanagement.list}?${searchParams.toString()}`);
   };
 
-  function generateExcel(data) {
-    if (data) {
-      const workbook = XLSX.utils.book_new();
-      const sheet = XLSX.utils.json_to_sheet(data);
-      XLSX?.utils.book_append_sheet(workbook, sheet, 'Sheet1');
-      const excelData = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-      const blob = new Blob([excelData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'data.xlsx';
-      link.click();
-      URL.revokeObjectURL(link.href);
-    } else {
-      toast.error('Failed to Download Try Again!');
-    }
-  }
+  // function generateExcel(data) {
+  //   if (data) {
+  //     const workbook = XLSX.utils.book_new();
+  //     const sheet = XLSX.utils.json_to_sheet(data);
+  //     XLSX?.utils.book_append_sheet(workbook, sheet, 'Sheet1');
+  //     const excelData = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+  //     const blob = new Blob([excelData], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  //     const link = document.createElement('a');
+  //     link.href = URL.createObjectURL(blob);
+  //     link.download = 'data.xlsx';
+  //     link.click();
+  //     URL.revokeObjectURL(link.href);
+  //   } else {
+  //     toast.error('Failed to Download Try Again!');
+  //   }
+  // }
 
   return (
     <Box
@@ -212,11 +212,11 @@ export default function Page({ searchParams }) {
           </Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-evenly' }}>
 
-          <Button startIcon={<DownloadIcon></DownloadIcon>} variant="contained" onClick={() => {
+          {/* <Button startIcon={<DownloadIcon></DownloadIcon>} variant="contained" onClick={() => {
               generateExcel(allEvents)
             }} sx={{mr:3}}>
               Download
-            </Button>
+            </Button> */}  
 
             <Button startIcon={<PlusIcon />} variant="contained" onClick={() => {
               router.push(paths.dashboard.eventmanagement.create);

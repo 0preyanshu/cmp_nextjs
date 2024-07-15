@@ -16,39 +16,63 @@ import { PaymentDetailsTable } from '@/components/dashboard/orders/payment-detai
 import { MobileDateTimePicker } from '@mui/x-date-pickers/MobileDateTimePicker';
 import dayjs from 'dayjs';
 import { Stack ,Checkbox,TextField,RadioGroup,Radio,Table,TableHead,TableRow,TableCell,TableBody,Divider} from '@mui/material';
+import { useParams } from 'next/navigation';
+import { formatDateTime } from '@/utils/formatTime';
+import { ParticipantsTable } from '@/components/dashboard/orders/participants-table';
+import { BuyerTable } from '@/components/dashboard/orders/buyer-table';
 
 
 
 
 
-const schema = z.object({
-  DevPublishableKey: z.string().min(1, 'Dev Publishable Key is required').max(255),
-  DevSecretKey: z.string().min(1, 'Dev Secret Key is required').max(255),
-  LivePublishableKey: z.string().min(1, 'Live Publishable Key is required').max(255),
-  LiveSecretKey: z.string().min(1, 'Live Secret Key is required').max(255),
-});
+
+
+
 
 export function CancelForm() {
   const pathname = usePathname();
   const dispatch = useDispatch();
   const router = useRouter();
+  const { allOrders} = useSelector((state) => state?.orders?.orders);
+  
+  const[currentOrder,setCurrentOrder]=useState(null); 
+
+  const {Id} = useParams();
+
+  React.useEffect(()=>{
+    console.log("allOrders",allOrders);
+    console.log("id",Id);
+      if(allOrders && Id){
+          const details=allOrders.find((order)=>order.id===Id);
+          console.log("order",details);
+          setCurrentOrder(details);
+
+      }
+  }
+  ,[allOrders,Id]);
+
   const order = {
-    id: 188,
-    eventName: 'Certified Scrum Master',
-    course: 'cc',
-    startDate: '20 June 2024',
-    totalParticipants: 1,
-    subTotal: '211,212',
-    fees: '0',
-    tax: '0',
-    total: '211,212',
-    buyer: {
-      firstName: 'drfsdfdsf',
-      lastName: '23234',
-      email: '2342342@gmail.com',
-      phone: '9643775010',
-    },
+    id: currentOrder?.id.slice(-3)||"-",
+    eventName: currentOrder?.event?.eventName||"-",
+    course: currentOrder?.course?.courseName||"-",
+    startDate: formatDateTime(currentOrder?.event?.eventStartDate)||"-",
+    totalParticipants: currentOrder?.participants?.length||"-",
+    subTotal: currentOrder?.orderInfo?.totalAmount-(currentOrder?.orderInfo?.feesAmount+currentOrder?.orderInfo?.taxAmount),
+    fees: currentOrder?.orderInfo?.feesAmount,
+    tax: currentOrder?.orderInfo?.taxAmount,
+    total: currentOrder?.orderInfo?.totalAmount,
   };
+  const schema = z.object({
+    participantsToRemove: z.array(z.string()).optional(),
+    sendCancellationEmail: z.boolean(),
+    customerNotes: z.string().nonempty("Customer notes are required"),
+    internalNotes: z.string().nonempty("Internal notes are required"),
+    refundType: z.enum(["FULL", "PARTIAL", "NONE"]),
+    refundAmount: z.preprocess(
+      (input) => Number(input),
+      z.number().min(0, 'Minimum refun amount should be 0').max(order.total, 'Refund amount must be at most total amount').optional()
+    ),
+  });
 
   const stripeData = useSelector((state) => state?.companyPaymentDetails?.stripeData);
   const { updateStripeCompanyPaymentDetails, getCompanyPaymentDetails } = CompanyPaymentDetailsActions;
@@ -73,12 +97,14 @@ export function CancelForm() {
 
   const defaultValues = React.useMemo(
     () => ({
-      DevPublishableKey: stripeData?.DevPublishableKey || '',
-      DevSecretKey: stripeData?.DevSecretKey || '',
-      LivePublishableKey: stripeData?.LivePublishableKey || '',
-      LiveSecretKey: stripeData?.LiveSecretKey || '',
+      participantsToRemove: [],
+    sendCancellationEmail: false,
+    customerNotes: '',
+    internalNotes: '',
+    refundType: 'NONE',
+    refundAmount: 0,
     }),
-    [stripeData]
+    [currentOrder,Id]
   );
 
   const {
@@ -86,6 +112,8 @@ export function CancelForm() {
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
+    watch,
+    setValue
   } = useForm({ defaultValues, resolver: zodResolver(schema) });
 
   React.useEffect(() => {
@@ -95,24 +123,9 @@ export function CancelForm() {
   const onSubmit = React.useCallback(
     async (data) => {
       try {
-        const newobject = {
-          variables: {
-            stripe: {
-              DevPublishableKey: data.DevPublishableKey,
-              DevSecretKey: data.DevSecretKey,
-              LivePublishableKey: data.LivePublishableKey,
-              LiveSecretKey: data.LiveSecretKey,
-            },
-          },
-        };
-
-        await dispatch(updateStripeCompanyPaymentDetails(newobject)).then((res) => {
-          if (res?.payload?.data?.data) {
-            toast.success('Update success!');
-          } else {
-            toast.error(res?.payload?.data?.error?.message || 'Internal Server Error');
-          }
-        });
+        console.log(data,"datatatata");
+        // await dispatch(cancelOrder({ id: currentOrder.id, ...data }));
+      
       } catch (err) {
         console.error(err);
       }
@@ -138,40 +151,40 @@ export function CancelForm() {
           <Grid item xs={12} md={12}>
             <Card sx={{ p: 3, width: '100%', position: 'relative', mb: 5 }}>
               <Typography variant="h6" sx={{ mb: 3 }}>
-                Order - 118
+                Order - {currentOrder?.id.slice(-3)}
               </Typography>
               <Stack direction="column" alignItems="flex-start" spacing={1} sx={{ mr: 8 }}>
                 <Stack direction="row" justifyContent="flex-start" sx={{ width: '200px' }}>
                   <Typography variant="h7" align="left" sx={{ flex: 1 }}>
-                    SubTotal:
+                    SubTotal: {order.subTotal}
                   </Typography>
-                  <Typography align="left"> USD</Typography>
+                  <Typography align="left">{order.fees} USD</Typography>
                 </Stack>
                 <Stack direction="row" justifyContent="flex-start" sx={{ width: '200px' }}>
                   <Typography variant="h7" align="left" sx={{ flex: 1 }}>
-                    Fees:
+                    Fees: 
                   </Typography>
-                  <Typography align="left"> USD</Typography>
+                  <Typography align="left">{order.fees} USD</Typography>
                 </Stack>
                 <Stack direction="row" justifyContent="flex-start" sx={{ width: '200px' }}>
                   <Typography variant="h7" align="left" sx={{ flex: 1 }}>
-                    Tax:
+                    Tax: 
                   </Typography>
                   <Typography color="error" align="left">
-                    USD
+                  {order.tax} USD
                   </Typography>
                 </Stack>
                 <Stack direction="row" justifyContent="flex-start" sx={{ width: '200px' }}>
                   <Typography variant="h7" align="left" sx={{ flex: 1 }}>
                     Total:
                   </Typography>
-                  <Typography align="left"> USD</Typography>
+                  <Typography align="left">{order.total} USD</Typography>
                 </Stack>
               </Stack>
             </Card>
             <Card sx={{ p: 3, width: '100%', position: 'relative', mb: 5 }}>
               <Typography variant="h6" sx={{ mb: 3 }}>
-                Order - 118
+                Order - {currentOrder?.id.slice(-3)}
               </Typography>
              
 
@@ -239,7 +252,7 @@ export function CancelForm() {
               </Typography>
               <Card>
                 <Box sx={{ overflowX: 'auto' }}>
-                  <PaymentDetailsTable rows={[]} />
+                <BuyerTable rows={currentOrder?.participants[0] ?[currentOrder?.participants[0]] : []}></BuyerTable>
                 </Box>
               </Card>
             </Card>
@@ -249,65 +262,70 @@ export function CancelForm() {
               </Typography>
               <Card>
                 <Box sx={{ overflowX: 'auto' }}>
-                  <PaymentDetailsTable rows={[]} />
+                <ParticipantsTable rows={currentOrder?.participants||[]} showCheckboxes control={control} setValue={setValue} watch={watch} />
                 </Box>
               </Card>
             </Card>
           
             <Card sx={{ p: 3, width: '100%', position: 'relative', mb: 5 }}>
-              <Typography variant="h6" sx={{ mb: 3 }}>
-              Select Cancellation Options
-              </Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={12} md={3} mb={3}>
-                  <FormControlLabel
-                    control={
-                      <Controller
-                        name="Send Cancellation Email"
-                        control={control}
-                        render={({ field }) => <Checkbox {...field} checked={field.value} />}
-                      />
-                    }
-                    label="Send Cancellation Email"
-                  />
-                </Grid>
-                <Grid item xs={12} md={12}>
-                  <FormControl fullWidth>
-                    <Controller
-                      name="customerNotes"
-                      control={control}
-                      render={({ field }) => (
-                        <TextField
-                          {...field}
-                          label="Customer Notes"
-                          multiline
-                          rows={4}
-                          variant="outlined"
-                        />
-                      )}
-                    />
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12} md={12}>
-                  <FormControl fullWidth>
-                    <Controller
-                      name="internalNotes"
-                      control={control}
-                      render={({ field }) => (
-                        <TextField
-                          {...field}
-                          label="Internal Notes"
-                          multiline
-                          rows={4}
-                          variant="outlined"
-                        />
-                      )}
-                    />
-                  </FormControl>
-                </Grid>
-              </Grid>
-            </Card>
-            <Card sx={{ p: 3, width: '100%', position: 'relative', mb: 5 }}>
+  <Typography variant="h6" sx={{ mb: 3 }}>
+    Select Cancellation Options
+  </Typography>
+  <Grid container spacing={2}>
+    <Grid item xs={12} md={3} mb={3}>
+      <FormControlLabel
+        control={
+          <Controller
+            name="sendCancellationEmail"
+            control={control}
+            render={({ field }) => <Checkbox {...field} checked={field.value} />}
+          />
+        }
+        label="Send Cancellation Email"
+      />
+    </Grid>
+    <Grid item xs={12} md={12}>
+      <FormControl fullWidth>
+        <Controller
+          name="customerNotes"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              label="Customer Notes"
+              multiline
+              rows={4}
+              variant="outlined"
+              error={!!errors.customerNotes}
+              helperText={errors.customerNotes ? errors.customerNotes.message : ''}
+            />
+          )}
+        />
+      </FormControl>
+    </Grid>
+    <Grid item xs={12} md={12}>
+      <FormControl fullWidth>
+        <Controller
+          name="internalNotes"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              label="Internal Notes"
+              multiline
+              rows={4}
+              variant="outlined"
+              error={!!errors.internalNotes}
+              helperText={errors.internalNotes ? errors.internalNotes.message : ''}
+            />
+          )}
+        />
+      </FormControl>
+    </Grid>
+  </Grid>
+</Card>
+
+<Card sx={{ p: 3, width: '100%', position: 'relative', mb: 5 }}>
   <Typography variant="h6" sx={{ mb: 3 }}>
     Select Refund Options
   </Typography>
@@ -321,44 +339,52 @@ export function CancelForm() {
         control={control}
         render={({ field }) => (
           <RadioGroup row {...field}>
-            <FormControlLabel value="full" control={<Radio />} label="Full Refund" />
-            <FormControlLabel value="partial" control={<Radio />} label="Partial Refund" />
-            <FormControlLabel value="none" control={<Radio />} label="No Refund" />
+            <FormControlLabel value="FULL" control={<Radio />} label="Full Refund" />
+            <FormControlLabel value="PARTIAL" control={<Radio />} label="Partial Refund" />
+            <FormControlLabel value="NONE" control={<Radio />} label="No Refund" />
           </RadioGroup>
         )}
       />
     </Grid>
-    <Grid item xs={12} mb={3}>
-      <FormControl fullWidth>
-        <Controller
-          name="refundAmount"
-          control={control}
-          render={({ field }) => (
-            <TextField {...field} label="Refund Amount" variant="outlined" />
-          )}
-        />
-      </FormControl>
-    </Grid>
+    {watch('refundType') === 'PARTIAL' && (
+      <Grid item xs={12} mb={3}>
+        <FormControl fullWidth>
+          <Controller
+            name="refundAmount"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Refund Amount"
+                variant="outlined"
+                type='number'
+                error={!!errors.refundAmount}
+                helperText={errors.refundAmount ? errors.refundAmount.message : ''}
+              />
+            )}
+          />
+        </FormControl>
+      </Grid>
+    )}
     <Grid item xs={12}>
-      <Typography variant="h6">
-        Total Refund: 0
-      </Typography>
+    <Typography variant="h6">
+  Total Refund: {watch('refundType') === 'FULL' ? order.total : watch('refundType') === 'PARTIAL' ? (watch('refundAmount')) || 0 : 0} USD
+</Typography>
+
     </Grid>
   </Grid>
   <Box sx={{ my: 5 }}>
-                
-
-                <Stack alignItems="flex-end" sx={{ mt: 2 }}>
-                  <LoadingButton
-                    variant="contained"
-                    style={{ textTransform: 'capitalize' }}
-                    type='submit'
-                   
-                  >
-                    {'Cancel Order'}  
-                  </LoadingButton>
-                </Stack>
-              </Box>
+    <Stack alignItems="flex-end" sx={{ mt: 2 }}>
+      <LoadingButton
+        variant="contained"
+        style={{ textTransform: 'capitalize' }}
+        type="submit"
+        loading={isSubmitting}
+      >
+        Cancel Order
+      </LoadingButton>
+    </Stack>
+  </Box>
 </Card>
 
           </Grid>
