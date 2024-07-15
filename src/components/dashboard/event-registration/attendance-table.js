@@ -16,10 +16,14 @@ import Checkbox from '@mui/material/Checkbox';
 import Paper from '@mui/material/Paper';
 import { toast } from '@/components/core/toaster';
 import axios from 'axios';
+import { useCallback } from 'react';
+import Papa from 'papaparse';
+import { saveAs } from 'file-saver';
 
 const HOST_API = "https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg";
 
-export const AttendanceTable = React.forwardRef(({ eventData, attendance, setParentIsSubmitting, currentPage = 1, currentLimit = 10 }, ref) => {
+export const AttendanceTable = React.forwardRef(({ eventData, attendance, setParentIsSubmitting, currentPage = 1 ,currentLimit=10}, ref) => {
+
   const [initialAttendance, setInitialAttendance] = React.useState(attendance);
   const [topLevelCheckboxes, setTopLevelCheckboxes] = React.useState([]);
 
@@ -30,7 +34,56 @@ export const AttendanceTable = React.forwardRef(({ eventData, attendance, setPar
     days.push(`Day ${days.length + 1}`);
   }
 
-  // Define the Zod schema
+  const downloadCSV = useCallback(() => {
+    attendance = watch('attendanceData') || [];
+    const header = ['Name', 'Email', 'Phone', ...days, 'Total Present', 'Total Absent'];
+    const data = eventData.participants.map((participant) => {
+      const attendanceEntry = attendance.find(item => item.participantID === participant.participantID);
+      const attendanceArray = days.map((_, dayIndex) => (attendanceEntry?.attendance.includes((dayIndex + 1).toString()) ? '1' : '0'));
+      const totalPresent = attendanceArray.filter(attended => attended === '1').length;
+      const totalAbsent = days.length - totalPresent;
+
+      return [
+        `${participant.firstName} ${participant.lastName}`,
+        participant.email,
+        participant.phone,
+        ...attendanceArray,
+        totalPresent.toString(),
+        totalAbsent.toString()
+      ];
+    });
+
+    const totalPresentRow = ['Total Present', '', '', ...days.map((_, dayIndex) => data.reduce((sum, row) => sum + (row[3 + dayIndex] === '1' ? 1 : 0), 0).toString())];
+    const totalAbsentRow = ['Total Absent', '', '', ...days.map((_, dayIndex) => data.reduce((sum, row) => sum + (row[3 + dayIndex] === '0' ? 1 : 0), 0).toString())];
+
+    const csvData = [header, ...data, totalPresentRow, totalAbsentRow];
+    const csv = Papa.unparse(csvData);
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    saveAs(blob, `attendance_${eventData.id}.csv`);
+  }, [days, eventData]);
+
+  const downloadRosterCSV = useCallback(() => {
+    attendance = watch('attendanceData') || [];
+    const header = ['Last Name', 'First Name', 'Email'];
+    const data = eventData.participants
+      .filter(participant => {
+        const attendanceEntry = attendance.find(item => item.participantID === participant.participantID);
+        return attendanceEntry && attendanceEntry.attendance.length === days.length;
+      })
+      .map(participant => [
+        participant.lastName,
+        participant.firstName,
+        participant.email
+      ]);
+
+    const csvData = [header, ...data];
+    const csv = Papa.unparse(csvData);
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    saveAs(blob, `roster_${eventData.id}.csv`);
+  }, [days, eventData])
+
   const attendanceSchema = z.object({
     attendanceData: z.array(z.object({
       eventID: z.string(),
@@ -50,11 +103,9 @@ export const AttendanceTable = React.forwardRef(({ eventData, attendance, setPar
     }
   });
 
-
-
   const rows = React.useMemo(() => {
     return eventData.participants.map((participant, index) => {
-      const attendanceData = new Set(watch(`attendanceData[${index}].attendance`)); // Converting to set for optimized lookup in checkboxes onChange
+      const attendanceData = new Set(watch(`attendanceData[${index}].attendance`));
       const attendanceArray = days.map((day, dayIndex) => attendanceData.has((dayIndex + 1).toString()));
       return {
         serialNo: index + 1,
@@ -73,15 +124,14 @@ export const AttendanceTable = React.forwardRef(({ eventData, attendance, setPar
     return rows.slice(start, end);
   }, [rows, currentPage, currentLimit]);
 
-    React.useEffect(() => {
+  React.useEffect(() => {
     const allTopLevelChecked = days.map((_, dayIndex) =>
-      eventData.participants.every((_, participantIndex) =>
-        watch(`attendanceData[${participantIndex}].attendance`).includes((dayIndex + 1).toString())
+      paginatedRows.every((_, participantIndex) =>
+        watch(`attendanceData[${(currentPage - 1) * currentLimit + participantIndex}].attendance`).includes((dayIndex + 1).toString())
       )
     );
-    
     setTopLevelCheckboxes(allTopLevelChecked);
-  }, [watch, eventData.participants]);
+  }, [watch, days.length, paginatedRows, currentPage, currentLimit]);
 
   const onSubmit = async data => {
     setParentIsSubmitting(true);
@@ -97,26 +147,22 @@ export const AttendanceTable = React.forwardRef(({ eventData, attendance, setPar
               attendance: participantData.attendance
             });
 
-            console.log("Response for", participantData.participantID, response.data?.data);
             if (!response.data.data) {
               const errorMessage = response.data.error || 'Unknown error occurred';
               toast.error(`Participant ${participantData.participantID} update failed: ${errorMessage}`);
-              console.error(`Submission error for ${participantData.participantID}: ${errorMessage}`);
               return null;
             }
 
             return { ...participantData, attendance: participantData.attendance };
           } catch (error) {
             toast.error(`Participant ${participantData.participantID} update failed`);
-            console.error(`Submission error for ${participantData.participantID}:`, error);
             return null;
           }
         }
         return null;
       });
 
-      const results = await Promise.all(promises.filter(Boolean)); // filter out null results
-      console.log("Submission results:", results);
+      const results = await Promise.all(promises.filter(Boolean));
 
       if (requestsMade === 0) {
         toast.error("No changes for participant attendance");
@@ -124,7 +170,6 @@ export const AttendanceTable = React.forwardRef(({ eventData, attendance, setPar
         toast.success(`Update successful`);
       }
 
-      // Update the initial attendance state
       setInitialAttendance(prevState => {
         const updatedAttendance = [...prevState];
         results.forEach(result => {
@@ -161,11 +206,35 @@ export const AttendanceTable = React.forwardRef(({ eventData, attendance, setPar
       } else {
         attendance.add(dayStr);
       }
+      console.log("row",row,watch(`attendanceData[${(currentPage - 1) * currentLimit + rowIndex}].attendance`),Array.from(attendance))
+      console.log("row",row,watch(`attendanceData[${(currentPage) * currentLimit + rowIndex}].attendance`),Array.from(attendance))
       setValue(`attendanceData[${(currentPage - 1) * currentLimit + rowIndex}].attendance`, Array.from(attendance));
+      console.log("after");
+     console.log("row",row,watch(`attendanceData[${(currentPage - 1) * currentLimit + rowIndex}].attendance`),Array.from(attendance))
+     console.log("row",row,watch(`attendanceData[${(currentPage) * currentLimit + rowIndex}].attendance`),Array.from(attendance))
+
     });
     setTopLevelCheckboxes(prev => {
       const newTopLevelCheckboxes = [...prev];
       newTopLevelCheckboxes[dayIndex] = !allChecked;
+      return newTopLevelCheckboxes;
+    });
+  };
+
+  const handleIndividualCheckboxChange = (checked, dayIndex, rowIndex) => {
+    const dayStr = (dayIndex + 1).toString();
+    const attendance = new Set(watch(`attendanceData[${(currentPage - 1) * currentLimit + rowIndex}].attendance`));
+    if (checked) {
+      attendance.add(dayStr);
+    } else {
+      attendance.delete(dayStr);
+    }
+    setValue(`attendanceData[${(currentPage - 1) * currentLimit + rowIndex}].attendance`, Array.from(attendance));
+
+    // Update top-level checkbox state
+    setTopLevelCheckboxes(prev => {
+      const newTopLevelCheckboxes = [...prev];
+      newTopLevelCheckboxes[dayIndex] = paginatedRows.every((row, rIndex) => watch(`attendanceData[${(currentPage - 1) * currentLimit + rIndex}].attendance`).includes(dayStr));
       return newTopLevelCheckboxes;
     });
   };
@@ -182,11 +251,12 @@ export const AttendanceTable = React.forwardRef(({ eventData, attendance, setPar
                 <TableCell sx={{ width: 200 }}>Email</TableCell>
                 <TableCell sx={{ width: 150 }}>Phone</TableCell>
                 {days.map((day, index) => (
-                  <TableCell key={index} sx={{ width: 100 }}>
-                    {/* <Checkbox
-                      checked={topLevelCheckboxes[index]}
+                  <TableCell key={index} sx={{ width: 130 }}>
+                    <Checkbox
+                      checked={paginatedRows.length === 0 ? false : (topLevelCheckboxes.length >= index + 1 ? topLevelCheckboxes[index] : false)}
                       onChange={() => handleTopCheckboxChange(index)}
-                    /> */}
+                      sx={{ marginRight: 1 }}
+                    />
                     {day}
                   </TableCell>
                 ))}
@@ -200,37 +270,34 @@ export const AttendanceTable = React.forwardRef(({ eventData, attendance, setPar
                   <TableCell sx={{ width: 200 }}>{row.email}</TableCell>
                   <TableCell sx={{ width: 150 }}>{row.phone}</TableCell>
                   {row.attendance.map((attended, dayIndex) => (
-                    <TableCell key={dayIndex} sx={{ width: 100 }}>
+                    <TableCell key={dayIndex} sx={{ width: 130 }}>
+
+                    
                       <Controller
                         name={`attendanceData[${(currentPage - 1) * currentLimit + rowIndex}].attendance`}
                         control={control}
-                        render={({ field }) => (
+                        render={({ field }) => {
+                          // console.log('field', field.value)
+                          console.log(watch(`attendanceData[${(currentPage-1) * currentLimit + rowIndex}].attendance`),`attendanceData[${(currentPage-1) * currentLimit + rowIndex}].attendance`,field.value);
+                          
+                          return(
+                          
                           <Checkbox
-                            checked={field.value.includes((dayIndex + 1).toString())}
+                            checked={watch(`attendanceData[${(currentPage-1) * currentLimit + rowIndex}].attendance`).includes((dayIndex + 1).toString())}
                             onChange={(e) => {
-                              const checked = e.target.checked;
-                              const attendance = new Set(field.value);
-                              const dayStr = (dayIndex + 1).toString();
-                              if (checked) {
-                                attendance.add(dayStr);
-                              } else {
-                                attendance.delete(dayStr);
-                              }
-                              setValue(`attendanceData[${(currentPage - 1) * currentLimit + rowIndex}].attendance`, Array.from(attendance));
-                              setTopLevelCheckboxes(prev => {
-                                const newTopLevelCheckboxes = [...prev];
-                                newTopLevelCheckboxes[dayIndex] = paginatedRows.every(row => row.attendance[dayIndex] || (checked && row.serialNo === rowIndex + 1));
-                                return newTopLevelCheckboxes;
-                              });
+                              handleIndividualCheckboxChange(e.target.checked, dayIndex, rowIndex);
                             }}
                           />
-                        )}
+                        )}}
                       />
                     </TableCell>
                   ))}
                 </TableRow>
               ))}
             </TableBody>
+            <button onClick={downloadRosterCSV}>
+              segrfthjyrtj
+            </button>
           </Table>
         </TableContainer>
         {!paginatedRows.length ? (

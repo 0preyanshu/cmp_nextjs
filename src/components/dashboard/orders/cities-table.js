@@ -73,11 +73,26 @@ export function CitiesTable({ rows }) {
         <Stack direction="row" spacing={1} sx={{ alignItems: 'center' ,marginLeft:0}}>
          {' '}
           <div>
-            <Link
+            <Link href={paths.dashboard.orders.details(row.id)} >
             
-            >
-              {row.eventStartDate}
+            
+              {"Order-"+row.id.slice(-3) || "-"}
             </Link>
+        
+          </div>
+        </Stack>
+      ),
+      name: 'Order ID',
+      width: '150px',
+    },
+    {
+      formatter: (row) => (
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' ,marginLeft:0}}>
+         {' '}
+          <div>
+           
+              {row.createdAt || "-"}
+          
         
           </div>
         </Stack>
@@ -88,35 +103,35 @@ export function CitiesTable({ rows }) {
    
     {
       formatter(row) {
-        return row.buyerFirstName + ' ' + row.buyerLastName;
+        return row.participants[0]?.participantFirstName|| "-";
       },
       name: 'Buyer Name',
       width: '150px',
     },
     {
       formatter(row) {
-        return row.buyerPhone;
+        return row.participants[0]?.participantPhone|| "-";
       },
       name: 'Phone',
       width: '150px',
     },
     {
       formatter(row) {
-        return row.buyerEmail;
+        return row.participants[0]?.participantEmail|| "-";
       },
       name: 'Email',
       width: '150px',
     },
     {
       formatter(row) {
-        return row.courseName || 'N/A';
+        return row.course?.courseName || '-';
       },
       name: 'Course',
       width: '150px',
     },
     {
       formatter(row) {
-        return row.eventName || 'N/A';
+        return row.event?.eventName || '-';
       },
       name: 'Event',
       width: '150px',
@@ -124,7 +139,7 @@ export function CitiesTable({ rows }) {
     ,
     {
       formatter(row) {
-        return row.numberOfParticipants || 'N/A';
+        return row.participants?.length || '0';
       },
       name: ' No of Participants',
       width: '150px',
@@ -132,7 +147,7 @@ export function CitiesTable({ rows }) {
     ,
     {
       formatter(row) {
-        return row.numberOfParticipants || '200';
+        return ("$"+row.orderInfo?.totalAmount+" USD")|| '-';
       },
       name: 'Amount',
       width: '100px',
@@ -140,7 +155,7 @@ export function CitiesTable({ rows }) {
     ,
     {
       formatter(row) {
-        return row.feesAmount || '200';
+        return ("$"+row.orderInfo?.feesAmount +" USD")|| '-';
       },
       name: ' Fee',
       width: '100px',
@@ -148,7 +163,7 @@ export function CitiesTable({ rows }) {
     ,
     {
       formatter(row) {
-        return row.taxAmount || '200';
+        return ("$"+row.orderInfo?.taxAmount+" USD") || '-';
       },
       name: 'Tax',
       width: '100px',
@@ -163,7 +178,7 @@ export function CitiesTable({ rows }) {
     },
     {
       formatter(row) {
-        return row.refundAmount || '200';
+        return ("$"+row.orderInfo?.refundAmount)+" USD" || '-';
       },
       name: 'Refund',
       width: '100px',
@@ -171,7 +186,7 @@ export function CitiesTable({ rows }) {
     ,
     {
       formatter(row) {
-        return row.sourceType || '200';
+        return row.orderInfo?.paymentSource || '-' ;
       },
       name: 'Payment Mode',
       width: '150px',

@@ -24,13 +24,15 @@ import { useDispatch } from 'react-redux';
 import { cityActions } from '@/redux/slices';
 import { toast } from '@/components/core/toaster';
 import { useRouter } from 'next/navigation';
+import { formatDateTime } from '@/utils/formatTime';
 
 
 
 
 
 
-export function PaymentDetailsTable({ rows }) {
+
+export function PaymentDetailsTable({ rows, paymentDate }) {
 
   const dispatch = useDispatch();
   const router = useRouter();
@@ -40,60 +42,60 @@ export function PaymentDetailsTable({ rows }) {
   const columns = [
     {
       formatter: (row) => (
-        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' ,marginLeft:3}}>
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center' ,marginLeft:1}}>
          {' '}
           <div>
             <Link
             
             >
-              {row.cityName}
+              {formatDateTime(paymentDate)}
             </Link>
         
           </div>
         </Stack>
       ),
       name: 'Date',
-      width: '150px',
+      width: '200px',
     },
    
     {
       formatter(row) {
-        return row.cityShortName;
+        return row.paymentSource;
       },
       name: 'Payment Type',
       width: '150px',
     },
+    // {
+    //   formatter(row) {
+    //     return row.cityShortName;
+    //   },
+    //   name: 'Transaction Id',
+    //   width: '150px',
+    // },
     {
       formatter(row) {
-        return row.cityShortName;
-      },
-      name: 'Transaction Id',
-      width: '150px',
-    },
-    {
-      formatter(row) {
-        return row.cityShortName;
+        return ("$"+row.totalAmount +" USD")||"-";
       },
       name: 'Amount',
       width: '150px',
     },
     {
       formatter(row) {
-        return row.cityShortName;
+        return ("$"+row.feesAmount+ " USD")||"-";
       },
       name: 'Fee',
       width: '150px',
     },
     {
       formatter(row) {
-        return row.cityShortName;
+        return ("$"+row.taxAmount+ " USD")||"-";
       },
       name: 'Tax',
       width: '150px',
     },
     {
       formatter(row) {
-        return row.cityShortName;
+        return ("$"+(row.totalAmount -(row.feesAmount + row.taxAmount)) + " USD")||"-";
       },
       name: 'Balance',
       width: '200px',
