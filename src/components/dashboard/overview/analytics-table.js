@@ -65,7 +65,7 @@ export function AnalyticsTable({ rows }) {
       formatter(row) {
         return (
           <div style={{ marginLeft: 3 }}>
-            {row.orders}
+            {Number(row.internalOrder) + Number(row.vendorOrder)}
           </div>
         );
       },

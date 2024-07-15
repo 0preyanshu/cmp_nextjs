@@ -34,6 +34,29 @@ export const AttendanceTable = React.forwardRef(({ eventData, attendance, setPar
     days.push(`Day ${days.length + 1}`);
   }
 
+  
+
+
+
+  const attendanceSchema = z.object({
+    attendanceData: z.array(z.object({
+      eventID: z.string(),
+      participantID: z.string(),
+      attendance: z.array(z.string())
+    }))
+  });
+
+  const { control, handleSubmit, setValue, watch, formState: { isSubmitting } } = useForm({
+    resolver: zodResolver(attendanceSchema),
+    defaultValues: {
+      attendanceData: attendance && attendance.length > 0 ? attendance : eventData.participants.map(participant => ({
+        eventID: eventData.id || "",
+        participantID: participant.participantID,
+        attendance: []
+      }))
+    }
+  });
+
   const downloadCSV = useCallback(() => {
     attendance = watch('attendanceData') || [];
     const header = ['Name', 'Email', 'Phone', ...days, 'Total Present', 'Total Absent'];
@@ -84,28 +107,46 @@ export const AttendanceTable = React.forwardRef(({ eventData, attendance, setPar
     saveAs(blob, `roster_${eventData.id}.csv`);
   }, [days, eventData])
 
-  const attendanceSchema = z.object({
-    attendanceData: z.array(z.object({
-      eventID: z.string(),
-      participantID: z.string(),
-      attendance: z.array(z.string())
-    }))
-  });
+  const downloadAgileRosterCSV = useCallback(() => {
+    const attendance = watch('attendanceData') || [];
+    const header = ['User Name (same as email)', 'First Name', 'Last Name', 'Participant Email', 'Attended', 'Attendee Company'];
+  
+    console.log('eventData', eventData);
+    console.log('attendanceData', attendance);
+  
+    const data = eventData.participants
+      .filter(participant => {
+        
+        const attendanceEntry = attendance.find(item => item.participantID === participant.participantID);
+        console.log('Checking participantID:', participant.participantID);
+        console.log('attendanceEntry found:', attendanceEntry);
+        console.log('participant', participant);
+  
+        return attendanceEntry && attendanceEntry.attendance.includes('1');
+      })
+      .map(participant => [
+        participant.email,
+        participant.firstName,
+        participant.lastName,
+        participant.email,
+        '-', // As the "Attended" column in the example is not clear on the data source, using '-' as placeholder
+        'Self Employed' // Assuming 'Self Employed' as company; replace this with actual data if available
+      ]);
+  
+    console.log('Filtered and mapped data:', data);
+  
+    const csvData = [header, ...data];
+    const csv = Papa.unparse(csvData);
+  
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    saveAs(blob, `roster_${eventData.id}.csv`);
+  }, [days, eventData]);
 
-  const { control, handleSubmit, setValue, watch, formState: { isSubmitting } } = useForm({
-    resolver: zodResolver(attendanceSchema),
-    defaultValues: {
-      attendanceData: attendance || eventData.participants.map(participant => ({
-        eventID: eventData.id || "",
-        participantID: participant.participantID,
-        attendance: []
-      }))
-    }
-  });
+
 
   const rows = React.useMemo(() => {
     return eventData.participants.map((participant, index) => {
-      const attendanceData = new Set(watch(`attendanceData[${index}].attendance`));
+      const attendanceData = new Set(watch(`attendanceData[${index}].attendance`)); //can optimize this
       const attendanceArray = days.map((day, dayIndex) => attendanceData.has((dayIndex + 1).toString()));
       return {
         serialNo: index + 1,
@@ -134,12 +175,14 @@ export const AttendanceTable = React.forwardRef(({ eventData, attendance, setPar
   }, [watch, days.length, paginatedRows, currentPage, currentLimit]);
 
   const onSubmit = async data => {
+    console.log('data', data);
     setParentIsSubmitting(true);
     let requestsMade = 0;
 
     try {
       const promises = data.attendanceData.map(async participantData => {
         const initialAttendanceEntry = initialAttendance.find(item => item.participantID === participantData.participantID)?.attendance || [];
+        console.log('participantData', );
         if (JSON.stringify(initialAttendanceEntry) !== JSON.stringify(participantData.attendance)) {
           requestsMade++;
           try {
@@ -193,7 +236,10 @@ export const AttendanceTable = React.forwardRef(({ eventData, attendance, setPar
 
   React.useImperativeHandle(ref, () => ({
     submit: handleSubmit(onSubmit),
-    isSubmitting
+    isSubmitting,
+    downloadCSV,
+    downloadRosterCSV,
+    downloadAgileRosterCSV
   }));
 
   const handleTopCheckboxChange = (dayIndex) => {
@@ -295,9 +341,7 @@ export const AttendanceTable = React.forwardRef(({ eventData, attendance, setPar
                 </TableRow>
               ))}
             </TableBody>
-            <button onClick={downloadRosterCSV}>
-              segrfthjyrtj
-            </button>
+        
           </Table>
         </TableContainer>
         {!paginatedRows.length ? (

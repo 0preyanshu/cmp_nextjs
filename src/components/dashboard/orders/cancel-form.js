@@ -20,6 +20,7 @@ import { useParams } from 'next/navigation';
 import { formatDateTime } from '@/utils/formatTime';
 import { ParticipantsTable } from '@/components/dashboard/orders/participants-table';
 import { BuyerTable } from '@/components/dashboard/orders/buyer-table';
+import { OrderActions } from '@/redux/slices';
 
 
 
@@ -34,6 +35,7 @@ export function CancelForm() {
   const dispatch = useDispatch();
   const router = useRouter();
   const { allOrders} = useSelector((state) => state?.orders?.orders);
+  const { cancelOrder } = OrderActions;
   
   const[currentOrder,setCurrentOrder]=useState(null); 
 
@@ -45,6 +47,7 @@ export function CancelForm() {
       if(allOrders && Id){
           const details=allOrders.find((order)=>order.id===Id);
           console.log("order",details);
+
           setCurrentOrder(details);
 
       }
@@ -67,32 +70,15 @@ export function CancelForm() {
     sendCancellationEmail: z.boolean(),
     customerNotes: z.string().nonempty("Customer notes are required"),
     internalNotes: z.string().nonempty("Internal notes are required"),
-    refundType: z.enum(["FULL", "PARTIAL", "NONE"]),
+    refundType: z.enum(["Full", "Partial", "None"]),
     refundAmount: z.preprocess(
       (input) => Number(input),
       z.number().min(0, 'Minimum refun amount should be 0').max(order.total, 'Refund amount must be at most total amount').optional()
     ),
   });
 
-  const stripeData = useSelector((state) => state?.companyPaymentDetails?.stripeData);
-  const { updateStripeCompanyPaymentDetails, getCompanyPaymentDetails } = CompanyPaymentDetailsActions;
 
 
-  const [selectedCourse, setSelectedCourse] = useState('');
-  const [filteredEvents, setFilteredEvents] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(dayjs());
-
-  useEffect(() => {
-    if (selectedCourse) {
-      setFilteredEvents(allEvents.filter(event => event.courseID === selectedCourse));
-    } else {
-      setFilteredEvents([]);
-    }
-  }, [selectedCourse]);
-
-  useEffect(() => {
-    dispatch(getCompanyPaymentDetails());
-  }, [dispatch]);
 
 
   const defaultValues = React.useMemo(
@@ -101,7 +87,7 @@ export function CancelForm() {
     sendCancellationEmail: false,
     customerNotes: '',
     internalNotes: '',
-    refundType: 'NONE',
+    refundType: 'None',
     refundAmount: 0,
     }),
     [currentOrder,Id]
@@ -123,15 +109,38 @@ export function CancelForm() {
   const onSubmit = React.useCallback(
     async (data) => {
       try {
-        console.log(data,"datatatata");
-        // await dispatch(cancelOrder({ id: currentOrder.id, ...data }));
-      
+        if(data.participantsToRemove.length===0){
+          toast.error('Please select atleast one participant to cancel');
+          return;
+        }
+        else if (data.participantsToRemove.includes(currentOrder?.participants[0]?.participantID)){
+          toast.error('You cannot cancel the buyer');
+          return;
+        }
+        else if(data.refundType==='Partial' && data.refundAmount===0){
+          toast.error('Refund amount cannot be 0');
+          return;
+        }
+        
+        console.log("curretOrder",currentOrder);
+        console.log(data, "datatatata");
+        const response =  await dispatch(cancelOrder({ id: currentOrder?.id, ...data }));
+         console.log("response",response);
+        if (response.payload?.data?.data?.data) { 
+          toast.success('Order cancelled successfully');
+          router.push(paths.dashboard.orders);
+        } else {
+          toast.error(response.payload?.data?.data?.error || 'Order cancellation failed');
+        }
+  
       } catch (err) {
         console.error(err);
+        // toast.error('An error occurred while cancelling the order');
       }
     },
-    [dispatch]
+    [dispatch,  router,currentOrder]
   );
+  
 
   const allCourses = [
     { id: '1', name: 'Course 1' },
@@ -339,14 +348,14 @@ export function CancelForm() {
         control={control}
         render={({ field }) => (
           <RadioGroup row {...field}>
-            <FormControlLabel value="FULL" control={<Radio />} label="Full Refund" />
-            <FormControlLabel value="PARTIAL" control={<Radio />} label="Partial Refund" />
-            <FormControlLabel value="NONE" control={<Radio />} label="No Refund" />
+            <FormControlLabel value="Full" control={<Radio />} label="Full Refund" />
+            <FormControlLabel value="Partial" control={<Radio />} label="Partial Refund" />
+            <FormControlLabel value="None" control={<Radio />} label="No Refund" />
           </RadioGroup>
         )}
       />
     </Grid>
-    {watch('refundType') === 'PARTIAL' && (
+    {watch('refundType') === 'Partial' && (
       <Grid item xs={12} mb={3}>
         <FormControl fullWidth>
           <Controller
@@ -368,7 +377,7 @@ export function CancelForm() {
     )}
     <Grid item xs={12}>
     <Typography variant="h6">
-  Total Refund: {watch('refundType') === 'FULL' ? order.total : watch('refundType') === 'PARTIAL' ? (watch('refundAmount')) || 0 : 0} USD
+  Total Refund: {watch('refundType') === 'Full' ? order.total : watch('refundType') === 'Partial' ? (watch('refundAmount')) || 0 : 0} USD
 </Typography>
 
     </Grid>

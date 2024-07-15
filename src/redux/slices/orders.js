@@ -115,7 +115,7 @@ function cancelOrder() {
   return createAsyncThunk(`${name}/cancelOrder`, async (data) => {
     console.log(data);
     try {
-      const response = await axios.put(HOST_API.concat(`/order/cancel`), data, {
+      const response = await axios.put(HOST_API.concat(`/order/cancel/${data.id}`), data, {
         headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
       });
       return response;
