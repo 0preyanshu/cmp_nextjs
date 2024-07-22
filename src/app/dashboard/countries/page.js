@@ -30,7 +30,7 @@ export default function Page({ searchParams }) {
   const [searchInput, setSearchInput] = React.useState(searchTerm || '');
 
   const router = useRouter();
-  const isInitialMount = React.useRef(true);
+  
 
   const { allCountries, loading: isLoading, totalData } = useSelector((state) => state?.countries?.country);
   const dispatch = useDispatch();
@@ -45,12 +45,10 @@ export default function Page({ searchParams }) {
     };
 
       
-   if(!isInitialMount.current||allCountries.length ===0) dispatch(fetchCountries(data));
+   dispatch(fetchCountries(data));
    updateSearchParams({ searchTerm: searchInput, page: currentPage, limit: rowsPerPage });
 
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-    }
+   
   }, [searchInput, currentPage, rowsPerPage]);
 
   const handleSearchChange = (event) => {

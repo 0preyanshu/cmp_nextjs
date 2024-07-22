@@ -39,7 +39,7 @@ export default function Page({ searchParams }) {
 
 
   const [searchInput, setSearchInput] = React.useState(searchTerm || '');
-  const isInitialMount = React.useRef(true);
+  
 
   React.useEffect(() => {
     const data = {
@@ -49,15 +49,13 @@ export default function Page({ searchParams }) {
       name: searchTerm || '',
     
     };
-    if (!isInitialMount.current || allVendors.length === 0) { dispatch(fetchVendors(data))}
+     dispatch(fetchVendors(data))
     updateSearchParams({
       searchTerm: searchInput,
       page: currentPage,
       limit: rowsPerPage
     });
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-    }
+   
   
 
   }, [dispatch, searchTerm, currentPage, rowsPerPage]);

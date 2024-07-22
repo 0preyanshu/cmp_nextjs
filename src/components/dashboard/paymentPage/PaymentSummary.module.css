@@ -1,0 +1,182 @@
+.card {
+    display: flex;
+    width: 100%;
+    position: relative;
+    padding: 24px 32px 32px 32px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 24px;
+    border-radius: 8px;
+    border: 0.5px solid #868686;
+    background: #fff;
+    box-shadow: 3px 7px 12px 0px rgba(0, 0, 0, 0.03);
+  }
+  
+  .card .logo {
+    position: absolute;
+    width: 87px;
+    height: 78px;
+    top: -54px;
+    right: 10px;
+    object-fit: contain;
+  }
+  
+  .card .head_wrapper {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  
+  .card .head_content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .card .course_name {
+    color: #222;
+    font-feature-settings: 'case' on, 'salt' on;
+    font-family: Inter;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 140%;
+  }
+  
+  .card p {
+    color: #383838;
+    font-feature-settings: 'case' on, 'salt' on;
+    font-family: Inter;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 140%;
+  }
+  
+  .card .border {
+    width: 100%;
+    height: 1px;
+    background: #d1d1d1;
+  }
+  
+  .card .pricing {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+  }
+  
+  .card .input {
+    position: relative;
+    width: 100%;
+  }
+  
+  .card .promo {
+    color: #bababa;
+    font-feature-settings: 'case' on, 'salt' on;
+    font-family: Inter;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 140%;
+    text-decoration-line: underline;
+  }
+  
+  .card input {
+    color: #bababa;
+    font-family: Inter;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: -0.36px;
+  }
+  
+  .card label {
+    color: #bababa;
+    font-family: Inter;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    letter-spacing: -0.36px;
+  }
+  
+  .card .promo_button {
+    background: transparent;
+    outline: none;
+    border: none;
+    width: fit-content;
+    color: #fb5741;
+    font-family: Inter;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 139%;
+    letter-spacing: -0.36px;
+    text-decoration-line: underline;
+    position: absolute;
+    top: 18px;
+    right: 12px;
+    cursor: pointer;
+  }
+  
+  .card .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .card .heading {
+    color: #383838;
+    font-feature-settings: 'case' on, 'salt' on;
+    font-family: Inter;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 140%;
+  }
+  
+  .card .price {
+    color: #383838;
+    text-align: right;
+    font-feature-settings: 'case' on, 'salt' on;
+    font-family: Inter;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 140%;
+    letter-spacing: -0.16px;
+  }
+  
+  .card .strike {
+    color: #828282;
+    text-align: right;
+    font-feature-settings: 'case' on, 'salt' on;
+    font-family: Inter;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 140%;
+    letter-spacing: -0.14px;
+    text-decoration: line-through;
+  }
+  
+  .card .total {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+  
+  .card h3 {
+    color: #222;
+    font-feature-settings: 'salt' on;
+    font-family: Inter;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 140%;
+  }
+  

@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-const HOST_API = 'https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg';
+import { HOST_API } from '@/config';
 
 // const initialState = [];
 

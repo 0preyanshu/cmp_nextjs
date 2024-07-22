@@ -36,7 +36,7 @@ export default function Page({ searchParams }) {
   const { allUsers, loading: isLoading, totalData } = useSelector((state) => state.users.users);
   const {  fetchUser } = UserActions;
   const { fetchUserType } = UserTypeActions ;
-  const isInitialMount = React.useRef(true);
+  
   const dispatch = useDispatch();
 
   React.useEffect(() => {
@@ -52,16 +52,13 @@ export default function Page({ searchParams }) {
       if(userTypes.length === 0){
         dispatch(fetchUserType({ limit: "", page: "", search: "" }));
       }
-      if(allUsers.length === 0 || isInitialMount.current){
+     
         dispatch(fetchUser(data));
-      }
+      
     
     updateSearchParams({ searchTerm: searchInput, page: currentPage, limit: rowsPerPage });
     
-   
-    if(isInitialMount.current){
-      isInitialMount.current = false;
-    }
+ 
   
   },[searchInput, currentPage, rowsPerPage, userTypeID]);
 

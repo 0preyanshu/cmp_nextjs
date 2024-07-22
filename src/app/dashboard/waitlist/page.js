@@ -51,7 +51,7 @@ export default function Page({ searchParams }) {
 
   const { getWaitlistData } = WaitlistActions;
 
-  const isInitialMount = React.useRef(true);
+
 
   React.useEffect(() => {
    
@@ -70,17 +70,13 @@ export default function Page({ searchParams }) {
       if(allEvents.length === 0){
         dispatch(fetchEvents({ limit: "", page: "", search: "" }));
       }
-      if(waitlistData.length === 0 || !isInitialMount.current){
+   
         dispatch(getWaitlistData(data));
-      }
+      
 
       ({ searchTerm: searchInput, page: currentPage, limit: rowsPerPage, startDate:startDate, courseID:courseID, eventID:eventID });
      
-    
-    if(isInitialMount.current){
-      isInitialMount.current = false;
-
-    }
+   
   }, [searchInput, currentPage, rowsPerPage,courseID,eventID,startDate]);
 
   const handleSearchChange = (event) => {

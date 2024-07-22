@@ -1,0 +1,117 @@
+.heading {
+    border-radius: 4px;
+    background: #000;
+    padding: 4px 10px;
+    display: flex;
+    align-items: center;
+
+    @media (max-width: 900px) {
+        border-radius: 0;
+    }
+
+    h3 {
+        color: #F9F9F9;
+        font-feature-settings: 'ss01' on;
+        font-family: Inter;
+        font-size: 15px;
+        font-style: normal;
+        font-weight: 500;
+        line-height: 140%;
+        /* 21px */
+    }
+}
+
+.form_wrapper {
+    @media (max-width: 900px) {
+        padding: 0 16px;
+    }
+}
+
+.details {
+    padding: 24px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+
+    @media (max-width: 900px) {
+        padding: 16px;
+    }
+
+    .row {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+
+        @media (max-width: 900px) {
+            justify-content: space-between;
+        }
+
+        p {
+            color: #383838;
+            font-feature-settings: 'calt' off;
+            font-family: Inter;
+            font-size: 15px;
+            font-style: normal;
+            font-weight: 500;
+            line-height: 22px;
+            /* 146.667% */
+            letter-spacing: -0.3px;
+        }
+
+        button {
+            color: #383838;
+            font-feature-settings: 'salt' on;
+            font-family: Inter;
+            font-size: 14px;
+            font-style: normal;
+            cursor: pointer;
+            font-weight: 500;
+            line-height: 140%;
+            /* 19.6px */
+            letter-spacing: -0.07px;
+            border-radius: 8px;
+            border: 0.5px solid #BABABA;
+            padding: 8px 12px;
+            background: #fff;
+        }
+
+        .active {
+            background: #F4FDF8;
+        }
+
+        .number {
+            display: flex;
+            align-items: center;
+
+            .increment {
+                border-radius: 6px 0px 0px 6px;
+                border: 0.5px solid #D2D2D2;
+            }
+
+            .count {
+                border-radius: 0;
+                border: 0.5px solid #D2D2D2;
+                cursor: default;
+            }
+
+            .decrement {
+                border-radius: 0px 6px 6px 0px;
+                border: 0.5px solid #D2D2D2;
+            }
+        }
+    }
+}
+
+.button {
+    display: flex;
+    width: 100%;
+    justify-content: flex-end;
+
+    @media (max-width: 900px) {
+        display: none;
+    }
+
+    button {
+        margin-top: 24px;
+    }
+}

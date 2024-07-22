@@ -25,125 +25,58 @@ import TableSkeleton from '@/components/core/Skeletion';
 import { Link } from '@mui/material';
 import RouterLink from 'next/link';
 import { ArrowLeft as ArrowLeftIcon } from '@phosphor-icons/react/dist/ssr/ArrowLeft';
+import { useParams } from 'next/navigation';
 
 
 export default function Page({ searchParams }) {
-  const {  searchTerm, page = 1, limit = 10,startDate,vendorID,courseID,endDate } = searchParams;
 
-  const [currentPage, setCurrentPage] = React.useState(parseInt(page));
-  const [rowsPerPage, setRowsPerPage] = React.useState(parseInt(limit));
-  const [searchInput, setSearchInput] = React.useState(searchTerm || '');
-  const [tabValue, setTabValue] = React.useState('1');
-
-  const router = useRouter();
-
-
-
-  const {allCourses}=useSelector((state)=>state?.courses?.courses);
-  // const { allInstructors } = useSelector((state) => state?.instructors?.instructors);
-  // const {allTimezones}=useSelector((state)=>state?.timezone?.timezones);
-  const { allEvents } = useSelector((state) => state?.event?.events);
-  const { allOrders, loading: isLoading, totalData } = useSelector((state) => state?.orders?.abandonedCart);
-  const { allVendors } = useSelector((state) => state?.vendors?.vendors);
-  const {fetchCourses} = CoursesActions;
-  const {fetchAbandonedCart} = OrderActions;
-  const { fetchVendors } = VendorActions;
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+  const [currentOrder, setCurrentOrder] = React.useState(null);
 
 
 
 
 
-  const dispatch = useDispatch();
 
 
 
-  const isInitialMount = React.useRef(true);
 
-  React.useEffect(() => {
-   
-      const data = {
-        page: currentPage,
-        limit: rowsPerPage,
-        name: searchInput || '',
-        startDate: startDate || '',
-        courseID: courseID || '',
-        vendorID: vendorID || '',
-        endDate: endDate || '',
-      
-        tab : tabValue  // Pass the tab value
+  const { allOrders} = useSelector((state) => state?.orders?.orders);
+
   
-      };
-      if(allCourses.length === 0 ){
-        dispatch(fetchCourses({ limit: "", page: "", search: "" }));
-      }
-      if(allVendors.length === 0){
-        dispatch(fetchVendors({ limit: "", page: "", search: "" }));
-      }
-      if(allOrders.length === 0 || !isInitialMount.current){
-        dispatch(fetchAbandonedCart(data));
-      }
+ 
 
-      updateSearchParams({ searchTerm: searchInput, page: currentPage, limit: rowsPerPage, startDate:startDate, courseID:courseID, vedorID:vendorID, endDate:endDate});
-     
-    
-    if(isInitialMount.current){
-      isInitialMount.current = false;
+  const {Id} = useParams();
 
-    }
-  }, [searchInput, currentPage, rowsPerPage,courseID,vendorID,startDate,tabValue,endDate]);
+  React.useEffect(()=>{
+    console.log("allOrders",allOrders);
+    console.log("id",Id);
+      if(allOrders && Id){
+          const details=allOrders.find((order)=>order.id===Id);
+          console.log("order",details);
 
-  const handleSearchChange = (event) => {
-    setSearchInput(event.target.value);
-    updateSearchParams({ ...searchParams, searchTerm: event.target.value, page: 1 });
-  };
+          setCurrentOrder(details);
+
+      }
+  }
+  ,[allOrders,Id]);
+
+
+
 
   const handlePageChange = (event, newPage) => {
     setCurrentPage(newPage);
-    updateSearchParams({ ...searchParams, page: newPage });
+
   };
 
   const handleRowsPerPageChange = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setCurrentPage(1);
-    updateSearchParams({ ...searchParams, limit: parseInt(event.target.value, 10), page: 1 });
+ 
   };
 
-  const handleTabChange = (event, newValue) => {
-    setTabValue(newValue);
-    setCurrentPage(1);
-  }
 
-  const updateSearchParams = (newFilters, newSortDir) => {
-    const searchParams = new URLSearchParams();
-
-
-    if (newFilters.searchTerm) {
-      searchParams.set('searchTerm', newFilters.searchTerm);
-    }
-
-    if (newFilters.page) {
-      searchParams.set('page', newFilters.page);
-    }
-
-    if (newFilters.limit) {
-      searchParams.set('limit', newFilters.limit);
-    }
-    if(newFilters.startDate){
-      searchParams.set('startDate', newFilters.startDate);
-    }
-    if(newFilters.endDate){
-      searchParams.set('endDate', newFilters.endDate);
-    }
-    if(newFilters.courseID){
-      searchParams.set('courseID', newFilters.courseID);
-    }
-    if(newFilters.vendorID){
-      searchParams.set('vendorsID', newFilters.vendorID);
-    }
-
-
-    // router.push(`${paths.dashboard.abandonedcart.list}?${searchParams.toString()}`);
-  };
 
   return (
     <Box
@@ -159,7 +92,7 @@ export default function Page({ searchParams }) {
             <Link
               color="text.primary"
               component={RouterLink}
-              href={paths.dashboard.orders.details("1")}
+              href={paths.dashboard.orders.details(Id)}
               sx={{ alignItems: 'center', display: 'inline-flex', gap: 1 }}
               variant="subtitle2"
             >
@@ -173,38 +106,42 @@ export default function Page({ searchParams }) {
             <Typography variant="h4">Order History</Typography>
           </Box>
         </Stack>
+        {/* subTotal: currentOrder?.orderInfo?.totalAmount-(currentOrder?.orderInfo?.feesAmount+currentOrder?.orderInfo?.taxAmount),
+    fees: currentOrder?.orderInfo?.feesAmount,
+    tax: currentOrder?.orderInfo?.taxAmount,
+    total: currentOrder?.orderInfo?.totalAmount, */}
 
 
         <Card sx={{ p: 3, width: '100%', position: 'relative', mb: 3 }}>
               <Typography variant="h6" sx={{ mb: 3 }}>
-                Order - 118
+                Order - {currentOrder?.id?.slice(-3) || "N/A"}
               </Typography>
               <Stack direction="column" alignItems="flex-start" spacing={1} sx={{ mr: 8 }}>
                 <Stack direction="row" justifyContent="flex-start" sx={{ width: '200px' }}>
                   <Typography variant="h7" align="left" sx={{ flex: 1 }}>
-                    SubTotal:
+                    SubTotal: 
                   </Typography>
-                  <Typography align="left"> USD</Typography>
+                  <Typography align="left">{currentOrder?.orderInfo?.totalAmount-(currentOrder?.orderInfo?.feesAmount+currentOrder?.orderInfo?.taxAmount)} USD</Typography>
                 </Stack>
                 <Stack direction="row" justifyContent="flex-start" sx={{ width: '200px' }}>
                   <Typography variant="h7" align="left" sx={{ flex: 1 }}>
                     Fees:
                   </Typography>
-                  <Typography align="left"> USD</Typography>
+                  <Typography align="left">{currentOrder?.orderInfo?.feesAmount} USD</Typography>
                 </Stack>
                 <Stack direction="row" justifyContent="flex-start" sx={{ width: '200px' }}>
                   <Typography variant="h7" align="left" sx={{ flex: 1 }}>
                     Tax:
                   </Typography>
                   <Typography color="error" align="left">
-                    USD
+                    {currentOrder?.orderInfo?.taxAmount} USD
                   </Typography>
                 </Stack>
                 <Stack direction="row" justifyContent="flex-start" sx={{ width: '200px' }}>
                   <Typography variant="h7" align="left" sx={{ flex: 1 }}>
                     Total:
                   </Typography>
-                  <Typography align="left"> USD</Typography>
+                  <Typography align="left">{currentOrder?.orderInfo?.totalAmount} USD</Typography>
                 </Stack>
               </Stack>
             </Card>
@@ -212,11 +149,9 @@ export default function Page({ searchParams }) {
         <Card>
           <Divider />
           <Box sx={{ overflowX: 'auto' }}>
-            {isLoading ? (
-              <TableSkeleton />
-            ) : (
-              <HistoryTable rows={[]} />
-            )}
+           
+              <HistoryTable rows={currentOrder?.orderHistory || []} />
+           
           </Box>
           <Divider />
           <Pagination page={currentPage-1} rowsPerPage={rowsPerPage} onPageChange={handlePageChange} onRowsPerPageChange={handleRowsPerPageChange} />

@@ -131,6 +131,11 @@ export function CompanyCreateForm() {
   const handleAvatarChange = async (event) => {
     const file = event.target.files?.[0];
     if (file) {
+      const validImageTypes = ['image/jpeg', 'image/png'];
+      if (!validImageTypes.includes(file.type)) {
+        toast.error('Only PNG or JPEG images are allowed');
+        return;
+      }
       setIsImageUploading(true);
       const reader = new FileReader();
       reader.readAsDataURL(file);

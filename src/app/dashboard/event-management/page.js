@@ -68,7 +68,7 @@ export default function Page({ searchParams }) {
   const { fetchTimezones } = TimezoneAction;
   const { fetchcategories } = CourseCategoryActions;
 
-  const isInitialMount = React.useRef(true);
+  
 
   React.useEffect(() => {
     const data = {
@@ -105,15 +105,13 @@ export default function Page({ searchParams }) {
     if(allCategories.length===0){
       dispatch(fetchcategories({limit:"",page:"",search:""}));
     }
-    if (allEvents.length === 0 || !isInitialMount.current) {
+   
       dispatch(fetchEvents(data));
-    }
+    
 
     updateSearchParams({ searchTerm: searchInput, page: currentPage, limit: rowsPerPage, countryID: countryID, stateID: stateID, instructorID: instructorID, courseCategoryID: courseCategoryID, courseID: courseID, timezoneID: timezoneID });
 
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-    }
+    
   }, [searchInput, currentPage, rowsPerPage, countryID, stateID, instructorID, courseCategoryID, courseID, timezoneID, tabValue]);
 
   const handleSearchChange = (event) => {

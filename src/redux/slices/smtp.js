@@ -3,7 +3,7 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 import { get } from 'lodash';
 
-const HOST_API = 'https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg';
+import { HOST_API } from '@/config';
 const name = 'smtp';
 const initialState = createInitialState();
 const extraActions = createExtraActions();

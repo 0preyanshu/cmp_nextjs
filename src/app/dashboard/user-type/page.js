@@ -36,7 +36,7 @@ export default function Page({ searchParams }) {
 
   const dispatch = useDispatch();
   const { fetchUserType } = UserTypeActions;
-  const isInitialMount = React.useRef(true);
+
 
   React.useEffect(() => {
    
@@ -45,12 +45,9 @@ export default function Page({ searchParams }) {
         limit: rowsPerPage,
         name: searchInput || ''
       };
-      if(userTypes.length === 0 || isInitialMount.current) dispatch(fetchUserType(data));
+      dispatch(fetchUserType(data));
       updateSearchParams({ searchTerm: searchInput, page: currentPage, limit: rowsPerPage });
-    if(isInitialMount.current){
-      isInitialMount.current = false;
-
-    }
+   
     
   }, [ searchInput, currentPage, rowsPerPage]);
 

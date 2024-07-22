@@ -46,35 +46,35 @@ export function HistoryTable({ rows }) {
             <Link
             
             >
-              {row.cityName}
+              {row.date || "-"}
             </Link>
         
           </div>
         </Stack>
       ),
-      name: 'First Name',
+      name: 'Date',
       width: '250px',
     },
    
     {
       formatter(row) {
-        return row.cityShortName;
+        return row.action;
       },
-      name: 'Last Name',
+      name: 'Action',
+      width: '300px',
+    },
+    {
+      formatter(row) {
+        return row.course;
+      },
+      name: 'Course',
       width: '200px',
     },
     {
       formatter(row) {
-        return row.cityShortName;
+        return row.event;
       },
-      name: 'Email',
-      width: '200px',
-    },
-    {
-      formatter(row) {
-        return row.cityShortName;
-      },
-      name: 'Phone',
+      name: 'Event Name',
       width: '200px',
     },
   

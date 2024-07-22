@@ -24,7 +24,7 @@ import TableSkeleton from '@/components/core/Skeletion';
 const Page = ({ searchParams }) => {
   const { searchTerm, page = 1, limit = 10 } = searchParams;
   const router = useRouter();
-  const isInitialMount = React.useRef(true);
+  
 
   const [searchInput, setSearchInput] = React.useState(searchTerm || '');
   const [currentPage, setCurrentPage] = React.useState(parseInt(page));
@@ -46,18 +46,16 @@ const Page = ({ searchParams }) => {
       limit: rowsPerPage,
       name: searchInput || '',
     };
-    if (!isInitialMount.current || allCategories.length === 0) {
+  
       dispatch(fetchcategories(data));
-    }
+    
     updateSearchParams({
       searchTerm: searchInput,
       page: currentPage,
       limit: rowsPerPage,
     });
 
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-    }
+
   }, [searchInput, currentPage, rowsPerPage]);
 
   const handleSearchChange = (event) => {

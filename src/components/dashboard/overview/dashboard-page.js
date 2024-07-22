@@ -16,8 +16,9 @@ import { paths } from '@/paths';
 import { useRouter } from 'next/navigation';
 import TableSkeleton from '@/components/core/Skeletion';
 import { useTheme } from '@mui/material/styles';
+import { HOST_API } from '@/config';
 
-const HOST_API = "https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg";
+// const HOST_API = "https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg";
 
 const transformGraphData = (newGraphData, period) => {
   console.log("n", newGraphData);

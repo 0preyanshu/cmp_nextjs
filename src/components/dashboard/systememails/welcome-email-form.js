@@ -20,6 +20,7 @@ import { toast } from '@/components/core/toaster';
 import { EditorField } from './editor-field';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
+import { HOST_API } from '@/config';
 
 
 
@@ -33,7 +34,7 @@ const schema = z.object({
   instructorID : z.string().min(1, 'Instructor is required')
 });
 
-const HOST_API = "https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg";
+// const HOST_API = "https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg";
 
 export function WelcomeEmails({ filteredEvents = [], sendTestEmail, sendTestEmailLoading = 0 }) {
   const [currentDetails, setCurrentDetails] = React.useState({});

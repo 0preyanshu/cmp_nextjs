@@ -3,7 +3,7 @@ import axios from 'axios';
 
 
 // const initialState = [];
-const HOST_API = "https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg";
+import { HOST_API } from '@/config';
 
 const name = 'Instructor';
 const initialState = createInitialState();

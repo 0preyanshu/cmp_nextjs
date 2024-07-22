@@ -34,23 +34,20 @@ export default function Page({ searchParams }) {
   const { allCurrency, totalData, loading: isLoading } = useSelector((state) => state?.currency?.currency);
   const dispatch = useDispatch();
   const { fetchCurrency } = CurrencyAction;
-  const isInitialMount = React.useRef(true);
+ 
 
   React.useEffect(() => {
-    if (!isInitialMount.current) {
+ 
       
       const data = {
         page: currentPage,
         limit: rowsPerPage,
         name: searchInput || ''
       };
-      if(allCurrency.length === 0 ||!isInitialMount.current) dispatch(fetchCurrency(data));
+       dispatch(fetchCurrency(data));
       updateSearchParams({ searchTerm: searchInput, page: currentPage, limit: rowsPerPage });
      
-    }
-    if(isInitialMount.current){
-      isInitialMount.current = false;
-    }
+   
   
   }, [searchInput, currentPage, rowsPerPage]);
 
