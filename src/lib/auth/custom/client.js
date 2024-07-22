@@ -2,8 +2,9 @@
 
 import axios from 'axios';
 import jwt from 'jsonwebtoken';
+import { HOST_API } from '@/config';
 
-const AUTH_URL = 'https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg'; //todo get from env
+// const AUTH_URL = 'https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg'; //todo get from env
 
 function generateToken() {
   const arr = new Uint8Array(12);
@@ -38,7 +39,7 @@ class AuthClient {
     const { email, password } = params;
 
     try {
-      const response = await axios.post(`${AUTH_URL}/auth/sign-in`, { email, password });
+      const response = await axios.post(`${HOST_API}/auth/sign-in`, { email, password });
       const { token } = response.data.data;
 
       localStorage.setItem('custom-auth-token', token);
