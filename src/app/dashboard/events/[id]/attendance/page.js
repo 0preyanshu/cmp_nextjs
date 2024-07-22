@@ -17,8 +17,9 @@ import { useParams } from 'next/navigation';
 import { LoadingButton } from '@mui/lab';
 import { useRef } from 'react';
 import { Button } from '@mui/material';
+import {HOST_API} from '@/config';
 
-const HOST_API = "https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg";
+// const HOST_API = "https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg";
 
 export default function Page({ searchParams }) {
   const attendanceTableRef = React.useRef();
