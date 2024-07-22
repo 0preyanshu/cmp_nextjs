@@ -1,0 +1,108 @@
+.container {
+    border-radius: 8px;
+    border: 1px solid #D4D4D4;
+    height: 57px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding: 0 20px;
+
+    @media (max-width: 900px) {
+        height: auto;
+        flex-direction: column;
+        padding: 8px;
+        width: 100%;
+    }
+
+    .wrapper {
+        display: flex;
+        align-items: center;
+        gap: 24px;
+        width: 100%;
+
+        @media (max-width: 900px) {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            justify-content: space-between;
+        }
+
+        .card {
+            border-radius: 8px;
+            border: 0.5px solid #C2C2C2;
+            background: #F4FDF8;
+            padding: 8px 12px;
+            position: relative;
+
+            @media (max-width: 900px) {
+                width: fit-content;
+
+            }
+
+            .number {
+                top: -10px;
+                right: -10px;
+                background: #fff;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: absolute;
+                color: #8B8B8B;
+                font-feature-settings: 'clig' off, 'liga' off;
+                font-family: Inter;
+                border-radius: 50%;
+                border: 1px solid #B3B3B3;
+                font-size: 14px;
+                width: 19px;
+                height: 19px;
+                font-style: normal;
+                font-weight: 500;
+                line-height: 26px;
+                /* 185.714% */
+                letter-spacing: 0.28px;
+            }
+
+            p {
+                color: #797979;
+                font-feature-settings: 'salt' on;
+                font-family: Inter;
+                font-size: 14px;
+                font-style: normal;
+                font-weight: 600;
+                line-height: 140%;
+                /* 19.6px */
+                letter-spacing: -0.07px;
+            }
+        }
+
+        p {
+            color: #BABABA;
+            font-feature-settings: 'ss01' on;
+            font-family: Inter;
+            font-size: 15px;
+            font-style: normal;
+            font-weight: 500;
+            line-height: 140%;
+            /* 21px */
+        }
+    }
+
+    button {
+        outline: none;
+        border: none;
+        background: transparent;
+        text-decoration: underline;
+        color: #FB5741;
+        font-feature-settings: 'ss01' on;
+        font-family: Inter;
+        font-size: 15px;
+        font-style: normal;
+        font-weight: 500;
+        line-height: 140%;
+        cursor: pointer;
+
+        @media (max-width: 900px) {
+            align-self: flex-end;
+        }
+    }
+}

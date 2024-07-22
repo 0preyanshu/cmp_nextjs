@@ -44,7 +44,7 @@ export default function Page({ searchParams }) {
 
 
   const [searchInput, setSearchInput] = React.useState(searchTerm || '');
-  const isInitialMount = React.useRef(true);
+  
 
   React.useEffect(() => {
     const data = {
@@ -52,9 +52,9 @@ export default function Page({ searchParams }) {
       limit: rowsPerPage,
       name: searchInput || ''
     };
-    if (!isInitialMount.current || allInstructors.length === 0) {
+
       dispatch(fetchInstructor(data));
-    }
+    
   
     updateSearchParams({
       searchTerm: searchInput,
@@ -62,9 +62,7 @@ export default function Page({ searchParams }) {
       limit: rowsPerPage
     });
   
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-    }
+  
   }, [searchInput, currentPage, rowsPerPage]);
 
   const handleSearchChange = (event) => {

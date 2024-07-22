@@ -41,7 +41,7 @@ export default function Page({ searchParams }) {
   const { fetchCountries } = countryActions;
   const { fetchCities } = cityActions;
 
-  const isInitialMount = React.useRef(true);
+  
 
   React.useEffect(() => {
    
@@ -58,9 +58,9 @@ export default function Page({ searchParams }) {
       if(allState.length === 0){
         dispatch(fetchState({ limit: "", page: "", search: "" }));
       }
-      if(allCities.length === 0|| !isInitialMount.current){  
+     
          dispatch(fetchCities(data));
-      }
+      
 
       updateSearchParams({ searchTerm: searchInput, page: currentPage, limit: rowsPerPage, countryID: countryID, stateID: stateID });
      

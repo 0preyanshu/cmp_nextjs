@@ -34,7 +34,7 @@ export default function Page({ searchParams }) {
   const dispatch = useDispatch();
   const { fetchCoupons} = CouponActions;
 
-  const isInitialMount = React.useRef(true);
+
 
   React.useEffect(() => {
    
@@ -43,13 +43,10 @@ export default function Page({ searchParams }) {
         limit: rowsPerPage,
         name: searchInput || ''
       };
-      if(allCoupons.length === 0 ||!isInitialMount.current) dispatch(fetchCoupons(data));
+    dispatch(fetchCoupons(data));
      
       updateSearchParams({ searchTerm: searchInput, page: currentPage, limit: rowsPerPage });
-    if(isInitialMount.current){
-      isInitialMount.current = false;
-
-    }
+    
     
   }, [ searchInput, currentPage, rowsPerPage]);
 

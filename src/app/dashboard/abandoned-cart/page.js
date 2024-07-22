@@ -61,7 +61,7 @@ export default function Page({ searchParams }) {
 
 
 
-  const isInitialMount = React.useRef(true);
+ 
 
   React.useEffect(() => {
    
@@ -83,17 +83,14 @@ export default function Page({ searchParams }) {
       if(allEvents.length === 0){
         dispatch(fetchEvents({ limit: "", page: "", search: "" }));
       }
-      if(allOrders.length === 0 || !isInitialMount.current){
+      
         dispatch(fetchAbandonedCart(data));
-      }
+      
 
       updateSearchParams({ searchTerm: searchInput, page: currentPage, limit: rowsPerPage, startDate:startDate, courseID:courseID, eventID:eventID, endDate:endDate});
      
     
-    if(isInitialMount.current){
-      isInitialMount.current = false;
-
-    }
+   
   }, [searchInput, currentPage, rowsPerPage,courseID,eventID,startDate,tabValue,endDate]);
 
   const handleSearchChange = (event) => {

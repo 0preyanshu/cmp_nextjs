@@ -3,7 +3,7 @@ import axios from 'axios';
 
 // import { HOST_API } from '../../config';
 
-const HOST_API = 'https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg';
+import { HOST_API } from '@/config';
 
 // const initialState = [];
 
@@ -70,7 +70,7 @@ function createCompanies() {
 function fetchCompanies() {
   return createAsyncThunk(`${name}/fetchCompanies`, async (data) => {
     try {
-      const response = await axios.get("https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg/company/01J1PVRA0K4FJ0MMA71VJXSB3E",{
+      const response = await axios.get(`${HOST_API}/company/01J1PVRA0K4FJ0MMA71VJXSB3E`,{
         headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
     });
 
@@ -142,7 +142,7 @@ function updatecompanies() {
 
 
     try {
-      const response = await axios.put("https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg/company/01J1PVRA0K4FJ0MMA71VJXSB3E",data,{
+      const response = await axios.put(`${HOST_API}/company/01J1PVRA0K4FJ0MMA71VJXSB3E`,data,{
         headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
     });
 

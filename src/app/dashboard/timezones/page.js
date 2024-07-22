@@ -33,7 +33,7 @@ export default function Page({ searchParams }) {
   const { allTimezones, totalData, loading: isLoading } = useSelector((state) => state?.timezone?.timezones);
   const dispatch = useDispatch();
   const { fetchTimezones } = TimezoneAction;
-  const isInitialMount = React.useRef(true);
+ 
 
   React.useEffect(() => {
  
@@ -43,13 +43,10 @@ export default function Page({ searchParams }) {
         limit: rowsPerPage,
         name: searchInput || ''
       };
-      if(allTimezones.length === 0 ||!isInitialMount.current) dispatch(fetchTimezones(data));
+      dispatch(fetchTimezones(data));
       updateSearchParams({ searchTerm:searchInput ,page: currentPage, limit: rowsPerPage });
     
-    if(isInitialMount.current){
-      isInitialMount.current = false;
-
-    }
+  
  
   }, [searchInput, currentPage, rowsPerPage]);
 

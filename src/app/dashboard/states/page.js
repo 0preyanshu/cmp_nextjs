@@ -37,7 +37,7 @@ export default function Page({ searchParams }) {
   const dispatch = useDispatch();
   const { fetchState } = StateActions;
   const { fetchCountries } = countryActions;
-  const isInitialMount = React.useRef(true);
+
 
   React.useEffect(() => {
     if (!isInitialMount.current) {
@@ -47,9 +47,9 @@ export default function Page({ searchParams }) {
         name: searchInput || '',
         countryId: countryID || '',
       };
-      if(allCountries.length === 0){
+     
         dispatch(fetchCountries({ limit: "", page: "", search: "" }));
-      }
+      
       if(allState.length === 0 || !isInitialMount.current){
        dispatch(fetchState(data));}
 
@@ -58,9 +58,7 @@ export default function Page({ searchParams }) {
     updateSearchParams({ searchTerm: searchInput, page: currentPage, limit: rowsPerPage });
     
    
-    if(isInitialMount.current){
-      isInitialMount.current = false;
-    }
+   
   
   },[searchInput, currentPage, rowsPerPage, countryID]);
 

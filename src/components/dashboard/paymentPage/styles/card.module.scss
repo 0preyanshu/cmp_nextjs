@@ -1,0 +1,65 @@
+.cardWrapper {
+    background-color: #fff3e0;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+  }
+  
+  .cardLabel {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+    position: relative;
+  }
+  
+  .cardLabelText {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 5px;
+  }
+  
+  .cardNumberWrapper {
+    display: flex;
+    align-items: center;
+    position: relative;
+  }
+  
+  .cardInput {
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    font-size: 16px;
+    width: 100%;
+  }
+  
+  .expiryCvcWrapper {
+    display: flex;
+    justify-content: space-between;
+    // gap: 10px;
+    width: 100%;
+  }
+  
+  .cardLogo {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+  }
+  
+  .sslSecured {
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+  }
+  
+  .sslSecured img {
+    width: 20px;
+    margin-right: 10px;
+  }
+  
+  .sslSecured span {
+    font-size: 14px;
+    color: #333;
+  }
+  

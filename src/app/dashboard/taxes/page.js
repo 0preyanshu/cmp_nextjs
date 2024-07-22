@@ -33,7 +33,7 @@ export default function Page({ searchParams }) {
   const { allTaxes,  loading: isLoading, totalData } = useSelector((state) => state?.taxes?.taxes);
   const dispatch = useDispatch();
   const { fetchTaxes } = TaxActions;
-  const isInitialMount = React.useRef(true);
+
 
   React.useEffect(() => {
    
@@ -42,12 +42,9 @@ export default function Page({ searchParams }) {
         limit: rowsPerPage,
         name: searchInput || ''
       };
-      if(allTaxes.length === 0 ||isInitialMount.current) dispatch(fetchTaxes(data));
+       dispatch(fetchTaxes(data));
       updateSearchParams({ searchTerm: searchInput, page: currentPage, limit: rowsPerPage });
-    if(isInitialMount.current){
-      isInitialMount.current = false;
-
-    }
+  
     
   }, [ searchInput, currentPage, rowsPerPage]);
 

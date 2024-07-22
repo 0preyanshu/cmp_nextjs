@@ -40,7 +40,7 @@ export default function Page({ searchParams }) {
 
   const [searchInput, setSearchInput] = React.useState(searchTerm || '');
 
-  const isInitialMount = React.useRef(true);
+
 
   React.useEffect(() => {
     const data = {
@@ -51,18 +51,16 @@ export default function Page({ searchParams }) {
       category: courseCategory || '',
     };
 
-    if (!isInitialMount.current || allCourses.length === 0) {
+  
       dispatch(fetchCourses(data));
-    }
+    
     if ( allCategories.length === 0) {
       dispatch(fetchcategories({ limit: '', page: '', search: '' }));
     }
 
     updateSearchParams({ searchTerm: searchInput, page: currentPage, limit: rowsPerPage, courseCategory });
 
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-    }
+    
   }, [searchInput, currentPage, rowsPerPage, courseCategory]);
 
   const handleSearchChange = (event) => {

@@ -1,3 +1,4 @@
+'use client'
 import * as React from 'react';
 import RouterLink from 'next/link';
 import Box from '@mui/material/Box';
@@ -10,10 +11,12 @@ import { config } from '@/config';
 import { paths } from '@/paths';
 import { PaymentApiForm } from '@/components/dashboard/paymentapi/paymentapi-create-form';
 import { CancelForm } from '../../../../../components/dashboard/orders/cancel-form';
+import { useParams } from 'next/navigation';
 
-export const metadata = { title: `Create | Payment | Dashboard | ${config.site.name}` };
+// export const metadata = { title: `Create | Payment | Dashboard | ${config.site.name}` };
 
 export default function Page() {
+  const { Id } = useParams();
   return (
     <Box
       sx={{
@@ -29,7 +32,7 @@ export default function Page() {
             <Link
               color="text.primary"
               component={RouterLink}
-              href={paths.dashboard.orders.details("1")}
+              href={paths.dashboard.orders.details(Id)}
               sx={{ alignItems: 'center', display: 'inline-flex', gap: 1 }}
               variant="subtitle2"
             >

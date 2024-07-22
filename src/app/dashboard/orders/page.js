@@ -75,9 +75,9 @@ export default function Page({ searchParams }) {
       if(allVendors.length === 0){
         dispatch(fetchVendors({ limit: "", page: "", search: "" }));
       }
-      if(allOrders.length === 0 || !isInitialMount.current){
+     
         dispatch(fetchOrder(data));
-      }
+      
 
       updateSearchParams({ searchTerm: searchInput, page: currentPage, limit: rowsPerPage, startDate:startDate, courseID:courseID, vedorID:vendorID, endDate:endDate});
      

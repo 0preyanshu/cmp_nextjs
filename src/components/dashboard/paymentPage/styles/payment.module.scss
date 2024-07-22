@@ -1,0 +1,187 @@
+.heading {
+    border-radius: 4px;
+    background: #000;
+    padding: 4px 10px;
+    display: flex;
+    align-items: center;
+
+    h3 {
+        color: #F9F9F9;
+        font-feature-settings: 'ss01' on;
+        font-family: Inter;
+        font-size: 15px;
+        font-style: normal;
+        font-weight: 500;
+        line-height: 140%;
+        /* 21px */
+    }
+}
+
+.wrapper {
+    width: 100%;
+    margin: 24px 0;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 24px;
+
+    @media (max-width: 900px) {
+        grid-template-columns: 1fr;
+        padding: 0 16px;
+    }
+
+    .options {
+        .option {
+            width: 100%;
+            padding: 14px 24px 14px 16px;
+            border-radius: 6px 6px 0px 0px;
+            border: 0.5px solid var(--neutral-grey, #B0B0B0);
+            box-shadow: 0px 0px 24px 0px rgba(229, 229, 229, 0.16);
+
+            h3 {
+                color: #383838;
+                font-feature-settings: 'clig' off, 'liga' off;
+                font-family: Inter;
+                font-size: 16px;
+                font-style: normal;
+                font-weight: 500;
+                line-height: 26px;
+                /* 162.5% */
+                letter-spacing: 0.28px;
+            }
+        }
+    }
+
+    .card_form {
+        border-radius: 8px;
+        border: 1px solid #D4D4D4;
+        background: #FFF5EA;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding: 21px 42px;
+
+        @media (max-width: 900px) {
+            padding: 16px;
+        }
+
+        input {
+            background: #fff;
+
+            @media (max-width: 900px) {
+                font-family: Inter;
+                font-size: 12px;
+                font-style: normal;
+                font-weight: 400;
+                line-height: 139%;
+                /* 16.68px */
+                letter-spacing: -0.36px;
+
+                &::placeholder {
+                    font-family: Inter;
+                    font-size: 12px;
+                    font-style: normal;
+                    font-weight: 400;
+                    line-height: 139%;
+                    /* 16.68px */
+                    letter-spacing: -0.36px;
+                }
+            }
+        }
+
+        .ssl {
+            display: flex;
+            justify-content: flex-end;
+            color: #0E3B65;
+            font-feature-settings: 'clig' off, 'liga' off;
+            font-family: Inter;
+            font-size: 12px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 15.128px;
+            letter-spacing: 0.326px;
+
+            span {
+                font-weight: 700;
+            }
+        }
+
+        h4 {
+            color: #383838;
+            font-feature-settings: 'case' on, 'salt' on;
+            font-family: Inter;
+            font-size: 15px;
+            font-style: normal;
+            font-weight: 600;
+            line-height: 140%;
+            /* 21px */
+        }
+
+        p {
+            color: #383838;
+            font-feature-settings: 'case' on, 'salt' on;
+            font-family: Inter;
+            font-size: 15px;
+            font-style: normal;
+            font-weight: 400;
+            line-height: 140%;
+
+            /* 21px */
+            span {
+                color: #FB5741;
+            }
+        }
+    }
+
+    .button {
+        display: flex;
+        width: 100%;
+        justify-content: flex-end;
+
+        button {
+            margin-top: 24px;
+            cursor: pointer;
+        }
+
+        .paypal {
+            border-radius: 8px;
+            border: 1px solid #ADAFAE;
+            background: #F6C757;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 14px;
+
+            &:disabled {
+                background: rgba(145, 158, 171, 0.24);
+            }
+        }
+
+        @media (max-width: 900px) {
+            display: none;
+        }
+    }
+
+    .message {
+        display: flex;
+        width: 100%;
+        justify-content: flex-end;
+
+        p {
+            color: #243574;
+            font-family: Inter;
+            font-size: 14px;
+            font-style: normal;
+            font-weight: 500;
+            line-height: 140%;
+            /* 19.6px */
+            letter-spacing: -0.07px;
+        }
+
+        @media (max-width: 900px) {
+            display: none;
+        }
+    }
+
+
+}
