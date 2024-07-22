@@ -5,7 +5,7 @@ import { LogLevel } from '@/lib/logger';
 
 
 
-export const HOST_API = "https://4zg88ggiaa.execute-api.ap-south-1.amazonaws.com/stg/payment-service/stripe/config"|| 'https://api.cmp.skillac.com';
+export const HOST_API = "https://4zg88ggiaa.execute-api.ap-south-1.amazonaws.com/stg"|| 'https://api.cmp.skillac.com';
 
 export const config = {
   site: {
