@@ -26,10 +26,7 @@ export default function Payment() {
 
   const [activeSection, setActiveSection] = React.useState(step ? step - 1 : 0);
   const [open, setOpen] = React.useState(false);
-  const [event, setEvent] = React.useState({
-    eventId: 1,
-    courseId: 1,
-  });
+  const [event, setEvent] = React.useState({});
   const [clientSecret, setClientSecret] = React.useState("test_client_secret");
   const [select, setSelect] = React.useState("card");
   const [triggerPayment, setTriggerPayment] = React.useState(false);
@@ -88,30 +85,7 @@ export default function Payment() {
     try {
       console.log(errors, "errors");
       console.log(data, "submitted values");
-      if (data.editable) {
-        const updatedData = {
-          internalOrderType: data.for === "Myself" ? "INDIVIDUAL" : "CORPORATE",
-          numberOfParticipants: data.attendees,
-          buyerName: `${data.first_name} ${data.last_name}`,
-          buyerPhoneNo: data.number,
-          buyerEmail: data.email,
-        };
-        setActiveSection(1);
-      } else {
-        const formdata = {
-          orderType: "INTERNAL",
-          internalOrderType: data.for === "Myself" ? "INDIVIDUAL" : "CORPORATE",
-          eventId: Number(event.eventId),
-          courseId: Number(event.courseId),
-          couponDiscount: priceDetails.couponDiscount > 0,
-          numberOfParticipants: data.attendees,
-          buyerName: `${data.first_name} ${data.last_name}`,
-          buyerPhoneNo: data.number,
-          buyerEmail: data.email,
-        };
-        // setValue('orderId', 'test_order_id');
-        setActiveSection(1);
-      }
+   
     } catch (error) {
       console.error(error);
     }

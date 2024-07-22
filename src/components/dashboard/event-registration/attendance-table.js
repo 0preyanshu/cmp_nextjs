@@ -19,8 +19,9 @@ import axios from 'axios';
 import { useCallback } from 'react';
 import Papa from 'papaparse';
 import { saveAs } from 'file-saver';
+import {HOST_API} from '@/config'
 
-const HOST_API = "https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg";
+// const HOST_API = "https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg";
 
 export const AttendanceTable = React.forwardRef(({ eventData, attendance, setParentIsSubmitting, currentPage = 1 ,currentLimit=10}, ref) => {
 

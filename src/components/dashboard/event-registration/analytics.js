@@ -15,9 +15,10 @@ import { current } from '@reduxjs/toolkit';
 import { toast } from '@/components/core/toaster';
 import { paths } from '@/paths';
 import { Chart } from 'react-apexcharts';
+import {HOST_API} from '@/config'
 
 
-const HOST_API = "https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg";
+// const HOST_API = "https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg";
 
 const handleCopy = (id) => {
   const url = `${window.location.origin}${paths.dashboard.eventregistration.attendance(id)}`;
