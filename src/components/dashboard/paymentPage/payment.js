@@ -3,17 +3,51 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Typography, FormControlLabel, Radio, Box } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
+import { CardNumberElement, CardExpiryElement, CardCvcElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import CardInput from './card';
-// import { PaymentElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import Styles from './styles/payment.module.scss';
+import {toast} from '@/components/core/toaster'
 
 const PAYPAL_URL = "https://www.paypal.com/checkout";
 
-export default function PaymentSection({ data, eventId, currencyId, clientSecret, select, setSelect, triggerPayment }) {
-  // const stripe = useStripe();
-  const stripe = 1; // Hardcoded value for stripe
-  // const elements = useElements();
-  const elements = 1; // Hardcoded value for elements
+const chargeApi = async (token, paymentDetails) => {
+  try {
+    const response = await fetch('https://4zg88ggiaa.execute-api.ap-south-1.amazonaws.com/stg/payment-service/stripe/charge', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        buyerFirstName: paymentDetails.buyerFirstName,
+        buyerLastName: paymentDetails.buyerLastName,
+        buyerPhone: paymentDetails.buyerPhone,
+        buyerEmail: paymentDetails.buyerEmail,
+        purchaseType: paymentDetails.purchaseType,
+        orderInfo: paymentDetails.orderInfo,
+        eventID: paymentDetails.eventID,
+        currencyID: paymentDetails.currencyID,
+        taxID: paymentDetails.taxID,
+        couponID: paymentDetails.couponID,
+        participants: paymentDetails.participants,
+        paymentData: {
+          token: token.id,
+          customerName: paymentDetails.customerName,
+          customerEmail: paymentDetails.customerEmail
+        }
+      }),
+    });
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error charging API: ", error);
+    throw error;
+  }
+};
+
+export default function PaymentSection({ data, eventID, currencyID,taxID, clientSecret, select, setSelect, triggerPayment, orderInfo , couponCode,setActiveSection }) {
+  const stripe = useStripe();
+  const elements = useElements();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -26,30 +60,60 @@ export default function PaymentSection({ data, eventId, currencyId, clientSecret
 
     setIsLoading(true);
 
-    // Simulate payment intent initiation
-    console.log('Initiating payment intent:', {
-      currencyId,
-      noOfParticipants: data.attendees,
-      eventId,
-      couponCode: data.coupon,
-      orderId: data.orderId,
-    });
+    const cardElement = elements.getElement(CardNumberElement);
 
-    // Simulate a successful payment confirmation
-    console.log('Payment confirmed');
+    try {
+      const { token, error } = await stripe.createToken(cardElement);
+      if (error) {
+        console.log("Error creating token:", error);
+        toast.error(error?.message || "Payment Failed")
+        setIsLoading(false);
+        return;
+      }
+     
 
-    setIsLoading(false);
+       console.log(data,"data");
+      const paymentDetails = {
+        buyerFirstName: data.first_name,
+        buyerLastName: data.last_name,
+        buyerPhone: data.number,
+        buyerEmail: data.email,
+        purchaseType: data.purchaseType || 'MY_SELF',
+        orderInfo: {
+          calculatedAmount: orderInfo.calculatedAmount,
+          noOfParticipants: data.attendees,
+          eventAmount: orderInfo.eventAmount,
+          taxAmount: orderInfo.taxAmount,
+          couponAmount: orderInfo.couponAmount,
+        },
+        eventID: eventID,
+        currencyID: currencyID,
+        taxID: taxID,
+        couponID:  undefined,
+        participants: data.participants || [],
+        customerName: data.first_name,
+        customerEmail: data.email,
+      };
+
+      const chargeResponse = await chargeApi(token, paymentDetails);
+      console.log("Charge response:", chargeResponse);
+      if(chargeResponse?.data){
+        toast.success("Payment Successful")
+        setActiveSection(2);
+      }else{
+        toast.error("Payment Failed")
+      }
+    } catch (error) {
+      console.error("Payment error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handlePayPalPay = () => {
     setIsLoading(true);
-    // Simulate redirect to PayPal
     router.push(PAYPAL_URL);
-  }
-
-  const paymentElementOptions = {
-    layout: "tabs"
-  }
+  };
 
   useEffect(() => {
     if (triggerPayment) {

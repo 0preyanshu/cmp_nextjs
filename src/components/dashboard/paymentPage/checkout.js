@@ -17,16 +17,22 @@ import PaymentFooter from './payment-footer';
 import PaymentSection from './payment';
 import InfoSection from './info-section';
 import Confirmed from './confirmed';
-export default function Payment() {
-  const eventid = 1;
-  const currencyid = 1;
-  const step = 1;
+import { useEffect,useState } from 'react';
 
+export default function Payment() {
+  const eventID = "01J357QX6967D3QCYVFADSX62T";
+  const currencyID = "01J357PVJD8A74YPX0GRZ3PWB3";
+  const taxID = "01J357QDCMJJBJG3XGTTS5J8AY";
+  const couponCode = "01J3583XS8NPE3YKDTXM1CMEPV";
+  const step = 1;
   const isDesktop = false;
 
   const [activeSection, setActiveSection] = React.useState(step ? step - 1 : 0);
   const [open, setOpen] = React.useState(false);
   const [event, setEvent] = React.useState({});
+  const [currency, setCurrency] = React.useState({});
+  const [tax, setTax] = React.useState({});
+  const [coupon, setCoupon] = React.useState({});
   const [clientSecret, setClientSecret] = React.useState("test_client_secret");
   const [select, setSelect] = React.useState("card");
   const [triggerPayment, setTriggerPayment] = React.useState(false);
@@ -85,11 +91,81 @@ export default function Payment() {
     try {
       console.log(errors, "errors");
       console.log(data, "submitted values");
-   
+      setActiveSection(1);
     } catch (error) {
       console.error(error);
     }
   };
+  const [orderInfo, setOrderInfo] = useState({
+    calculatedAmount: 0,
+    noOfParticipants: 0,
+    eventAmount: 0,
+    taxAmount: 0,
+    couponAmount: 0,
+  });
+
+  useEffect(() => {
+    if(!event || !tax  ){
+      return ; 
+    }
+    const noOfParticipants = watch("attendees");
+    const eventAmount = event?.eventPrice?.filter(price => price.currencyID === currencyID)[0]?.earlyBirdPrice * 100 || 0;
+    const totalAmount = eventAmount * noOfParticipants;
+
+    const couponAmount = coupon
+      ? coupon.couponType === 'FIXED'
+        ? (coupon.couponAmount * 100)
+        : totalAmount * (coupon.couponAmount / 100)
+      : 0;
+
+
+    const taxPercentage = tax?.taxPercentage || 0;
+    const taxAmount = taxPercentage ? (totalAmount - couponAmount) * (taxPercentage / 100) : 0;
+
+    // Calculate total amount
+    const calculatedAmount = (totalAmount - couponAmount) + taxAmount;
+
+    // Update order info state
+    setOrderInfo({
+      calculatedAmount,
+      noOfParticipants,
+      eventAmount,
+      taxAmount,
+      couponAmount,
+    });
+
+    console.log("event",event);
+
+    console.log("l",{
+      calculatedAmount,
+      noOfParticipants,
+      eventAmount,
+      taxAmount,
+      couponAmount,
+    })
+
+  }, [event, currencyID, watch("attendees"), coupon, tax]);
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [event, currency, tax, coupon] = await Promise.all([
+          fetch(`https://4zg88ggiaa.execute-api.ap-south-1.amazonaws.com/stg/event/${eventID}`).then(res => res.json()),
+          fetch(`https://4zg88ggiaa.execute-api.ap-south-1.amazonaws.com/stg/currency/${currencyID}`).then(res => res.json()),
+          taxID ? fetch(`https://4zg88ggiaa.execute-api.ap-south-1.amazonaws.com/stg/tax/${taxID}`).then(res => res.json()) : Promise.resolve(undefined),
+          couponCode ? fetch(`https://4zg88ggiaa.execute-api.ap-south-1.amazonaws.com/stg/coupon/with-code/${couponCode}`).then(res => res.json()) : Promise.resolve(undefined)
+        ]);
+
+        setEvent(event.data.event);
+        setCurrency(currency.data.currency);
+        setTax(tax?.data?.tax);
+        setCoupon(coupon?.data?.coupon);
+      } catch (error) {
+        console.error("Error fetching data: ", error);
+      }
+    };
+
+    fetchData();
+  }, [eventID, currencyID, taxID, couponCode]);
 
   React.useEffect(() => {
     const fetchStripeConfig = async () => {
@@ -102,7 +178,6 @@ export default function Payment() {
       if (response.ok) {
         const data = await response.json();
         const { publishableKey } = data.data;
-        console.log(publishableKey);
         setStripePromise(loadStripe(publishableKey));
       } else {
         console.error('Failed to fetch Stripe config');
@@ -149,12 +224,17 @@ export default function Payment() {
                     <Elements stripe={stripePromise}>
                       <PaymentSection
                         data={values}
-                        eventId={eventid}
-                        currencyId={currencyid}
+                        eventID={eventID}
+                        currencyID={currencyID}
+                        taxID = {taxID}
                         clientSecret={"pi_test_123_secret_456"}
                         select={select}
                         setSelect={setSelect}
                         triggerPayment={triggerPayment}
+                        orderInfo = {orderInfo}
+                        couponCode = {couponCode}
+                        setActiveSection={setActiveSection}
+
                       />
                     </Elements>
                   )}
@@ -171,7 +251,7 @@ export default function Payment() {
             </Box>
           </Grid>
           <Grid item xs={12} md={4} sx={{ display: { xs: 'none', md: 'block' } }}>
-            <PaymentSummary data={values} setData={setValue} activeSection={activeSection} setActiveSection={setActiveSection} event={event} loading={false} currencyid={currencyid} />
+           {activeSection!==2 &&  <PaymentSummary data={values} setData={setValue} activeSection={activeSection} setActiveSection={setActiveSection} event={event} loading={false} currencyID={currencyID} orderInfo={orderInfo} currency={currency}/>}
           </Grid>
           <div className={Styles.fixed_footer}>
             <div className={Styles.price}>
@@ -190,7 +270,7 @@ export default function Payment() {
           </div>
           {open && activeSection!==2 && (
             <div className={Styles.info}>
-              <PaymentSummary data={values} setData={setValue} activeSection={activeSection} setActiveSection={setActiveSection} event={event} loading={false} currencyid={currencyid} />
+              <PaymentSummary data={values} setData={setValue} activeSection={activeSection} setActiveSection={setActiveSection} event={event} loading={false} currencyid={currencyID} />
             </div>
           )}
         </Grid>
