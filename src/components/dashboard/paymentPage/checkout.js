@@ -262,7 +262,7 @@ export default function Payment({searchParams}) {
                         setSelect={setSelect}
                         triggerPayment={triggerPayment}
                         orderInfo = {orderInfo}
-                        couponCode = {couponCode}
+                    
                         setActiveSection={setActiveSection}
                         currentOrder={currentOrder}
                         setCurrentOrder={setCurrentOrder}
