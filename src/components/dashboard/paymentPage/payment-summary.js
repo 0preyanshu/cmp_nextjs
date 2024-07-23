@@ -4,12 +4,12 @@ import moment from 'moment';
 import { TextField, Skeleton } from '@mui/material';
 import styles from './PaymentSummary.module.css';  // Import the CSS module
 
-export default function PaymentSummary({ orderInfo, currency, fetchedEvent,loading }) {
-  // const [loading, setLoading] = useState(false);
-  const [data, setData] = useState({
-    attendees: 1,
-    coupon: '',
-  });
+export default function PaymentSummary({ data, orderInfo, currency, fetchedEvent, loading, fetchCoupon }) {
+  const [coupon, setCoupon] = useState('');
+
+  useEffect(() => {
+    console.log("orderInfo", orderInfo);
+  }, [orderInfo]);
 
   const [priceDetails, setPriceDetails] = useState({
     currencyName: 'USD',
@@ -36,9 +36,9 @@ export default function PaymentSummary({ orderInfo, currency, fetchedEvent,loadi
     setPriceDetails({
       currencyName: currency?.currencyName || 'USD',
       currencyLogo: currency?.currencyLogo || '$',
-      price: orderInfo?.eventAmount || 0,
+      price: orderInfo?.calculatedAmount || 0,
       regularPrice: orderInfo?.calculatedAmount || 0,
-      couponDiscount: 0,
+      couponDiscount: orderInfo?.couponDiscount || 0,
       subtotal: orderInfo?.calculatedAmount || 0,
       taxAndCharges: orderInfo?.taxAmount || 0,
       totalAmount: orderInfo?.calculatedAmount || 0,
@@ -53,18 +53,21 @@ export default function PaymentSummary({ orderInfo, currency, fetchedEvent,loadi
       timezoneShortName: 'PST',
       courseLogo: '/images/course-logo.png',
     });
+
+    console.log("fetchedEvent", fetchedEvent);
+
   }, [orderInfo, currency, fetchedEvent]);
 
-  const applyCoupon = (e) => {
+  const applyCoupon = async (e) => {
     e.preventDefault();
-    // Mock coupon application logic
-    // if (data.coupon === 'DISCOUNT10') {
-    //   const discount = 10;
-    //   const newPrice = priceDetails.price - discount;
-    //   // enqueueSnackbar('Coupon code applied successfully', { variant: 'success' });
-    // } else {
-    //   // enqueueSnackbar('Invalid Coupon!', { variant: 'error' });
-    // }
+    try {
+      if (coupon) {
+        await fetchCoupon(coupon);
+        // orderInfo will automatically get updated, triggering the useEffect to update price details
+      }
+    } catch (error) {
+      console.error("Error applying coupon: ", error);
+    }
   };
 
   return (
@@ -96,7 +99,15 @@ export default function PaymentSummary({ orderInfo, currency, fetchedEvent,loadi
       <div className={styles.pricing}>
         <div className={styles.promo}>Promo Code</div>
         <form className={styles.input} onSubmit={applyCoupon}>
-          <TextField size='large' fullWidth label="Enter Promo Code" name="promo" onChange={(e) => setData({ ...data, coupon: e.target.value })} required value={data.coupon} />
+          <TextField
+            size='large'
+            fullWidth
+            label="Enter Promo Code"
+            name="promo"
+            onChange={(e) => setCoupon(e.target.value)}
+            required
+            value={coupon}
+          />
           <button className={styles.promo_button} type='submit'>Apply</button>
         </form>
 
@@ -151,6 +162,6 @@ export default function PaymentSummary({ orderInfo, currency, fetchedEvent,loadi
           <div>{priceDetails.currencyName} {priceDetails.currencyLogo}{priceDetails.totalAmount}</div>
         </div>
       )}
-    </div >
+    </div>
   );
 }

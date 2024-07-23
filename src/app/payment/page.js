@@ -1,10 +1,10 @@
 import React from 'react';
 import Payment from '@/components/dashboard/paymentPage/checkout';
 
-function App() {
+function App({searchParams}) {
     return (
         <div className="App">
-            <Payment/>
+            <Payment searchParams={searchParams}/>
         </div>
     );
 }

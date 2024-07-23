@@ -45,7 +45,7 @@ const chargeApi = async (token, paymentDetails) => {
   }
 };
 
-export default function PaymentSection({ data, eventID, currencyID,taxID, clientSecret, select, setSelect, triggerPayment, orderInfo , couponCode,setActiveSection }) {
+export default function PaymentSection({ data, eventID, currencyID,taxID, clientSecret, select, setSelect, triggerPayment, orderInfo , couponCode,setActiveSection,currentOrder,setCurrentOrder }) {
   const stripe = useStripe();
   const elements = useElements();
   const router = useRouter();
@@ -78,7 +78,7 @@ export default function PaymentSection({ data, eventID, currencyID,taxID, client
         buyerLastName: data.last_name,
         buyerPhone: data.number,
         buyerEmail: data.email,
-        purchaseType: data.purchaseType || 'MY_SELF',
+        purchaseType: data.for ||'MY_SELF',
         orderInfo: {
           calculatedAmount: orderInfo.calculatedAmount,
           noOfParticipants: data.attendees,
@@ -98,6 +98,7 @@ export default function PaymentSection({ data, eventID, currencyID,taxID, client
       const chargeResponse = await chargeApi(token, paymentDetails);
       console.log("Charge response:", chargeResponse);
       if(chargeResponse?.data){
+        setCurrentOrder(chargeResponse?.data);
         toast.success("Payment Successful")
         setActiveSection(2);
       }else{
