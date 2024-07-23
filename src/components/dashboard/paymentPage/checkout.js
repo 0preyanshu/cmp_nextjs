@@ -18,12 +18,15 @@ import PaymentSection from './payment';
 import InfoSection from './info-section';
 import Confirmed from './confirmed';
 import { useEffect,useState } from 'react';
+import { toast } from '@/components/core/toaster';
 
-export default function Payment() {
+export default function Payment({searchParams}) {
   const eventID = "01J357QX6967D3QCYVFADSX62T";
   const currencyID = "01J357PVJD8A74YPX0GRZ3PWB3";
   const taxID = "01J357QDCMJJBJG3XGTTS5J8AY";
-  const couponCode = "01J3583XS8NPE3YKDTXM1CMEPV";
+  // const {eventID,currencyID,taxID} = searchParams;
+  console.log("eventID",eventID);
+
   const step = 1;
   const isDesktop = false;
 
@@ -32,14 +35,17 @@ export default function Payment() {
   const [event, setEvent] = React.useState({});
   const [currency, setCurrency] = React.useState({});
   const [tax, setTax] = React.useState({});
-  const [coupon, setCoupon] = React.useState({});
+  const [coupon, setCoupon] = React.useState(null);
   const [clientSecret, setClientSecret] = React.useState("test_client_secret");
   const [select, setSelect] = React.useState("card");
   const [triggerPayment, setTriggerPayment] = React.useState(false);
   const [stripePromise, setStripePromise] = React.useState(null);
+  const [currentOrder,setCurrentOrder] = React.useState(null);
+  const [loadingCoupon, setLoadingCoupon] = React.useState(false);
+  
 
   const validationSchema = z.object({
-    for: z.enum(["Myself", "SomeoneElse"], { required_error: "Select who you are buying for" }),
+    for: z.enum(["MY_SELF", "SOMEONE_ELSE"], { required_error: "Select who you are buying for" }),
     attendees: z.number().min(1, "There must be at least one attendee"),
     first_name: z.string().min(1, "First name is required!"),
     last_name: z.string().min(1, "Last name is required!"),
@@ -52,7 +58,7 @@ export default function Payment() {
   });
 
   const defaultValues = {
-    for: "Myself",
+    for: "MY_SELF",
     attendees: 1,
     first_name: "",
     last_name: "",
@@ -108,9 +114,11 @@ export default function Payment() {
     if(!event || !tax  ){
       return ; 
     }
-    const noOfParticipants = watch("attendees");
+    const noOfParticipants = Number(watch("attendees"));
     const eventAmount = event?.eventPrice?.filter(price => price.currencyID === currencyID)[0]?.earlyBirdPrice * 100 || 0;
     const totalAmount = eventAmount * noOfParticipants;
+
+    console.log("totalAmount",totalAmount);
 
     const couponAmount = coupon
       ? coupon.couponType === 'FIXED'
@@ -119,8 +127,11 @@ export default function Payment() {
       : 0;
 
 
-    const taxPercentage = tax?.taxPercentage || 0;
+    const taxPercentage = Number(tax?.taxPercentage) || 0;
+    console.log("tax",taxPercentage);
     const taxAmount = taxPercentage ? (totalAmount - couponAmount) * (taxPercentage / 100) : 0;
+    
+    console.log("taxAmount",taxAmount);
 
     // Calculate total amount
     const calculatedAmount = (totalAmount - couponAmount) + taxAmount;
@@ -151,21 +162,20 @@ export default function Payment() {
         const [event, currency, tax, coupon] = await Promise.all([
           fetch(`https://4zg88ggiaa.execute-api.ap-south-1.amazonaws.com/stg/event/${eventID}`).then(res => res.json()),
           fetch(`https://4zg88ggiaa.execute-api.ap-south-1.amazonaws.com/stg/currency/${currencyID}`).then(res => res.json()),
-          taxID ? fetch(`https://4zg88ggiaa.execute-api.ap-south-1.amazonaws.com/stg/tax/${taxID}`).then(res => res.json()) : Promise.resolve(undefined),
-          couponCode ? fetch(`https://4zg88ggiaa.execute-api.ap-south-1.amazonaws.com/stg/coupon/with-code/${couponCode}`).then(res => res.json()) : Promise.resolve(undefined)
+          taxID ? fetch(`https://4zg88ggiaa.execute-api.ap-south-1.amazonaws.com/stg/tax/${taxID}`).then(res => res.json()) : Promise.resolve(undefined)
+          
         ]);
 
         setEvent(event.data.event);
         setCurrency(currency.data.currency);
         setTax(tax?.data?.tax);
-        setCoupon(coupon?.data?.coupon);
       } catch (error) {
         console.error("Error fetching data: ", error);
       }
     };
 
     fetchData();
-  }, [eventID, currencyID, taxID, couponCode]);
+  }, [eventID, currencyID, taxID]);
 
   React.useEffect(() => {
     const fetchStripeConfig = async () => {
@@ -186,6 +196,26 @@ export default function Payment() {
 
     fetchStripeConfig();
   }, []);
+
+  const fetchCoupon = async (couponCode) => {
+    try {
+      setLoadingCoupon(true);
+      const response = await fetch(`https://4zg88ggiaa.execute-api.ap-south-1.amazonaws.com/stg/coupon/with-code/${couponCode}`);
+      const data = await response.json();
+        console.log("data",data);
+      setLoadingCoupon(false);
+      if(data?.data?.coupon){
+        toast.success("Coupon applied successfully");
+        setCoupon(data.data.coupon);
+      }
+      else{
+        toast.error("Coupon not found");
+      } 
+    } catch (error) {
+      setLoadingCoupon(false);
+      console.error("Error fetching coupon: ", error);
+    }
+  };
 
   return (
     <div className={Styles.payment_page}>
@@ -234,6 +264,8 @@ export default function Payment() {
                         orderInfo = {orderInfo}
                         couponCode = {couponCode}
                         setActiveSection={setActiveSection}
+                        currentOrder={currentOrder}
+                        setCurrentOrder={setCurrentOrder}
 
                       />
                     </Elements>
@@ -242,7 +274,9 @@ export default function Payment() {
               )}
               {
                 activeSection === 2 && (
-                  <><Confirmed></Confirmed></>
+                  <><Confirmed currentOrder ={currentOrder?.order} event={event} currency={currency}
+                  token={currentOrder?.token} For={values.for}
+                  ></Confirmed></>
                 )
 
               
@@ -251,7 +285,7 @@ export default function Payment() {
             </Box>
           </Grid>
           <Grid item xs={12} md={4} sx={{ display: { xs: 'none', md: 'block' } }}>
-           {activeSection!==2 &&  <PaymentSummary data={values} setData={setValue} activeSection={activeSection} setActiveSection={setActiveSection} event={event} loading={false} currencyID={currencyID} orderInfo={orderInfo} currency={currency}/>}
+           {activeSection!==2 &&  <PaymentSummary data={values} setData={setValue} activeSection={activeSection} setActiveSection={setActiveSection} fetchedEvent={event} loading={loadingCoupon} currencyID={currencyID} orderInfo={orderInfo} currency={currency} fetchCoupon={fetchCoupon}/>}
           </Grid>
           <div className={Styles.fixed_footer}>
             <div className={Styles.price}>
@@ -270,7 +304,8 @@ export default function Payment() {
           </div>
           {open && activeSection!==2 && (
             <div className={Styles.info}>
-              <PaymentSummary data={values} setData={setValue} activeSection={activeSection} setActiveSection={setActiveSection} event={event} loading={false} currencyid={currencyID} />
+              <PaymentSummary data={values} setData={setValue} activeSection={activeSection} setActiveSection={setActiveSection} fetchedEvent={event} loading={loadingCoupon} currencyID={currencyID} fetchCoupon={fetchCoupon} orderInfo={orderInfo} currency={currency}
+               />
             </div>
           )}
         </Grid>

@@ -30,19 +30,19 @@ export default function BasicInformation({ control, setData, formValues }) {
               <>
                 <Button
                   onClick={() => {
-                    field.onChange('Myself');
-                    handleInputChange('for', 'Myself');
+                    field.onChange('MY_SELF');
+                    handleInputChange('for', 'MY_SELF');
                   }}
-                  variant={formValues.for === 'Myself' ? 'contained' : 'outlined'}
+                  variant={formValues.for === 'MY_SELF' ? 'contained' : 'outlined'}
                 >
-                  Myself
+                  My Self
                 </Button>
                 <Button
                   onClick={() => {
                     field.onChange('Someone Else');
-                    handleInputChange('for', 'SomeoneElse');
+                    handleInputChange('for', 'SOMEONE_ELSE');
                   }}
-                  variant={formValues.for === 'SomeoneElse' ? 'contained' : 'outlined'}
+                  variant={formValues.for === 'SOMEONE_ELSE' ? 'contained' : 'outlined'}
                 >
                   Someone Else
                 </Button>
