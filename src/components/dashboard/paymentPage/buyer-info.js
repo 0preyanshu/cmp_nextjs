@@ -14,7 +14,7 @@ export default function BuyerInformation({ control, errors, onSubmit, setData, i
   return (
     <div>
       <div className={Styles.heading}>
-        <Typography variant="h6">Buyer Information</Typography>
+      Buyer Information
       </div>
       <form onSubmit={onSubmit}>
         <Box mt={5}>

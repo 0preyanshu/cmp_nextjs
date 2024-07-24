@@ -4,8 +4,9 @@ import moment from 'moment';
 import { TextField, Skeleton } from '@mui/material';
 import styles from './PaymentSummary.module.css';  // Import the CSS module
 
-export default function PaymentSummary({ data, orderInfo, currency, fetchedEvent, loading, fetchCoupon }) {
+export default function PaymentSummary({ data, orderInfo, currency, fetchedEvent, loading, fetchCoupon, setCouponData }) {
   const [coupon, setCoupon] = useState('');
+  const [couponApplied, setCouponApplied] = useState(false);  // New state to track coupon application
 
   useEffect(() => {
     console.log("orderInfo", orderInfo);
@@ -42,16 +43,17 @@ export default function PaymentSummary({ data, orderInfo, currency, fetchedEvent
       subtotal: orderInfo?.calculatedAmount || 0,
       taxAndCharges: orderInfo?.taxAmount || 0,
       totalAmount: orderInfo?.calculatedAmount || 0,
+      couponDiscount: orderInfo?.couponAmount || 0,
     });
 
     setEvent({
       eventId: fetchedEvent?.eventId || 1,
       eventName: fetchedEvent?.eventName || 'React Workshop',
-      instructorName: 'John Doe',
+      instructorName: fetchedEvent?.instructorName || 'John Doe',
       classStartDate: fetchedEvent?.eventStartDate || '2024-08-01T10:00:00',
       classEndDate: fetchedEvent?.eventEndDate || '2024-08-05T10:00:00',
-      timezoneShortName: 'PST',
-      courseLogo: '/images/course-logo.png',
+      timezoneShortName: fetchedEvent?.timezoneShortName || 'PST',
+      courseLogo: fetchedEvent?.courseLogo || '/images/course-logo.png',
     });
 
     console.log("fetchedEvent", fetchedEvent);
@@ -62,18 +64,37 @@ export default function PaymentSummary({ data, orderInfo, currency, fetchedEvent
     e.preventDefault();
     try {
       if (coupon) {
-        await fetchCoupon(coupon);
-        // orderInfo will automatically get updated, triggering the useEffect to update price details
+        const fetched = await fetchCoupon(coupon);
+        if(fetched){
+          setCouponApplied(true);
+        }else{
+          setCoupon("")
+        }
+          // Mark coupon as applied
       }
     } catch (error) {
       console.error("Error applying coupon: ", error);
     }
   };
 
+  const removeCoupon = () => {
+    // Reset the coupon details and price details
+    setCoupon('');
+    setCouponApplied(false);
+    setPriceDetails((prevDetails) => ({
+      ...prevDetails,
+      couponDiscount: 0,
+      totalAmount: prevDetails.regularPrice + prevDetails.taxAndCharges,
+    }));
+    setCouponData(null);  // Clear coupon data in the parent component if necessary
+  };
+
   return (
     <div className={styles.card}>
       {loading ? (
-        <Skeleton variant="rectangular" width={210} height={118} />
+        <div className={styles.center}>
+          <Skeleton variant="rectangular" width={210} height={118} sx={{ml:5}} />
+        </div>
       ) : (
         <div className={styles.head_wrapper}>
           <div className={styles.head_content}>
@@ -107,12 +128,24 @@ export default function PaymentSummary({ data, orderInfo, currency, fetchedEvent
             onChange={(e) => setCoupon(e.target.value)}
             required
             value={coupon}
+            disabled={couponApplied}  // Disable input when coupon is applied
           />
-          <button className={styles.promo_button} type='submit'>Apply</button>
+          {!couponApplied && (
+            <button className={styles.promo_button} type='submit' disabled={couponApplied}>
+              Apply
+            </button>
+          )}
+          {couponApplied && (
+            <button className={styles.promo_button} type='button' onClick={removeCoupon}>
+              Remove
+            </button>
+          )}
         </form>
 
         {loading ? (
-          <Skeleton variant="rectangular" width={210} height={118} />
+          <div className={styles.center}>
+            <Skeleton variant="rectangular" width={210} height={118} />
+          </div>
         ) : (
           <>
             <div className={styles.row}>
