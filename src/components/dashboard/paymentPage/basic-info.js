@@ -18,7 +18,7 @@ export default function BasicInformation({ control, setData, formValues }) {
   return (
     <div>
       <div className={Styles.heading}>
-        <h3>Basic Information</h3>
+        Basic Information
       </div>
       <div className={Styles.details}>
         <div className={Styles.row}>

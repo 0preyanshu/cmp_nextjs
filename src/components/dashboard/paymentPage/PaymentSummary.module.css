@@ -179,4 +179,15 @@
     font-weight: 600;
     line-height: 140%;
   }
+  .card .center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+  }
+  
+  .card {
+    /* other styles */
+    position: relative;
+  }
   

@@ -8,17 +8,35 @@ import moment from 'moment';
 import axios from 'axios';
 import { toast } from '@/components/core/toaster';
 import { HOST_API } from '@/config';
+import { maxWidth } from '@mui/system';
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import RecieptPDF from './receiptPDF';
+import { saveAs } from 'file-saver';
+import { pdf } from '@react-pdf/renderer';
 
-const Confirmed = ({ currentOrder, event, currency, token,For}) => {
+const generatePdfDocument = async (documentData, fileName) => {
+  try {
+      console.log(documentData, "documentData");
+      const blob = await pdf(
+          <RecieptPDF orderDetails={documentData} />
+      ).toBlob();
+      console.log(blob, "blob");
+      saveAs(blob, fileName);
+  } catch (error) {
+      console.error('Error generating PDF:', error);
+  }
+};
+
+const Confirmed = ({ currentOrder, event, currency, token,For,values}) => {
   const [attendeeFormData, setAttendeeFormData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [orderDetails, setOrderDetails] = useState({
-    buyerName: currentOrder?.buyerFirstName,
-    buyerEmail: currentOrder?.buyerEmail,
+    buyerName: currentOrder?.buyerFirstName || '-',
+    buyerEmail: currentOrder?.buyerEmail || '-',
     buyerPhoneNo: currentOrder?.buyerPhone || '-',
-    transactionId: currentOrder?.transactions[0]?.transactionID,
-    numberOfParticipants: currentOrder?.orderInfo?.noOfParticipants,
-    totalAmount: currentOrder?.orderInfo?.totalAmount,
+    transactionId: currentOrder?.transactions[0]?.transactionID ||  '-',
+    numberOfParticipants: currentOrder?.orderInfo?.noOfParticipants|| '-',
+    totalAmount: currentOrder?.orderInfo?.totalAmount|| '-',
     currencyType: currency.currencyShortName,
     currencySymbol: currency.currencySymbol,
     eventName: event.eventName,
@@ -28,7 +46,7 @@ const Confirmed = ({ currentOrder, event, currency, token,For}) => {
     timZoneShortName: event.timezoneID,
     courseLogoUrl: event.courseLogoUrl || 'https://via.placeholder.com/150',
     orderParticipantDTOS: currentOrder?.participants || [],
-  });
+  },[currentOrder, event, currency]);
 
   useEffect(() => {
     console.log(currentOrder, "currentOrder");
@@ -62,7 +80,7 @@ const Confirmed = ({ currentOrder, event, currency, token,For}) => {
   
       const response = await axios.put(`${HOST_API}/order/update-participant/${currentOrder?.id}`, {
         token,
-        newParticipants: allParticipants,
+        newParticipants: newParticipants,
       });
   
       console.log(response?.data?.data, "response");
@@ -84,6 +102,20 @@ const Confirmed = ({ currentOrder, event, currency, token,For}) => {
       setLoading(false);
     }
   };
+
+  const [pdfloading, setpdfLoading] = useState(false);
+
+    const handleDownload = async () => {
+      console.log('Generating PDF...');
+        setpdfLoading(true);
+        try {
+            await generatePdfDocument(orderDetails, `Receipt_${orderDetails.transactionId}.pdf`);
+        } catch (error) {
+            console.error('Error generating PDF:', error);
+        } finally {
+            setpdfLoading(false);
+        }
+    };
   
   return (
     <div className={Styles.confirmed_page}>
@@ -91,16 +123,17 @@ const Confirmed = ({ currentOrder, event, currency, token,For}) => {
         <img src="https://strapis3images.s3.amazonaws.com/Group_431_89daa9d285.svg" alt="logo" />
       </div>
       <div className={Styles.wrapper}>
-        {For==="MY_SELF" && orderDetails.orderParticipantDTOS.length ===1 && <>
+        {console.log(For," for ",values.attendee)}
+        {For!=="MY_SELF" || values.attendee !==1 && <>
         
           <div className={Styles.form}>
           {orderDetails.numberOfParticipants - orderDetails.orderParticipantDTOS.length > 0 && (
             <div className={Styles.header_text}>
-              <h3>Please enter attendee information in the form below</h3>
+             Please enter attendee information in the form below
             </div>
           )}
           <div className={Styles.heading}>
-            <h3>Attendees Information</h3>
+            Attendees Information
           </div>
           <div className={Styles.attendees}>
             <p>
@@ -199,7 +232,7 @@ const Confirmed = ({ currentOrder, event, currency, token,For}) => {
         </div>
         </>}
         <div className={Styles.confirm}>
-          <div className={Styles.desktop}>
+          <div className={Styles.desktop} style={{maxWidth:"550px"}}>
             <CustomizedStepper activeSection={3} />
           </div>
           <div className={Styles.card}>
@@ -225,40 +258,32 @@ const Confirmed = ({ currentOrder, event, currency, token,For}) => {
               No. of Attendees: <span>{orderDetails.numberOfParticipants}</span>
             </div>
             <div className={Styles.reciept}>
-              {orderDetails.orderParticipantDTOS.length > 0 && (
-                <></>
-                // Uncomment and implement PDF download functionality here
-                // <PDFDownloadLink
-                //   document={<RecieptPDF details={orderDetails} />}
-                //   fileName={Invoice${orderDetails.eventName}}
-                //   style={{ textDecoration: 'none' }}
-                // >
-                //   {({ loading }) => (
-                //     <button>
-                //       {loading ? <CircularProgress size={24} color="inherit" /> : 'Download receipt'}
-                //     </button>
-                //   )}
-                // </PDFDownloadLink>
-              )}
-            </div>
+            {orderDetails.orderParticipantDTOS.length > 0 && (
+                <button onClick={handleDownload} disabled={pdfloading}>
+                    {pdfloading ? <CircularProgress size={24} color="inherit" /> : 'Download Receipt'}
+                </button>
+            )}
+        </div>
           </div>
-          <div className={Styles.course_card}>
-            <div className={Styles.course_wrapper}>
-              <div className={Styles.left}>
-                <div className={Styles.course_image}>
-                  {/* <img src={orderDetails.courseLogoUrl} alt="" /> */}
-                </div>
-                <div className={Styles.course_details}>
-                  <p>{orderDetails.eventName}</p>
-                  <p>{orderDetails.instructorName}</p>
-                  <p>{moment(orderDetails.eventStartDate).format('dddd, MMMM Do YYYY, h:mm a')} - {moment(orderDetails.eventEndDate).format('h:mm a')}</p>
-                  <p>{orderDetails.timZoneShortName}</p>
-                </div>
-              </div>
-            </div>
-          </div>
+          <div className={Styles.course_card} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', border: '1px solid #e0e0e0', borderRadius: '8px',  }}>
+      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <h3 style={{ margin: 0 }}>{orderDetails.eventName}</h3>
+        <p style={{ fontWeight: 'bold', margin: 0 }}>{orderDetails.instructorName}</p>
+      </div>
+      <div style={{ textAlign: 'right' }}>
+        <p style={{ margin: 0, fontWeight: 'bold' }}>
+          {moment(orderDetails.eventStartDate).format('MMM DD')} - {moment(orderDetails.eventEndDate).format('MMM DD, YYYY')}
+        </p>
+        <p style={{ margin: 0, fontWeight: 'bold' }}>
+          {moment(orderDetails.eventStartDate).format('ddd')} - {moment(orderDetails.eventEndDate).format('ddd')} ({moment(orderDetails.eventEndDate).diff(moment(orderDetails.eventStartDate), 'days')} Days)
+        </p>
+        <p style={{ margin: 0, fontWeight: 'bold' }}>
+          {moment(orderDetails.eventStartDate).format('hh:mm A')} - {moment(orderDetails.eventEndDate).format('hh:mm A')} ({orderDetails.timezoneShortName})
+        </p>
+      </div>
+    </div>
           <div className={Styles.footer}>
-            <p>Thank you for your order!</p>
+            <h3>Thank you for your order!</h3>
           </div>
         </div>
       </div>

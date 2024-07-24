@@ -45,7 +45,7 @@ const chargeApi = async (token, paymentDetails) => {
   }
 };
 
-export default function PaymentSection({ data, eventID, currencyID,taxID, clientSecret, select, setSelect, triggerPayment, orderInfo , couponCode,setActiveSection,currentOrder,setCurrentOrder }) {
+export default function PaymentSection({ data, eventID, currencyID,taxID, clientSecret, select, setSelect, triggerPayment, orderInfo , coupon,setActiveSection,currentOrder,setCurrentOrder }) {
   const stripe = useStripe();
   const elements = useElements();
   const router = useRouter();
@@ -89,7 +89,7 @@ export default function PaymentSection({ data, eventID, currencyID,taxID, client
         eventID: eventID,
         currencyID: currencyID,
         taxID: taxID,
-        couponID:  undefined,
+        couponID:  coupon ? coupon?.id : undefined,
         participants: data.participants || [],
         customerName: data.first_name,
         customerEmail: data.email,
@@ -129,7 +129,7 @@ export default function PaymentSection({ data, eventID, currencyID,taxID, client
   return (
     <div>
       <div className={Styles.heading}>
-        <Typography variant="h4">Payment</Typography>
+      Payment
       </div>
       <div className={Styles.wrapper}>
         <div className={Styles.options}>

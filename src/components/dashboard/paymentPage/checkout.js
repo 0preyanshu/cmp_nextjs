@@ -19,12 +19,13 @@ import InfoSection from './info-section';
 import Confirmed from './confirmed';
 import { useEffect,useState } from 'react';
 import { toast } from '@/components/core/toaster';
+import { maxWidth } from '@mui/system';
 
 export default function Payment({searchParams}) {
-  const eventID = "01J357QX6967D3QCYVFADSX62T";
-  const currencyID = "01J357PVJD8A74YPX0GRZ3PWB3";
-  const taxID = "01J357QDCMJJBJG3XGTTS5J8AY";
-  // const {eventID,currencyID,taxID} = searchParams;
+  // const eventID = "01J357QX6967D3QCYVFADSX62T";
+  // const currencyID = "01J357PVJD8A74YPX0GRZ3PWB3";
+  // const taxID = "01J357QDCMJJBJG3XGTTS5J8AY";
+  const {eventID,currencyID,taxID} = searchParams;
   console.log("eventID",eventID);
 
   const step = 1;
@@ -42,7 +43,7 @@ export default function Payment({searchParams}) {
   const [stripePromise, setStripePromise] = React.useState(null);
   const [currentOrder,setCurrentOrder] = React.useState(null);
   const [loadingCoupon, setLoadingCoupon] = React.useState(false);
-  
+
 
   const validationSchema = z.object({
     for: z.enum(["MY_SELF", "SOMEONE_ELSE"], { required_error: "Select who you are buying for" }),
@@ -202,20 +203,24 @@ export default function Payment({searchParams}) {
       setLoadingCoupon(true);
       const response = await fetch(`https://4zg88ggiaa.execute-api.ap-south-1.amazonaws.com/stg/coupon/with-code/${couponCode}`);
       const data = await response.json();
-        console.log("data",data);
+      console.log("data", data);
       setLoadingCoupon(false);
-      if(data?.data?.coupon){
+      if (data?.data?.coupon) {
         toast.success("Coupon applied successfully");
-        setCoupon(data.data.coupon);
-      }
-      else{
+        setCoupon(data.data.coupon);  // Update to set coupon data
+        return true;  // Indicate successful coupon application
+      } else {
         toast.error("Coupon not found");
-      } 
+        return false;  // Indicate unsuccessful coupon application
+      }
     } catch (error) {
       setLoadingCoupon(false);
       console.error("Error fetching coupon: ", error);
+      // toast.error("Error fetching coupon");
+      return false;  
     }
   };
+  
 
   return (
     <div className={Styles.payment_page}>
@@ -226,7 +231,8 @@ export default function Payment({searchParams}) {
         <Grid container spacing={isDesktop ? 3 : 5}>
           <Grid item xs={12} md={8}>
             <Box sx={{ mt: { xs: "0", md: "-40px" } }}>
-              <CustomizedStepper activeSection={activeSection} />
+              <div > <CustomizedStepper activeSection={activeSection}  /></div>
+             
               {activeSection === 0 && (
                 <>
                   <BasicInformation data={values} setData={setValue} control={control} formValues={values} />
@@ -262,6 +268,7 @@ export default function Payment({searchParams}) {
                         setSelect={setSelect}
                         triggerPayment={triggerPayment}
                         orderInfo = {orderInfo}
+                        coupon={coupon}
                     
                         setActiveSection={setActiveSection}
                         currentOrder={currentOrder}
@@ -275,7 +282,7 @@ export default function Payment({searchParams}) {
               {
                 activeSection === 2 && (
                   <><Confirmed currentOrder ={currentOrder?.order} event={event} currency={currency}
-                  token={currentOrder?.token} For={values.for}
+                  token={currentOrder?.token} For={values.for} values={values} 
                   ></Confirmed></>
                 )
 
@@ -285,7 +292,10 @@ export default function Payment({searchParams}) {
             </Box>
           </Grid>
           <Grid item xs={12} md={4} sx={{ display: { xs: 'none', md: 'block' } }}>
-           {activeSection!==2 &&  <PaymentSummary data={values} setData={setValue} activeSection={activeSection} setActiveSection={setActiveSection} fetchedEvent={event} loading={loadingCoupon} currencyID={currencyID} orderInfo={orderInfo} currency={currency} fetchCoupon={fetchCoupon}/>}
+           {activeSection!==2 &&  <PaymentSummary data={values} setData={setValue} activeSection={activeSection} setActiveSection={setActiveSection} fetchedEvent={event} loading={loadingCoupon} currencyID={currencyID} orderInfo={orderInfo} currency={currency} fetchCoupon={fetchCoupon}
+           setCouponData={setCoupon}
+           
+           />}
           </Grid>
           <div className={Styles.fixed_footer}>
             <div className={Styles.price}>
@@ -305,6 +315,7 @@ export default function Payment({searchParams}) {
           {open && activeSection!==2 && (
             <div className={Styles.info}>
               <PaymentSummary data={values} setData={setValue} activeSection={activeSection} setActiveSection={setActiveSection} fetchedEvent={event} loading={loadingCoupon} currencyID={currencyID} fetchCoupon={fetchCoupon} orderInfo={orderInfo} currency={currency}
+              setCouponData = {setCoupon}
                />
             </div>
           )}
