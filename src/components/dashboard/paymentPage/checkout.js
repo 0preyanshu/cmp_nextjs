@@ -1,6 +1,6 @@
 'use client';
 import * as React from 'react';
-import { Box, Grid, Typography, Skeleton } from '@mui/material';
+import { Box, Grid, Typography, Skeleton,createTheme } from '@mui/material';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import { LoadingButton } from '@mui/lab';
@@ -20,6 +20,15 @@ import Confirmed from './confirmed';
 import { useEffect,useState } from 'react';
 import { toast } from '@/components/core/toaster';
 import { maxWidth } from '@mui/system';
+
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#FB5741', 
+    },
+  },
+});
 
 export default function Payment({searchParams}) {
   // const eventID = "01J357QX6967D3QCYVFADSX62T";

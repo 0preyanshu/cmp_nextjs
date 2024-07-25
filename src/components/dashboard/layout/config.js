@@ -50,6 +50,7 @@ export const layoutConfig = {
           title: 'Settings',
           icon: 'gear',
           items: [
+            { key: 'Email Logs', title: 'Email Logs', href: paths.dashboard.emaillogs.list },
             { key: 'company information', title: 'Company information', href: paths.dashboard.companyinformation.list },
             { key: 'coursecategories', title: 'Course Categories', href: paths.dashboard.coursecategories.list },
             { key: 'courses', title: 'Courses', href: paths.dashboard.courses.list  },

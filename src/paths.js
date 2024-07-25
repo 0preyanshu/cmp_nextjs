@@ -171,6 +171,11 @@ export const paths = {
     create: '/dashboard/emailapi/create',
     edit : (timezoneId) => `/dashboard/emailapi/edit/${timezoneId}`,
   },
+  emaillogs: {
+    list: '/dashboard/emaillogs',
+    create: '/dashboard/emaillogs/create',
+    view : (Id) => `/dashboard/emaillogs/view/${Id}`,
+  },
   paymentapi: {
     list: '/dashboard/paymentapi',
     create: '/dashboard/paymentapi/create',

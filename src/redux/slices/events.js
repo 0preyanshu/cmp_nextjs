@@ -212,7 +212,7 @@ function fetchEvents() {
     try {
       const response = await axios.get(
         HOST_API.concat(
-          `/event?page=${data.page}&limit=${data.limit}&search=${data.name}&courseID=${data.courseId}&instructorID=${data.instructorId}&courseCategoryID=${data.courseCategoryId}&countryID=${data.countryId}&timezone=${data.timezone}&status=${data.status}`
+          `/event?page=${data.page}&limit=${data.limit}&search=${data.name || ""}&courseID=${data.courseId|| ""}&instructorID=${data.instructorId|| ""}&courseCategoryID=${data.courseCategoryId|| ""}&countryID=${data.countryId|| ""}&timezone=${data.timezone|| ""}&status=${data.status|| ""}`
         ),
         {
           headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },

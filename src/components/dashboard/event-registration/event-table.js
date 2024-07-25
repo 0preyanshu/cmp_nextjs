@@ -14,6 +14,7 @@ import { Copy as CopyIcon } from '@phosphor-icons/react/dist/ssr/Copy';
 import { paths } from '@/paths';
 import { DataTable } from '@/components/core/data-table';
 import { toast } from '@/components/core/toaster';
+import { Clipboard as ClipboardIcon } from '@phosphor-icons/react/dist/ssr/Clipboard';
 
 export function EventTable({ rows }) {
   const router = useRouter();
@@ -144,6 +145,22 @@ export function EventTable({ rows }) {
           <IconButton onClick={() => handleCopy(row)}>
             <CopyIcon />
           </IconButton>
+          <IconButton
+  onClick={() => {
+    const { id } = row;
+    const { taxable, taxID,currencyID } = row.eventPrice[0];
+    const baseUrl = `${window.location.origin}/payment?eventID=${id}&currencyID=${currencyID}`;
+    const url = taxable ? `${baseUrl}&taxID=${taxID}` : baseUrl;
+
+    navigator.clipboard.writeText(url).then(() => {
+      toast.success('URL copied to clipboard');
+    }).catch(err => {
+      toast.error('Failed to copy URL');
+    });
+  }}
+>
+  <ClipboardIcon  />
+</IconButton>
         </div>
       ),
       name: 'Actions',

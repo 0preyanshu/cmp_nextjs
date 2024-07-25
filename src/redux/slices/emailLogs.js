@@ -31,14 +31,12 @@ function getEmailLogsData() {
       }
       const response = await axios.get(
         HOST_API.concat(
-          `/emailLogs/get?page=${data?.page}&limit=${data?.limit}&startDate=${
-            data?.filterStartDate ? encodeURIComponent(data?.filterStartDate) : ''
-          }&endDate=${data?.filterEndDate ? encodeURIComponent(data?.filterEndDate) : ''}${
-            data?.filterEvent && data?.filterEvent !== 'All' ? `&eventId=${data?.filterEvent}` : ''
-          }&search=${data?.filterName || ''}&eventType=${status}`
+          `/email-logs?page=${data?.page}&limit=${data?.limit}&startDate=${
+            data?.startDate || ""
+          }&endDate=${data?.endDate || ''}&search=${data?.name || ''}&eventID=${data.eventID || ''}&status=${status}`
         ),
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` },
+          headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
         }
       );
       // const response = await axios.get(HOST_API.concat(`/emailLogs/get?eventName=prtk_test_2&page=0&limit=2`), {
@@ -68,8 +66,8 @@ const createExtraReducers = () => {
       },
       [fulfilled]: (state, actions) => {
         console.log(actions);
-        state.emailLogs = actions?.payload?.emailLogDTOS;
-        state.totalElements = actions?.payload?.totalElements;
+        state.emailLogs = actions?.payload?.data?.data || [];
+        state.totalElements = actions?.payload?.totalElements || 0;
         state.isLoading = false;
         state.toast = 'Email Logs fetched successfully!';
       },
