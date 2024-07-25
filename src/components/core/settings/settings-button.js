@@ -12,13 +12,28 @@ import { setSettings as setPersistedSettings } from '@/lib/settings/set-settings
 import { useSettings } from '@/hooks/use-settings';
 
 import { SettingsDrawer } from './settings-drawer';
+import { usePathname } from 'next/navigation';
 
 export function SettingsButton() {
   const { settings } = useSettings();
   const { setColorScheme } = useColorScheme();
   const router = useRouter();
+  const pathname = usePathname();
 
   const [openDrawer, setOpenDrawer] = React.useState(false);
+
+  React.useEffect(() => {
+    console.log("pathname", pathname);
+    // console.log("setColorScheme", router);
+    if (pathname === '/payment') {
+      setColorScheme('light');
+    }
+  }, [pathname, setColorScheme]);
+
+  // Check if the current path is /payment
+  if (pathname === '/payment') {
+    return null;
+  }
 
   const handleUpdate = async (values) => {
     if (values.colorScheme) {

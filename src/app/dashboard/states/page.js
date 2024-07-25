@@ -38,9 +38,11 @@ export default function Page({ searchParams }) {
   const { fetchState } = StateActions;
   const { fetchCountries } = countryActions;
 
+ 
+
 
   React.useEffect(() => {
-    if (!isInitialMount.current) {
+  
       const data = {
         page: currentPage,
         limit: rowsPerPage,
@@ -54,7 +56,7 @@ export default function Page({ searchParams }) {
        dispatch(fetchState(data));}
 
       
-    }
+    
     updateSearchParams({ searchTerm: searchInput, page: currentPage, limit: rowsPerPage });
     
    

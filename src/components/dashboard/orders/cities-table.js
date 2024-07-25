@@ -45,19 +45,7 @@ export function CitiesTable({ rows }) {
             <Link href={paths.dashboard.orders.details(row.id)}>
               {"Order-" + row.id.slice(-3) || "-"}
             </Link>
-            <IconButton
-              onClick={() => {
-                const url = `${window.location.origin}/payment?eventID=${row.eventID}&taxID=${row.taxID}&currencyID=${row.currencyID}`;
-                navigator.clipboard.writeText(url).then(() => {
-                  toast.success('URL copied to clipboard');
-                }).catch(err => {
-                  toast.error('Failed to copy URL');
-                });
-              }}
-              size="small"
-            >
-              <ClipboardIcon size={16} />
-            </IconButton>
+          
           </div>
         </Stack>
       ),

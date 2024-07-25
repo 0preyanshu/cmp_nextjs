@@ -17,6 +17,7 @@ import { useRouter } from 'next/navigation';
 import TableSkeleton from '@/components/core/Skeletion';
 import { useTheme } from '@mui/material/styles';
 import { HOST_API } from '@/config';
+import {formatCurrency} from '@/utils/formatNumber';
 
 // const HOST_API = "https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg";
 
@@ -207,10 +208,10 @@ const DashboardPage = ({ searchParams }) => {
                     <Typography variant="h6" fontWeight="bold" gutterBottom>
                       {item.period.charAt(0).toUpperCase() + item.period.slice(1)}
                     </Typography>
-                    <Row title="Orders" label={item.totalOrders} value={"$" + item.totalOrders} color={theme.palette.mode === 'dark' ? '#FFFFFF' : '#212B36'} />
-                    <Row title="Internal" label={item.internalOrders} value={"$" + item.internalOrders} color={theme.palette.mode === 'dark' ? '#FFFFFF' : '#212B36'} />
-                    <Row title="Vendor" label={item.vendorOrders} value={"$" + item.vendorOrders} color={theme.palette.mode === 'dark' ? '#FFFFFF' : '#212B36'} />
-                    <Row title="Total" label={item.totalOrders} value={"$" + item.totalProfit} fontWeight="bold" color={theme.palette.mode === 'dark' ? '#FFFFFF' : '#212B36'} />
+                    <Row title="Orders" label={item.totalOrders} value={formatCurrency(item.totalOrders)} color={theme.palette.mode === 'dark' ? '#FFFFFF' : '#212B36'} />
+                    <Row title="Internal" label={item.internalOrders} value={formatCurrency(item.internalOrders)} color={theme.palette.mode === 'dark' ? '#FFFFFF' : '#212B36'} />
+                    <Row title="Vendor" label={item.vendorOrders} value={formatCurrency(item.vendorOrders)} color={theme.palette.mode === 'dark' ? '#FFFFFF' : '#212B36'} />
+                    <Row title="Total" label={item.totalOrders} value={formatCurrency(item.totalProfit)} fontWeight="bold" color={theme.palette.mode === 'dark' ? '#FFFFFF' : '#212B36'} />
                   </CardContent>
                 </Card>
               </Grid>
@@ -252,6 +253,7 @@ const DashboardPage = ({ searchParams }) => {
 };
 
 const Row = ({ title, label, value, fontWeight = 500, margin = '8px 0', color = '#212B36' }) => (
+
   <div style={{ display: 'flex', justifyContent: 'space-between', margin, color, alignItems: 'stretch' }}>
     <Typography variant="body2" sx={{ fontWeight, width: '60px' }}>
       {title}

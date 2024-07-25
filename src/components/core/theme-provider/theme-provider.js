@@ -3,7 +3,7 @@
 import * as React from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import { Experimental_CssVarsProvider as CssVarsProvider } from '@mui/material/styles';
-
+import { usePathname } from 'next/navigation';
 import { useSettings } from '@/hooks/use-settings';
 import { createTheme } from '@/styles/theme/create-theme';
 
@@ -12,16 +12,27 @@ import { Rtl } from './rtl';
 
 export function ThemeProvider({ children }) {
   const { settings } = useSettings();
+  const pathname = usePathname();
+
+  const isPaymentPage = pathname === '/payment';
+  const primaryColor = isPaymentPage ? 'tomatoOrange' : settings.primaryColor;
+  const colorScheme = isPaymentPage ? 'light' : settings.colorScheme;
 
   const theme = createTheme({
-    primaryColor: settings.primaryColor,
-    colorScheme: settings.colorScheme,
+    primaryColor,
+    colorScheme,
+    direction: settings.direction,
+  });
+
+   console.log("theme", {
+    primaryColor,
+    colorScheme,
     direction: settings.direction,
   });
 
   return (
     <EmotionCache options={{ key: 'mui' }}>
-      <CssVarsProvider defaultColorScheme={settings.colorScheme} defaultMode={settings.colorScheme} theme={theme}>
+      <CssVarsProvider defaultColorScheme={colorScheme} defaultMode={colorScheme} theme={theme}>
         <CssBaseline />
         <Rtl direction={settings.direction}>{children}</Rtl>
       </CssVarsProvider>

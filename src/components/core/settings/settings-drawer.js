@@ -14,6 +14,7 @@ import { OptionsDirection } from './options-direction';
 import { OptionsLayout } from './options-layout';
 import { OptionsNavColor } from './options-nav-color';
 import { OptionsPrimaryColor } from './options-primary-color';
+import { usePathname } from 'next/navigation';
 
 export function SettingsDrawer({ canReset = true, onClose, onUpdate, onReset, open, values = {} }) {
   const handleChange = React.useCallback(
@@ -23,6 +24,14 @@ export function SettingsDrawer({ canReset = true, onClose, onUpdate, onReset, op
     [onUpdate]
   );
 
+//   const pathname = usePathname(); 
+//   React.useEffect(() => {
+//     console.log("xyz", pathname);
+//     if (pathname === '/payment') {
+//       handleChange('colorScheme', 'tomatoOrange');
+      
+//   }
+// }, [pathname]);
   return (
     <Drawer
       ModalProps={{ BackdropProps: { invisible: true }, sx: { zIndex: 1400 } }}
