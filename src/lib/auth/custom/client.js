@@ -39,8 +39,11 @@ class AuthClient {
     const { email, password } = params;
 
     try {
+      console.log("email",email)
       const response = await axios.post(`${HOST_API}/auth/sign-in`, { email, password });
       const { token } = response.data.data;
+
+      console.log(token,"t");
 
       localStorage.setItem('custom-auth-token', token);
 
@@ -67,7 +70,7 @@ class AuthClient {
     }
 
 
-    const secretKey = 'StagingSecretKey'; // todo: get from env
+    const secretKey = 'CMPPRODSECRETKEYSKILLBOOKHELIVERSE'; // todo: get from env
     try {
       const verifiedDecoded = jwt.verify(token, secretKey);
       console.log("verifiedDecoded", verifiedDecoded)
