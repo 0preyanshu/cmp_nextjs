@@ -30,8 +30,9 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import { InstructorActions } from '@/redux/slices';
 import { LoadingButton } from '@mui/lab';
+import {HOST_API} from '@/config';
 
-const S3_URL = 'https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg';
+const S3_URL = HOST_API;
 
 const schema = zod.object({
   avatar: zod.string().optional(),
@@ -149,6 +150,11 @@ export function InstructorsCreateForm() {
     async (event) => {
       const file = event.target.files?.[0];
       if (file) {
+        const validImageTypes = ['image/jpeg', 'image/png','image/webp'];
+        if (!validImageTypes.includes(file.type)) {
+          toast.error('Only PNG or JPEG images are allowed');
+          return;
+        }
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = async () => {
@@ -157,7 +163,9 @@ export function InstructorsCreateForm() {
           setIsImageUploading(true);
           try {
             const imageId = `image-${Date.now()}`;
-            const { data } = await axios.get(`${S3_URL}/s3-signed-url/upload/${imageId}`);
+            const { data } = await axios.get(`${S3_URL}/s3-signed-url/upload/${imageId}`,{
+              headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
+            });
             await axios.put(data?.data?.s3SignedUrl, file, {
               headers: {
                 'Content-Type': file.type,

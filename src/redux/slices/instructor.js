@@ -4,7 +4,6 @@ import axios from 'axios';
 
 import { HOST_API } from '@/config';
 
-// const initialState = [];
 
 const name = 'Instructor';
 const initialState = createInitialState();
@@ -47,6 +46,7 @@ function createInstructor() {
             firstname:obj.firstname,
             lastname:obj.lastname,
             email:obj.email,
+            phone : obj.phone
         }
         try {
             const response = await axios.post(HOST_API.concat(`/instructor`), newobj, {

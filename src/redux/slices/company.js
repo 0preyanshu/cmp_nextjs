@@ -70,7 +70,7 @@ function createCompanies() {
 function fetchCompanies() {
   return createAsyncThunk(`${name}/fetchCompanies`, async (data) => {
     try {
-      const response = await axios.get(`${HOST_API}/company/01J1PVRA0K4FJ0MMA71VJXSB3E`,{
+      const response = await axios.get(`${HOST_API}/company/01J3ZKGKPPF5JJEN17EWJC4TF7`,{
         headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
     });
 
@@ -142,7 +142,7 @@ function updatecompanies() {
 
 
     try {
-      const response = await axios.put(`${HOST_API}/company/01J1PVRA0K4FJ0MMA71VJXSB3E`,data,{
+      const response = await axios.put(`${HOST_API}/company/01J3ZKGKPPF5JJEN17EWJC4TF7`,data,{
         headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
     });
 

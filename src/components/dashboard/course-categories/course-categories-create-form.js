@@ -150,34 +150,43 @@ export function CourseCategoriesCreateForm() {
     async (event) => {
       const file = event.target.files?.[0];
       if (file) {
-        const validImageTypes = ['image/jpeg', 'image/png'];
+        const validImageTypes = ['image/jpeg', 'image/png','image/webp'];
         if (!validImageTypes.includes(file.type)) {
-          toast.error('Only PNG or JPEG images are allowed');
+          toast.error('Only PNG , JPEG and WEBP images are allowed');
           return;
         }
         const reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onload = async () => {
-
           const dataurl = reader.result;
-          setDataUrl(dataurl);              
+          setDataUrl(dataurl);
           setIsImageUploading(true);
           try {
             const imageId = `image-${Date.now()}`;
-            const { data } = await axios.get(`${S3_URL}/s3-signed-url/upload/${imageId}`);
+            const token = localStorage.getItem('custom-auth-token');
+            console.log('Token:', token); // Check if the token is correctly retrieved
+            
+            // Add headers to the axios.get request
+            const { data } = await axios.get(`${S3_URL}/s3-signed-url/upload/${imageId}`, {
+              headers: {
+                Authorization: `Bearer ${token}`
+              }
+            });
+  
+            // Add headers to the axios.put request
             await axios.put(data?.data?.s3SignedUrl, file, {
               headers: {
                 'Content-Type': file.type,
-                'Authorization' : localStorage.getItem('custom-auth-token')
+                // Authorization: `Bearer ${token}`
               },
             });
+            
             setValue('avatar', imageId);
             toast.success('Image uploaded successfully');
           } catch (err) {
-            logger.error(err);
+            console.error(err); // Ensure logger is defined
             toast.error('Failed to upload image');
-          }
-          finally{
+          } finally {
             setIsImageUploading(false);
           }
         };
@@ -188,6 +197,7 @@ export function CourseCategoriesCreateForm() {
     },
     [setValue]
   );
+  
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
