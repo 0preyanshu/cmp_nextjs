@@ -21,7 +21,7 @@ import { CitiesTable } from '@/components/dashboard/emaillogs/cities-table';
 // import { EmailLogsActions } from '@/redux/slices';
 import { useRouter } from 'next/navigation';
 import { EmailLogsActions, EventsActions } from '@/redux/slices';
-import { TableSkeleton } from '@/components/core/Skeletion';
+import TableSkeleton from '@/components/core/Skeletion';
 import { useDispatch } from 'react-redux';
 
 
