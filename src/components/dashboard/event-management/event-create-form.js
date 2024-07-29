@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import {
   Box, Button, Card, CardActions, CardContent, Divider, FormControl,
   FormHelperText, InputLabel, OutlinedInput, Select, Stack, Grid, MenuItem,
-  Typography
+  Typography,Autocomplete,TextField,createFilterOptions
 } from '@mui/material';
 import { Controller, useForm ,register,useFieldArray,useFormContext} from 'react-hook-form';
 import { z as zod } from 'zod';
@@ -22,6 +22,10 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs from 'dayjs';
 import coursecategory from '@/redux/slices/coursecategory';
+import CheckBoxIcon from '@mui/icons-material/CheckBox';
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
+// import { createFilterOptions } from '@mui/material/Autocomplete';
+
 
 const dateIsValid = (date) => !Number.isNaN(new Date(date).getTime());
 const dateIsInFuture = (date) => dayjs(date).isAfter(dayjs());
@@ -67,7 +71,7 @@ const schema = zod.object({
     (input) => Number(input),
     zod.number().min(1, 'Capacity must be at least 1')
   ),
-  instructorID: zod.string().min(1, 'Instructor is required'),
+  instructorID: zod.array(zod.string()).min(1, 'At least one Instructor is required').max(4,"At most 4 Instructors are allowed"),
   waitlistCapacity: zod.preprocess(
     (input) => Number(input),
     zod.number().min(1, 'Waitlist Capacity must be at least 1')
@@ -140,7 +144,7 @@ export function EventCreateForm() {
     eventStartDate: dateIsValid(currentEvent?.eventStartDate) && dateIsInFuture(currentEvent?.eventStartDate) ? new Date(currentEvent?.eventStartDate).toISOString() : new Date().toISOString(),
     eventEndDate: dateIsValid(currentEvent?.eventEndDate) && dateIsInFuture(currentEvent?.eventEndDate) ? new Date(currentEvent?.eventEndDate).toISOString() : new Date().toISOString(),
     capacity: currentEvent.capacity || '',
-    instructorID: currentEvent?.instructorID ?  currentEvent.instructorID[0] : '',
+    instructorID: currentEvent?.instructorID ?  currentEvent.instructorID : [],
     waitlistCapacity: currentEvent.waitlistCapacity || '',
     show: currentEvent.show || false,
     upcoming: currentEvent.upcoming || false,
@@ -258,10 +262,20 @@ export function EventCreateForm() {
   const onSubmit = React.useCallback(
     async (data) => {
       try {
+
+        if(data?.eventPrice?.length===0){
+          toast.error("Please add atleast one Event Price");
+          return;
+        }
+        if(data?.salesDescription?.saleEndDate<data?.salesDescription?.saleStartDate){
+          toast.error("Sale End Date must be equal or greater than Sale Start Date");
+          return;
+
+        }
         const changedData = getChangedFields(data);
        
-        const temp = data?.instructorID;
-        data.instructorID = [temp];
+
+       
         console.log(data,"data");
         console.log(changedData,"changedData");
 
@@ -411,7 +425,7 @@ export function EventCreateForm() {
                     render={({ field }) => (
                       <FormControl error={Boolean(errors.eventStartDate)} fullWidth sx={{  mt: 3 }}>
                         <DatePicker
-                          label="Expiry Date"
+                          label="Start Date"
                           value={dayjs(field.value)}
                           onChange={(date) => {
                             setValue('eventStartDate', date.toISOString());
@@ -474,8 +488,8 @@ export function EventCreateForm() {
             )}
           />
         </Grid>
-        <Grid item md={6} xs={12}>
-        <Controller
+        <Grid item md={12} xs={12}>
+        {/* <Controller
             control={control}
             name="instructorID"
             render={({ field }) => (
@@ -494,7 +508,8 @@ export function EventCreateForm() {
                 {errors.instructorID ? <FormHelperText>{errors.instructorID.message}</FormHelperText> : null}
               </FormControl>
             )}
-          />
+          /> */}
+          <InstructorSelection control={control} errors={errors} allInstructors={allInstructors?.filter((e)=>e.status_==="ACTIVE")} />
         </Grid>
         <Grid item md={6} xs={12}>
           <Controller
@@ -505,6 +520,28 @@ export function EventCreateForm() {
                 <InputLabel required>Waitlist Capacity</InputLabel>
                 <OutlinedInput {...field} type='number' />
                 {errors.waitlistCapacity? <FormHelperText>{errors.waitlistCapacity.message}</FormHelperText> : null}
+              </FormControl>
+            )}
+          />
+        </Grid>
+        <Grid item md={6} xs={12}>
+        <Controller
+            control={control}
+            name="timezoneID"
+            render={({ field }) => (
+              <FormControl error={Boolean(errors.timezoneID)} fullWidth sx={{  mt: 3 }}>
+                <InputLabel required>Timezone</InputLabel>
+                <Select {...field} disabled={allInstructors?.filter((e)=>e.status_==="ACTIVE").length === 0}>
+                  <MenuItem value="">
+                    <>Select Timezone</>
+                  </MenuItem>
+                  {allTimezones?.filter((e)=>e.status_==="ACTIVE").map((state) => (
+                    <MenuItem key={state.id} value={state.id}>
+                      {state.timezoneName}
+                    </MenuItem>
+                  ))}
+                </Select>
+                {errors.timezoneID ? <FormHelperText>{errors.timezoneID.message}</FormHelperText> : null}
               </FormControl>
             )}
           />
@@ -547,28 +584,7 @@ export function EventCreateForm() {
             />
           </Grid>
 
-          <Grid item md={12} xs={12}>
-        <Controller
-            control={control}
-            name="timezoneID"
-            render={({ field }) => (
-              <FormControl error={Boolean(errors.timezoneID)} fullWidth sx={{  mt: 3 }}>
-                <InputLabel required>Timezone</InputLabel>
-                <Select {...field} disabled={allInstructors?.filter((e)=>e.status_==="ACTIVE").length === 0}>
-                  <MenuItem value="">
-                    <>Select Timezone</>
-                  </MenuItem>
-                  {allTimezones?.filter((e)=>e.status_==="ACTIVE").map((state) => (
-                    <MenuItem key={state.id} value={state.id}>
-                      {state.timezoneName}
-                    </MenuItem>
-                  ))}
-                </Select>
-                {errors.timezoneID ? <FormHelperText>{errors.timezoneID.message}</FormHelperText> : null}
-              </FormControl>
-            )}
-          />
-        </Grid>
+
 
         
 
@@ -697,7 +713,7 @@ export function EventCreateForm() {
     render={({ field }) => (
       <FormControl error={Boolean(errors.salesDescription?.saleEndDate)} fullWidth>
         <DatePicker
-          label="Sale Start Date"
+          label="Sale End Date"
           value={field.value ? dayjs(field.value) : null}
           onChange={(date) => setValue('salesDescription.saleEndDate', date.toISOString())}
           renderInput={(params) => (
@@ -857,7 +873,7 @@ export function EventCreateForm() {
   </Stack>
 </CardContent>
         <CardActions sx={{ justifyContent: 'flex-end' }}>
-          <Button color="secondary" component={RouterLink} href={paths.dashboard.eventmanagement.list}>
+          <Button color="secondary" component={RouterLink} href={paths.dashboard.eventregistration.list}>
             Cancel
           </Button>
           <LoadingButton
@@ -1012,3 +1028,88 @@ const PriceGroup = ({ control, index, remove,watch,setValue }) => {
     </Box>
   );
 };
+
+const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
+const checkedIcon = <CheckBoxIcon fontSize="small" />;
+
+const InstructorSelection = ({ control, errors,allInstructors }) => {
+  // const allEvents = [
+  //   {
+  //     id: '01J3ZKXPBEZSP91B1WGR6EHY4C',
+  //     email: 'test@example.us',
+  //     firstname: 'Jon',
+  //     lastname: 'Doe',
+  //     photo: 'https://cmp-bucket-public.s3.amazonaws.com/samplephoto',
+  //     phone: '6019521325',
+  //     status_: 'ACTIVE'
+  //   },
+  //   {
+  //     id: '01J3ZKXPBEZSP91B1WGR6EHY4D',
+  //     email: 'jane@example.us',
+  //     firstname: 'Jane',
+  //     lastname: 'Doe',
+  //     photo: 'https://cmp-bucket-public.s3.amazonaws.com/samplephoto',
+  //     phone: '6019521326',
+  //     status_: 'ACTIVE'
+  //   }
+  //   // Add more instructors as needed
+  // ];
+
+  // const icon = <span>☐</span>; // Your unchecked icon
+  // const checkedIcon = <span>☑</span>; // Your checked icon
+
+  return (
+    <div>
+      <Controller
+        name="instructorID"
+        control={control}
+        render={({ field }) => (
+          <Autocomplete
+            {...field}
+            multiple
+            disableCloseOnSelect
+            freeSolo
+            onChange={(event, newValue) => {
+              if (newValue.find((option) => option.all)) {
+                return field.onChange(field?.value?.length === allInstructors?.length ? [] : allInstructors?.map((option) => option.id));
+              }
+
+              field.onChange(newValue);
+            }}
+            options={allInstructors.map((option) => option.id)}
+            getOptionLabel={(eventId) => {
+              const event = allInstructors.find((event) => event.id === eventId);
+              return event ? `${event.firstname} ${event.lastname}` : '';
+            }}
+            filterOptions={(options, params) => {
+              const filter = createFilterOptions();
+              const filtered = filter(options, params);
+              return [{ title: 'Select All...', all: true }, ...filtered];
+            }}
+            renderOption={(props, option, { selected }) => (
+              <li {...props}>
+                <Checkbox
+                  icon={icon}
+                  checkedIcon={checkedIcon}
+                  style={{ marginRight: 8 }}
+                  checked={option.all ? (field.value.length === allInstructors.length) : selected}
+                />
+                {option.all ? option.title : `${allInstructors.find((event) => event.id === option)?.firstname} ${allInstructors.find((event) => event.id === option)?.lastname}` || ''}
+              </li>
+            )}
+            renderInput={(params) => (
+              <TextField
+                label="Select Instructors:"
+                {...params}
+                error={!!errors.instructorID}
+                helperText={errors.instructorID ? errors.instructorID.message : ''}
+              />
+            )}
+          />
+        )}
+      />
+    </div>
+  );
+};
+
+export default InstructorSelection;
