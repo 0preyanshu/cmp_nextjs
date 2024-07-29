@@ -52,7 +52,7 @@ export default function Page({ searchParams }) {
      
         dispatch(fetchCountries({ limit: "", page: "", search: "" }));
       
-      if(allState.length === 0 || !isInitialMount.current){
+      if(allState.length === 0 ){
        dispatch(fetchState(data));}
 
       
