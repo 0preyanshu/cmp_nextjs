@@ -1,3 +1,4 @@
+'use client';
 import * as React from 'react';
 import RouterLink from 'next/link';
 import Box from '@mui/material/Box';
@@ -9,10 +10,13 @@ import { ArrowLeft as ArrowLeftIcon } from '@phosphor-icons/react/dist/ssr/Arrow
 import { config } from '@/config';
 import { paths } from '@/paths';
 import {MessageDisplay } from '@/components/dashboard/emaillogs/cities-create-form';
+import {Button} from '@mui/material';
+import {useRouter} from 'next/navigation';
 
-export const metadata = { title: `Create | Customers | Dashboard | ${config.site.name}` };
+// export const metadata = { title: `Create | Customers | Dashboard | ${config.site.name}` };
 
 export default function Page() {
+  const router = useRouter();
   return (
     <Box
       sx={{
@@ -22,19 +26,19 @@ export default function Page() {
         width: 'var(--Content-width)',
       }}
     >
+      {/* onClick={() => router.back()}  */}
       <Stack spacing={4}>
         <Stack spacing={3}>
-          <div>
-            <Link
-              color="text.primary"
-              component={RouterLink}
-              href={paths.dashboard.emaillogs.list}
-              sx={{ alignItems: 'center', display: 'inline-flex', gap: 1 }}
-              variant="subtitle2"
-            >
-              <ArrowLeftIcon fontSize="var(--icon-fontSize-md)" />
-              back
-            </Link>
+        <div>
+        <Box
+        onClick={() => router.back()}
+        sx={{ alignItems: 'center', display: 'inline-flex', gap: 1, cursor: 'pointer', mb: 2 }}
+      >
+        <ArrowLeftIcon fontSize="var(--icon-fontSize-md)" />
+        <Typography variant="subtitle2" color="text.primary">
+          back
+        </Typography>
+      </Box>
           </div>
           <div>
             <Typography variant="h5">View Message</Typography>

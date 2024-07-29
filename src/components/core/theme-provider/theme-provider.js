@@ -16,7 +16,7 @@ export function ThemeProvider({ children }) {
 
   const isPaymentPage = pathname === '/payment';
   const primaryColor = isPaymentPage ? 'tomatoOrange' : settings.primaryColor;
-  const colorScheme = isPaymentPage ? 'light' : settings.colorScheme;
+  const colorScheme = isPaymentPage ? 'light' : settings.colorScheme || 'light';
 
   const theme = createTheme({
     primaryColor,
@@ -24,7 +24,7 @@ export function ThemeProvider({ children }) {
     direction: settings.direction,
   });
 
-   console.log("theme", {
+  console.log("theme", {
     primaryColor,
     colorScheme,
     direction: settings.direction,

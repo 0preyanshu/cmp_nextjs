@@ -19,7 +19,7 @@ import OutlinedInput from '@mui/material/OutlinedInput';
 import { useRouter } from 'next/navigation';
 import { paths } from '@/paths';
 import { useDispatch, useSelector } from 'react-redux';
-import { CurrencyAction } from '@/redux/slices';
+import { CurrencyAction,countryActions } from '@/redux/slices';
 import TableSkeleton from '@/components/core/Skeletion';
 
 export default function Page({ searchParams }) {
@@ -32,8 +32,10 @@ export default function Page({ searchParams }) {
   const router = useRouter();
 
   const { allCurrency, totalData, loading: isLoading } = useSelector((state) => state?.currency?.currency);
+  const { allCountries} = useSelector((state) => state?.countries?.country);
   const dispatch = useDispatch();
   const { fetchCurrency } = CurrencyAction;
+  const { fetchCountries } = countryActions;
  
 
   React.useEffect(() => {
@@ -45,6 +47,9 @@ export default function Page({ searchParams }) {
         name: searchInput || ''
       };
        dispatch(fetchCurrency(data));
+       if(allCountries.length === 0){
+        dispatch(fetchCountries({page: 1, limit: "", name: ""}));
+       }
       updateSearchParams({ searchTerm: searchInput, page: currentPage, limit: rowsPerPage });
      
    

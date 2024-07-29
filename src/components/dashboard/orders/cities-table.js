@@ -146,6 +146,13 @@ export function CitiesTable({ rows }) {
       },
       name: 'Payment Mode',
       width: '150px',
+    },
+    {
+      formatter(row) {
+        return row.orderStatus;
+      },
+      name: 'Status',
+      width: '150px',
     }
   ];
 

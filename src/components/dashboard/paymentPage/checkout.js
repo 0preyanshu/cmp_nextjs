@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Box, Grid, Typography, Skeleton,createTheme } from '@mui/material';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
-import { LoadingButton } from '@mui/lab';
+
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -20,15 +20,11 @@ import Confirmed from './confirmed';
 import { useEffect,useState } from 'react';
 import { toast } from '@/components/core/toaster';
 import { maxWidth } from '@mui/system';
+import { CircularProgress } from '@mui/material';
+import { LoadingButton } from '@mui/lab';
 
 
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#FB5741', 
-    },
-  },
-});
+
 
 export default function Payment({searchParams}) {
   // const eventID = "01J357QX6967D3QCYVFADSX62T";
@@ -52,6 +48,9 @@ export default function Payment({searchParams}) {
   const [stripePromise, setStripePromise] = React.useState(null);
   const [currentOrder,setCurrentOrder] = React.useState(null);
   const [loadingCoupon, setLoadingCoupon] = React.useState(false);
+  const [loadingStripe,setLoadingStripe] = React.useState(false);
+  const[loadingData,setLoadingData] = React.useState(false);
+  const [paymentloading,setPaymentLoading] = React.useState(false);
 
 
   const validationSchema = z.object({
@@ -97,10 +96,15 @@ export default function Payment({searchParams}) {
   const values = watch();
 
   const priceDetails = {
-    currencyName: "USD",
-    currencyLogo: "$",
-    totalAmount: 100,
-    couponDiscount: 0,
+    currencyName:  'USD',
+    currencyLogo: '$',
+    price: 0,
+    regularPrice:  0,
+    couponDiscount:  0,
+    subtotal:  0,
+    taxAndCharges:  0,
+    totalAmount:  0,
+    couponDiscount:  0,
   };
 
   const onSubmit = async (data) => {
@@ -168,19 +172,22 @@ export default function Payment({searchParams}) {
   }, [event, currencyID, watch("attendees"), coupon, tax]);
   React.useEffect(() => {
     const fetchData = async () => {
+      setLoadingData(true);
       try {
         const [event, currency, tax, coupon] = await Promise.all([
-          fetch(`https://4zg88ggiaa.execute-api.ap-south-1.amazonaws.com/stg/event/${eventID}`).then(res => res.json()),
-          fetch(`https://4zg88ggiaa.execute-api.ap-south-1.amazonaws.com/stg/currency/${currencyID}`).then(res => res.json()),
-          taxID ? fetch(`https://4zg88ggiaa.execute-api.ap-south-1.amazonaws.com/stg/tax/${taxID}`).then(res => res.json()) : Promise.resolve(undefined)
+          fetch(`https://zl15dvruoa.execute-api.us-east-1.amazonaws.com/prod/event/${eventID}`).then(res => res.json()),
+          fetch(`https://zl15dvruoa.execute-api.us-east-1.amazonaws.com/prod/currency/${currencyID}`).then(res => res.json()),
+          taxID ? fetch(`https://zl15dvruoa.execute-api.us-east-1.amazonaws.com/prod/tax/${taxID}`).then(res => res.json()) : Promise.resolve(undefined)
           
         ]);
 
         setEvent(event.data.event);
         setCurrency(currency.data.currency);
         setTax(tax?.data?.tax);
+        setLoadingData(false);
       } catch (error) {
         console.error("Error fetching data: ", error);
+        setLoadingData(false);
       }
     };
 
@@ -189,19 +196,21 @@ export default function Payment({searchParams}) {
 
   React.useEffect(() => {
     const fetchStripeConfig = async () => {
-      const response = await fetch("https://4zg88ggiaa.execute-api.ap-south-1.amazonaws.com/stg/payment-service/stripe/config", {
-        headers: {
-          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjAxSjJCUVpSU1FXQ1QwUFpZWDhINkVQRjM0IiwiZW1haWwiOiJhZG1pbkBoZWxpdmVyc2UuY29tIiwidXNlclR5cGVJRCI6IjAxSjJCUzVSRkdDTTdLWjI2QUFZUjM3VkVYIiwiZGVmYXVsdFByaXZpbGVnZXMiOlsiMCIsIjAiXSwiaWF0IjoxNzIwOTY2MjUyLCJleHAiOjE3MjEzOTgyNTJ9.fOZXIZuBvtZuySR1ZxlBOi5nalZEXnTox1_nd7TqON4`
-        }
-      });
+      setLoadingStripe(true);
+      const response = await fetch("https://zl15dvruoa.execute-api.us-east-1.amazonaws.com/prod/payment-service/stripe/config");
 
       if (response.ok) {
         const data = await response.json();
         const { publishableKey } = data.data;
         setStripePromise(loadStripe(publishableKey));
+        setLoadingStripe(false);
+
       } else {
         console.error('Failed to fetch Stripe config');
+        setLoadingStripe(false);
+
       }
+     
     };
 
     fetchStripeConfig();
@@ -210,7 +219,7 @@ export default function Payment({searchParams}) {
   const fetchCoupon = async (couponCode) => {
     try {
       setLoadingCoupon(true);
-      const response = await fetch(`https://4zg88ggiaa.execute-api.ap-south-1.amazonaws.com/stg/coupon/with-code/${couponCode}`);
+      const response = await fetch(`https://zl15dvruoa.execute-api.us-east-1.amazonaws.com/prod/coupon/with-code/${couponCode}`);
       const data = await response.json();
       console.log("data", data);
       setLoadingCoupon(false);
@@ -232,12 +241,18 @@ export default function Payment({searchParams}) {
   
 
   return (
+    
     <div className={Styles.payment_page}>
       <div className={Styles.header}>
         <img src="https://strapis3images.s3.amazonaws.com/Group_431_89daa9d285.svg" alt="logo" />
       </div>
-      <div className={Styles.payment_card}>
-        <Grid container spacing={isDesktop ? 3 : 5}>
+      {loadingStripe && <>
+        <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+                  <CircularProgress />
+                </Box>
+      </>}
+      {!loadingStripe && <><div className={Styles.payment_card}>
+        <Grid container spacing={isDesktop ? 3 : 5} data-joy-color-scheme="light">
           <Grid item xs={12} md={8}>
             <Box sx={{ mt: { xs: "0", md: "-40px" } }}>
               <div > <CustomizedStepper activeSection={activeSection}  /></div>
@@ -282,6 +297,7 @@ export default function Payment({searchParams}) {
                         setActiveSection={setActiveSection}
                         currentOrder={currentOrder}
                         setCurrentOrder={setCurrentOrder}
+                        setPaymentLoading={setPaymentLoading}
 
                       />
                     </Elements>
@@ -291,7 +307,7 @@ export default function Payment({searchParams}) {
               {
                 activeSection === 2 && (
                   <><Confirmed currentOrder ={currentOrder?.order} event={event} currency={currency}
-                  token={currentOrder?.token} For={values.for} values={values} 
+                  token={currentOrder?.token} For={values.for} values={values} orderInfo={orderInfo}
                   ></Confirmed></>
                 )
 
@@ -301,35 +317,44 @@ export default function Payment({searchParams}) {
             </Box>
           </Grid>
           <Grid item xs={12} md={4} sx={{ display: { xs: 'none', md: 'block' } }}>
-           {activeSection!==2 &&  <PaymentSummary data={values} setData={setValue} activeSection={activeSection} setActiveSection={setActiveSection} fetchedEvent={event} loading={loadingCoupon} currencyID={currencyID} orderInfo={orderInfo} currency={currency} fetchCoupon={fetchCoupon}
+           {activeSection!==2 &&  <PaymentSummary data={values} setData={setValue} activeSection={activeSection} setActiveSection={setActiveSection} fetchedEvent={event} loading={loadingCoupon||loadingData} currencyID={currencyID} orderInfo={orderInfo} currency={currency} fetchCoupon={fetchCoupon}
            setCouponData={setCoupon}
            
            />}
           </Grid>
           <div className={Styles.fixed_footer}>
-            <div className={Styles.price}>
-              <p>Total: {priceDetails.currencyName} {priceDetails.currencyLogo}{priceDetails.totalAmount}</p>
+            {activeSection !== 2 && !open && <>
+              <div className={Styles.price}>
+              <p>Total: {currency?.currencyName || 'USD'} {currency?.currencyLogo || '$'}{orderInfo?.calculatedAmount || 0}</p>
             </div>
-            <div className={Styles.buttons}>
-              <button style={{ background: "#000" }} onClick={() => setOpen(!open)}>{open ? "Close Details" : "View Details"}</button>
+            </>}
+            {activeSection !== 2 && <>
+              <div className={Styles.buttons}>
+              <button style={{ background: "#000" }} onClick={() => {
+                console.log("open", open);
+                setOpen(!open);
+
+              }}>{open ? "Close Details" : "View Details"}</button>
               <LoadingButton
-                loading={isSubmitting}
-                style={{ background: "#FB5741" }}
+                loading={isSubmitting || paymentloading}
+               variant = "contained"
                 onClick={activeSection === 0 ? handleSubmit(onSubmit) : () => setTriggerPayment(!triggerPayment)}
               >
                 {activeSection === 0 ? "Continue >" : "Pay Now"}
               </LoadingButton>
             </div>
+            </>}
           </div>
           {open && activeSection!==2 && (
             <div className={Styles.info}>
-              <PaymentSummary data={values} setData={setValue} activeSection={activeSection} setActiveSection={setActiveSection} fetchedEvent={event} loading={loadingCoupon} currencyID={currencyID} fetchCoupon={fetchCoupon} orderInfo={orderInfo} currency={currency}
+              <PaymentSummary data={values} setData={setValue} activeSection={activeSection} setActiveSection={setActiveSection} fetchedEvent={event} loading={loadingCoupon ||loadingData } currencyID={currencyID} fetchCoupon={fetchCoupon} orderInfo={orderInfo} currency={currency}
               setCouponData = {setCoupon}
                />
             </div>
           )}
         </Grid>
-      </div>
+      </div></>}
+     
     </div>
   );
 }

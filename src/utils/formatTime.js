@@ -1,28 +1,12 @@
-import { format, getTime, formatDistanceToNow } from 'date-fns';
+
+import dayjs from 'dayjs';
+import relativeTime from 'dayjs/plugin/relativeTime';
+
+dayjs.extend(relativeTime);
 
 // ----------------------------------------------------------------------
 
-export function fDate(date) {
-  return format(new Date(date), 'dd MMMM yyyy');
-}
 
-export function fDateTime(date) {
-  return format(new Date(date), 'dd MMM yyyy HH:mm');
-}
-
-export function fTimestamp(date) {
-  return getTime(new Date(date));
-}
-
-export function fDateTimeSuffix(date) {
-  return format(new Date(date), 'dd/MM/yyyy hh:mm p');
-}
-
-export function fToNow(date) {
-  return formatDistanceToNow(new Date(date), {
-    addSuffix: true,
-  });
-} 
 export  function formatDate(dateString) {
   const date = new Date(dateString);
   const options = { day: '2-digit', month: 'long', year: 'numeric' };
@@ -37,3 +21,8 @@ export function formatDateTime(dateString) {
   const formattedTime = date.toLocaleTimeString('en-GB', timeOptions);
   return `${formattedDate} ${formattedTime}`;
 }
+
+
+export function getRelativeTime(date){
+  return dayjs(date).fromNow();
+};

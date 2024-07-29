@@ -25,6 +25,7 @@ import TableSkeleton from '@/components/core/Skeletion';
 import { useUserPrivileges } from '@/hooks/use-privilages';
 
 
+
 export default function Page({ searchParams }) {
   const {  searchTerm, page = 1, limit = 10,startDate,eventID,courseID,endDate } = searchParams;
 

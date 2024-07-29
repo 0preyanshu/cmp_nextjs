@@ -13,7 +13,7 @@ import Analytics  from '@/components/dashboard/event-registration/analytics';
 
 export const metadata = { title: `Create | Customers | Dashboard | ${config.site.name}` };
 
-export default function Page() {
+export default function Page({searchParams}) {
   return (
     <Box
       sx={{
@@ -41,7 +41,7 @@ export default function Page() {
             <Typography variant="h5">Analytics</Typography>
           </div>
         </Stack>
-        <Analytics></Analytics>
+        <Analytics searchParams={{searchParams}}></Analytics>
       </Stack>
     </Box>
   );

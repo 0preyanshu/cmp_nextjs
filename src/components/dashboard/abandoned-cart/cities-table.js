@@ -24,6 +24,7 @@ import { useDispatch } from 'react-redux';
 import { cityActions } from '@/redux/slices';
 import { toast } from '@/components/core/toaster';
 import { useRouter } from 'next/navigation';
+import {getRelativeTime} from '@/utils/formatTime';
 
 
 
@@ -81,6 +82,14 @@ export function CitiesTable({ rows }) {
    
     {
       formatter(row) {
+        return getRelativeTime(row?.createdAt) || 'N/A';
+      },
+      name: 'Ago',
+      width: '150px',
+    },
+   
+    {
+      formatter(row) {
         return row.firstname + ' ' + row.lastname;
       },
       name: 'Buyer Name',
@@ -109,9 +118,16 @@ export function CitiesTable({ rows }) {
     },
     {
       formatter(row) {
-        return row.event?.eventName || 'N/A';
+        return formatDateTime(row.event?.eventStartDate) || 'N/A';
       },
       name: 'Event Start Date',
+      width: '200px',
+    },
+    {
+      formatter(row) {
+        return row.event?.eventName || 'N/A';
+      },
+      name: 'Event Name',
       width: '200px',
     }
 

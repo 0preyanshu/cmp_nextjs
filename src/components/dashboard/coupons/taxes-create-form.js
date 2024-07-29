@@ -37,16 +37,13 @@ import { Checkbox, TextField, Autocomplete } from '@mui/material';
 import { Typography,createFilterOptions } from '@mui/material';
 import CheckBoxIcon from '@mui/icons-material/CheckBox';
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank';
-import { all } from 'axios';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Switch from '@mui/material/Switch';
 
 
 
-const allCoursesData = [
-  { id: 1, courseName: 'Mathematics' },
-  { id: 2, courseName: 'Physics' },
-  { id: 3, courseName: 'Chemistry' },
-  { id: 4, courseName: 'Biology' },
-];
+
+
 
 const dateIsValid = (date) => !Number.isNaN(new Date(date).getTime());
 const dateIsInFuture = (date) => dayjs(date).isAfter(dayjs());
@@ -59,11 +56,12 @@ const schema = zod.object({
     message: 'Date must be in the future',
   }),
   couponAmount: zod.preprocess((val) => Number(val), zod.number().min(1, 'Coupon amount must be at least 1')),
-  currencyID: zod.string().min(1, 'Currency type is required'),
+  
   usageLimit: zod.preprocess((val) => Number(val), zod.number().min(1, 'Usage limit must be at least 1')),
   courseID: zod.array(zod.string()).min(1, 'At least one course is required'),
   eventID: zod.array(zod.string()).min(1, 'At least one event is required'),
   couponType: zod.string().min(1, 'Coupon type is required'),
+  status_: zod.boolean(),
 });
 
 export function TaxesCreateForm() {
@@ -96,10 +94,11 @@ export function TaxesCreateForm() {
       expiryDate: dateIsValid(currentCoupon?.expiryDate) && dateIsInFuture(currentCoupon?.expiryDate) ? new Date(currentCoupon.expiryDate).toISOString() : new Date().toISOString() , 
       couponType: currentCoupon?.couponType||'FIXED',
       couponAmount: currentCoupon?.couponAmount|| '',
-      currencyID: currentCoupon?.currencyID|| '',
+     
       usageLimit: currentCoupon?.usageLimit||'',
       courseID: currentCoupon?.courseID|| [],
       eventID:currentCoupon?.eventID|| [],
+      status_: currentCoupon?.status_||true,
     }),
     [currentCoupon]
   );
@@ -142,10 +141,10 @@ export function TaxesCreateForm() {
     expiryDate: 'expiryDate',
     couponType: 'couponType',
     couponAmount: 'couponAmount',
-    currencyID: 'currencyID',
     usageLimit: 'usageLimit',
     courseID: 'courseID',
     eventID: 'eventID',
+    status_: 'status_'
   };
 
   const getChangedFields = (data) => {
@@ -166,6 +165,7 @@ export function TaxesCreateForm() {
         const changedData = getChangedFields(data);
         console.log(changedData, 'changedData');
         console.log(data, 'data');
+        changedData.status_ = data.status_ ? 'ACTIVE' : 'INACTIVE';
 
         if (isEdit) {
           await dispatch(updateCoupons(changedData)).then((res) => {
@@ -270,7 +270,7 @@ export function TaxesCreateForm() {
                     )}
                   />
                 </Grid>
-                <Grid md={6} xs={12}>
+                {/* <Grid md={6} xs={12}>
                   <Controller
                     control={control}
                     name="currencyID"
@@ -289,7 +289,7 @@ export function TaxesCreateForm() {
                       </FormControl>
                     )}
                   />
-                </Grid>
+                </Grid> */}
                 <Grid md={6} xs={12}>
                   <Controller
                     control={control}
@@ -303,6 +303,28 @@ export function TaxesCreateForm() {
                           {...field}
                         />
                         {errors.usageLimit ? <FormHelperText>{errors.usageLimit.message}</FormHelperText> : null}
+                      </FormControl>
+                    )}
+                  />
+                </Grid>
+
+                <Grid xs={12} md={6} mt={4} >
+                  <Controller
+                    name="status_"
+                    control={control}
+                    render={({ field }) => (
+                      <FormControl fullWidth error={Boolean(errors.status_)}>
+                        <FormControlLabel
+                          control={
+                            <Switch
+                              checked={field.value}
+                              onChange={(event) => field.onChange(event.target.checked)}
+                              color="primary"
+                            />
+                          }
+                          label="Active"
+                        />
+                        {errors.status_ ? <FormHelperText>{errors.status_.message}</FormHelperText> : null}
                       </FormControl>
                     )}
                   />

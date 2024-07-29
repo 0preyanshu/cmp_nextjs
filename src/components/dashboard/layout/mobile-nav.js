@@ -136,7 +136,8 @@ function NavItem({
   title,
 }) {
   const [open, setOpen] = React.useState(forceOpen);
-  const active = isNavItemActive({ disabled, external, href, matcher, pathname });
+  const active = href==="/dashboard"? pathname===href: isNavItemActive({ disabled, external, href, matcher, pathname });
+  
   const Icon = icon ? icons[icon] : null;
   const ExpandIcon = open ? CaretDownIcon : CaretRightIcon;
   const isBranch = children && !href;

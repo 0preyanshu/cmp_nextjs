@@ -109,9 +109,17 @@ export function CitiesTable({ rows }) {
     },
     {
       formatter(row) {
-        return row.event?.eventName || 'N/A';
+        return formatDateTime(row.event?.eventStartDate) || 'N/A';
       },
       name: 'Event Start Date',
+      width: '200px',
+    }
+    ,
+    {
+      formatter(row) {
+        return formatDateTime(row.event?.eventName) || 'N/A';
+      },
+      name: 'Event Name',
       width: '200px',
     }
 

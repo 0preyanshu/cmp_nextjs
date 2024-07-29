@@ -34,7 +34,8 @@ export function EventTable({ rows }) {
     return `${formattedDate} ${formattedTime}`;
   }
 
-  const handleCopy = (row) => {
+  const handleCopy = (event, row) => {
+    event.stopPropagation();
     const url = `${window.location.origin}${paths.dashboard.eventregistration.attendance(row.id)}`;
     navigator.clipboard.writeText(url).then(() => {
       toast.success('URL copied to clipboard!');
@@ -141,26 +142,10 @@ export function EventTable({ rows }) {
     },
     {
       formatter: (row) => (
-        <div style={{ display: "flex" }}>
-          <IconButton onClick={() => handleCopy(row)}>
+        <div style={{ display: "flex",zIndex:+10 }}>
+          <IconButton onClick={(event) => handleCopy(event, row)}>
             <CopyIcon />
           </IconButton>
-          <IconButton
-  onClick={() => {
-    const { id } = row;
-    const { taxable, taxID,currencyID } = row.eventPrice[0];
-    const baseUrl = `${window.location.origin}/payment?eventID=${id}&currencyID=${currencyID}`;
-    const url = taxable ? `${baseUrl}&taxID=${taxID}` : baseUrl;
-
-    navigator.clipboard.writeText(url).then(() => {
-      toast.success('URL copied to clipboard');
-    }).catch(err => {
-      toast.error('Failed to copy URL');
-    });
-  }}
->
-  <ClipboardIcon  />
-</IconButton>
         </div>
       ),
       name: 'Actions',
