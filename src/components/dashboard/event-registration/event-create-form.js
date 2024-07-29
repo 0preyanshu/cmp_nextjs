@@ -67,7 +67,7 @@ const schema = zod.object({
     (input) => Number(input),
     zod.number().min(1, 'Capacity must be at least 1')
   ),
-  instructorID: zod.string().min(1, 'Instructor is required'),
+  instructorID: zod.array(zod.string()).min(1, 'At least one Instructor is required').max(4,"At most 4 Instructors are allowed"),
   waitlistCapacity: zod.preprocess(
     (input) => Number(input),
     zod.number().min(1, 'Waitlist Capacity must be at least 1')
@@ -475,7 +475,7 @@ export function EventCreateForm() {
           />
         </Grid>
         <Grid item md={6} xs={12}>
-        <Controller
+        {/* <Controller
             control={control}
             name="instructorID"
             render={({ field }) => (
@@ -494,7 +494,8 @@ export function EventCreateForm() {
                 {errors.instructorID ? <FormHelperText>{errors.instructorID.message}</FormHelperText> : null}
               </FormControl>
             )}
-          />
+          /> */}
+          <InstructorSelection control={control} errors={errors} allInstructors={allInstructors} />
         </Grid>
         <Grid item md={6} xs={12}>
           <Controller
@@ -1012,3 +1013,74 @@ const PriceGroup = ({ control, index, remove,watch,setValue }) => {
     </Box>
   );
 };
+
+function InstructorSelection({ control, errors }) {
+  const { allInstructors } = useSelector((state) => state?.instructor?.instructors);
+  const allInstructorData = [
+    {
+      "id": "01J3ZKXPBEZSP91B1WGR6EHY4C",
+      "email": "test@example.us",
+      "firstname": "Jon",
+      "lastname": "Doe",
+      "photo": "https://cmp-bucket-public.s3.amazonaws.com/samplephoto",
+      "phone": "6019521325",
+      "status_": "ACTIVE"
+    }
+    // Add more instructors as needed
+  ];
+
+  return (
+    <div>
+      <Controller
+        name="instructorID"
+        control={control}
+        render={({ field }) => (
+          <>
+            <Autocomplete
+              {...field}
+              multiple
+              disableCloseOnSelect
+              freeSolo
+              onChange={(event, newValue) => {
+                if (newValue.find((option) => option.all))
+                  return field.onChange(field?.value?.length === allInstructorData?.length ? [] : allInstructorData?.map((option) => option.id));
+
+                field.onChange(newValue);
+              }}
+              options={allInstructorData && allInstructorData?.map((option) => option.id)}
+              getOptionLabel={(instructorId) =>
+                allInstructorData.find((instructor) => instructor.id === instructorId)?.firstname + ' ' + allInstructorData.find((instructor) => instructor.id === instructorId)?.lastname || ''
+              }
+              filterOptions={(options, params) => {
+                const filter = createFilterOptions();
+                const filtered = filter(options, params);
+                return [{ title: 'Select All...', all: true }, ...filtered];
+              }}
+              renderOption={(props, option, { selected }) => (
+                <li {...props}>
+                  <Checkbox
+                    icon={icon}
+                    checkedIcon={checkedIcon}
+                    style={{ marginRight: 8 }}
+                    checked={option.all ? (field.value.length === allInstructorData.length) : selected}
+                  />
+                  {option.all ? option?.title : allInstructorData.find((instructor) => instructor.id === option)?.firstname + ' ' + allInstructorData.find((instructor) => instructor.id === option)?.lastname || ''}
+                </li>
+              )}
+              renderInput={(params) => (
+                <TextField
+                  label="Select Instructors:"
+                  {...params}
+                  error={!!errors.instructorID}
+                  helperText={errors.instructorID ? errors.instructorID.message : ''}
+                />
+              )}
+            />
+          </>
+        )}
+      />
+    </div>
+  );
+}
+
+export default InstructorSelection;
