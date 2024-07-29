@@ -80,6 +80,7 @@ export function SignInForm() {
       const { error } = await authClient.signInWithPassword(values);
 
       if (error) {
+        console.log("error",error)
         setError('root', { type: 'server', message: error });
         setIsPending(false);
         return;

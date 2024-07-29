@@ -85,20 +85,20 @@ export function VendorsCreateForm() {
         const changedData = getChangedFields(data);
         if (isEdit) {
           await dispatch(updatevendors(changedData)).then((res) => {
-            if (res?.payload?.data?.data?.data) {
+            if (res?.payload?.data?.data) {
               toast.success('Update success!');
               router.push('/dashboard/vendors');
             } else {
-              toast.error(res?.payload?.data?.data?.error?.message || 'Internal Server Error');
+              toast.error(res?.payload?.data?.error?.message || 'Internal Server Error');
             }
           });
         } else {
           await dispatch(createvendor(data)).then((res) => {
-            if (res?.payload?.data?.data?.data) {
+            if (res?.payload?.data?.data) {
               toast.success('Create success!');
               router.push('/dashboard/vendors');
             } else {
-              toast.error(res?.payload?.data?.data?.error?.message || 'Internal Server Error');
+              toast.error(res?.payload?.data?.error?.message || 'Internal Server Error');
             }
           });
         }

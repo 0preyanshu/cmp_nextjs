@@ -115,12 +115,12 @@ export function VendorsTable({ rows }) {
           }
           await dispatch(updatevendors(data)).then((res) => {
             console.log(res?.payload?.data?.data?.data,"reso");
-            if (res?.payload?.data?.data?.data) {
+            if (res?.payload?.data?.data) {
             
                   toast.success('Details updated');
                   router.push(paths.dashboard.vendors.list);
             } else {
-              toast.error(res?.payload?.data?.data?.error?.message || 'Internal Server Error');
+              toast.error(res?.payload?.data?.error?.message || 'Internal Server Error');
             }
           })
   
