@@ -29,8 +29,9 @@ import { useDispatch, useSelector } from 'react-redux';
 import { CourseCategoryActions } from '@/redux/slices';
 import { LoadingButton } from '@mui/lab';
 import { get } from 'http';
+import {HOST_API} from '@/config'
 
-const S3_URL = 'https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg';
+const S3_URL = HOST_API;
 
 const schema = zod.object({
   avatar: zod.string().optional(),
@@ -167,6 +168,7 @@ export function CourseCategoriesCreateForm() {
             await axios.put(data?.data?.s3SignedUrl, file, {
               headers: {
                 'Content-Type': file.type,
+                'Authorization' : localStorage.getItem('custom-auth-token')
               },
             });
             setValue('avatar', imageId);
