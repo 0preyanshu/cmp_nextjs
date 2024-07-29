@@ -22,18 +22,15 @@ export function SettingsButton() {
 
   const [openDrawer, setOpenDrawer] = React.useState(false);
 
-  React.useEffect(() => {
-    console.log("pathname", pathname);
-    // console.log("setColorScheme", router);
-    if (pathname === '/payment') {
-      setColorScheme('light');
-    }
-  }, [pathname, setColorScheme]);
-
-  // Check if the current path is /payment
-  if (pathname === '/payment') {
-    return null;
-  }
+  // React.useEffect(async() => {
+  //   if (pathname === '/payment') {
+  //     setColorScheme('light');
+  //     const updatedSettings = { ...settings, colorScheme: 'light' };
+  //     await setPersistedSettings(updatedSettings);
+  //   } else {
+  //     setColorScheme(settings?.colorScheme || 'light');
+  //   }
+  // }, [pathname]);
 
   const handleUpdate = async (values) => {
     if (values.colorScheme) {
@@ -44,7 +41,6 @@ export function SettingsButton() {
 
     await setPersistedSettings(updatedSettings);
 
-    // Refresh the router to apply the new settings.
     router.refresh();
   };
 
@@ -53,9 +49,12 @@ export function SettingsButton() {
 
     await setPersistedSettings({});
 
-    // Refresh the router to apply the new settings.
     router.refresh();
   };
+
+  if (pathname === '/payment') {
+    return null;
+  }
 
   return (
     <React.Fragment>

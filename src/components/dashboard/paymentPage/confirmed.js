@@ -13,6 +13,7 @@ import { PDFDownloadLink } from '@react-pdf/renderer';
 import RecieptPDF from './receiptPDF';
 import { saveAs } from 'file-saver';
 import { pdf } from '@react-pdf/renderer';
+import {CloudArrowDown} from '@phosphor-icons/react';
 
 const generatePdfDocument = async (documentData, fileName) => {
   try {
@@ -27,9 +28,16 @@ const generatePdfDocument = async (documentData, fileName) => {
   }
 };
 
-const Confirmed = ({ currentOrder, event, currency, token,For,values}) => {
+const Confirmed = ({ currentOrder, event, currency, token,For,values,orderInfo}) => {
   const [attendeeFormData, setAttendeeFormData] = useState([]);
   const [loading, setLoading] = useState(false);
+  // setOrderInfo({
+  //   calculatedAmount,
+  //   noOfParticipants,
+  //   eventAmount,
+  //   taxAmount,
+  //   couponAmount,
+  // });
   const [orderDetails, setOrderDetails] = useState({
     buyerName: currentOrder?.buyerFirstName || '-',
     buyerEmail: currentOrder?.buyerEmail || '-',
@@ -46,7 +54,12 @@ const Confirmed = ({ currentOrder, event, currency, token,For,values}) => {
     timZoneShortName: event.timezoneID,
     courseLogoUrl: event.courseLogoUrl || 'https://via.placeholder.com/150',
     orderParticipantDTOS: currentOrder?.participants || [],
-  },[currentOrder, event, currency]);
+    orderDate : currentOrder?.orderHistory[0]?.date || 'N/A',
+    calculatedAmount:orderInfo?.calculatedAmount,
+    eventAmount:orderInfo?.eventAmount,
+    taxAmount:orderInfo?.taxAmount,
+    couponAmount:orderInfo?.couponAmount,
+  },[currentOrder, event, currency,orderInfo]);
 
   useEffect(() => {
     console.log(currentOrder, "currentOrder");
@@ -123,8 +136,9 @@ const Confirmed = ({ currentOrder, event, currency, token,For,values}) => {
         <img src="https://strapis3images.s3.amazonaws.com/Group_431_89daa9d285.svg" alt="logo" />
       </div>
       <div className={Styles.wrapper}>
-        {console.log(For," for ",values.attendee)}
-        {For!=="MY_SELF" || values.attendee !==1 && <>
+        {console.log(For," for ",values)}
+        {console.log("x",orderDetails.numberOfParticipants,orderDetails.orderParticipantDTOS.length)}
+        {(For!=="MY_SELF" || values.attendees !==1) && <>
         
           <div className={Styles.form}>
           {orderDetails.numberOfParticipants - orderDetails.orderParticipantDTOS.length > 0 && (
@@ -258,17 +272,26 @@ const Confirmed = ({ currentOrder, event, currency, token,For,values}) => {
               No. of Attendees: <span>{orderDetails.numberOfParticipants}</span>
             </div>
             <div className={Styles.reciept}>
-            {orderDetails.orderParticipantDTOS.length > 0 && (
-                <button onClick={handleDownload} disabled={pdfloading}>
-                    {pdfloading ? <CircularProgress size={24} color="inherit" /> : 'Download Receipt'}
-                </button>
-            )}
+              {console.log(For,"for",values.attendees ,(For==="MY_SELF" && values.attendees ===1),((orderDetails.numberOfParticipants - orderDetails.orderParticipantDTOS.length <= 0) || (For==="MY_SELF" && values.attendees ===1)))}
+            {((orderDetails.numberOfParticipants - orderDetails.orderParticipantDTOS.length <= 0) || (For==="MY_SELF" && values.attendees ===1)) &&(
+    <button onClick={handleDownload} disabled={pdfloading} style={{ display: 'flex', alignItems: 'center' }}> 
+        {pdfloading ? (
+            <CircularProgress size={24} color="inherit" sx={{ ml: 5 }} />
+        ) : (
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div style={{ marginRight: '10px' }}>Download Receipt</div>
+                <CloudArrowDown size={24} sx={{ ml: 2, mt: 5 }} />
+            </div>
+        )}
+    </button>
+)}
+
         </div>
           </div>
           <div className={Styles.course_card} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', border: '1px solid #e0e0e0', borderRadius: '8px',  }}>
       <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <h3 style={{ margin: 0 }}>{orderDetails.eventName}</h3>
-        <p style={{ fontWeight: 'bold', margin: 0 }}>{orderDetails.instructorName}</p>
+        <p style={{  margin: 0 }}>Instructor : {orderDetails.instructorName}</p>
       </div>
       <div style={{ textAlign: 'right' }}>
         <p style={{ margin: 0, fontWeight: 'bold' }}>

@@ -11,7 +11,7 @@ export function DynamicLayout({ children }) {
   const { settings } = useSettings();
 
   return settings.layout === 'horizontal' ? (
-    <HorizontalLayout>{children}</HorizontalLayout>
+    <VerticalLayout>{children}</VerticalLayout>
   ) : (
     <VerticalLayout>{children}</VerticalLayout>
   );

@@ -7,12 +7,13 @@ import { CardNumberElement, CardExpiryElement, CardCvcElement, useStripe, useEle
 import CardInput from './card';
 import Styles from './styles/payment.module.scss';
 import {toast} from '@/components/core/toaster'
+import Image from 'next/image';
 
 const PAYPAL_URL = "https://www.paypal.com/checkout";
 
 const chargeApi = async (token, paymentDetails) => {
   try {
-    const response = await fetch('https://4zg88ggiaa.execute-api.ap-south-1.amazonaws.com/stg/payment-service/stripe/charge', {
+    const response = await fetch('https://zl15dvruoa.execute-api.us-east-1.amazonaws.com/prod/payment-service/stripe/charge', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -45,7 +46,7 @@ const chargeApi = async (token, paymentDetails) => {
   }
 };
 
-export default function PaymentSection({ data, eventID, currencyID,taxID, clientSecret, select, setSelect, triggerPayment, orderInfo , coupon,setActiveSection,currentOrder,setCurrentOrder }) {
+export default function PaymentSection({ data, eventID, currencyID,taxID, clientSecret, select, setSelect, triggerPayment, orderInfo , coupon,setActiveSection,currentOrder,setCurrentOrder,setPaymentLoading}) {
   const stripe = useStripe();
   const elements = useElements();
   const router = useRouter();
@@ -59,6 +60,7 @@ export default function PaymentSection({ data, eventID, currencyID,taxID, client
     }
 
     setIsLoading(true);
+    setPaymentLoading(true);
 
     const cardElement = elements.getElement(CardNumberElement);
 
@@ -68,6 +70,7 @@ export default function PaymentSection({ data, eventID, currencyID,taxID, client
         console.log("Error creating token:", error);
         toast.error(error?.message || "Payment Failed")
         setIsLoading(false);
+        setPaymentLoading(false);
         return;
       }
      
@@ -108,6 +111,7 @@ export default function PaymentSection({ data, eventID, currencyID,taxID, client
       console.error("Payment error:", error);
     } finally {
       setIsLoading(false);
+      setPaymentLoading(false);
     }
   };
 
@@ -148,7 +152,7 @@ export default function PaymentSection({ data, eventID, currencyID,taxID, client
               control={<Radio onChange={() => setSelect("paypal")} checked={select === "paypal"} />}
               label={
                 <Typography variant="h6">
-                  PayPal
+                 <img src="./assets/PayPal.png" alt="PayPal"  width={100} height={25} />
                 </Typography>
               }
             />
@@ -180,13 +184,16 @@ export default function PaymentSection({ data, eventID, currencyID,taxID, client
                 Click <strong>"PayPal Checkout"</strong> and you will be redirected to PayPal to make the payment. After completing the payment process, you will be redirected back to Skillbook where you can view the order details.
               </Typography>
             </div>
+            
             <div className={Styles.button}>
-              <LoadingButton loading={isLoading} onClick={handlePayPalPay}>
-                PayPal Checkout
-              </LoadingButton>
+                            <LoadingButton loading={isLoading} className={Styles.paypal} onClick={handlePayPalPay}>
+                                <img src="./assets/PayPal.png"  style={isLoading ? { opacity: 0 ,margiBottom:"10px"} : {margiBottom:"10px"}} alt="paypal" />
+                                Checkout
+                            </LoadingButton>
+                       
             </div>
             <div className={Styles.message}>
-              <Typography variant="body2">The safer, easier way to pay</Typography>
+              <Typography variant="body2" sx={{mt:1}}>The safer, easier way to pay</Typography>
             </div>
           </div>
         )}

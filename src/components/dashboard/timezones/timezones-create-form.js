@@ -217,7 +217,7 @@ export function TimezonesCreateForm() {
             style={{ textTransform: 'capitalize' }}
             loading={isSubmitting}
           >
-            {!isEdit ? 'Create Currency' : 'Save Changes'}
+            {!isEdit ? 'Create ' : 'Save Changes'}
           </LoadingButton>
         </CardActions>
       </Card>

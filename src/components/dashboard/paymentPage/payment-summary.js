@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import moment from 'moment';
 import { TextField, Skeleton } from '@mui/material';
 import styles from './PaymentSummary.module.css';  // Import the CSS module
+import Avatar from '@mui/material/Avatar';
 
 export default function PaymentSummary({ data, orderInfo, currency, fetchedEvent, loading, fetchCoupon, setCouponData }) {
   const [coupon, setCoupon] = useState('');
@@ -111,7 +112,9 @@ export default function PaymentSummary({ data, orderInfo, currency, fetchedEvent
               {moment(event.classStartDate).format("hh:mm A")} - {moment(event.classEndDate).format("hh:mm A")} ({event.timezoneShortName})
             </div>
           </div>
-          <img className={styles.logo} src={event.courseLogo} alt="logo" />
+          <Avatar className={styles.logo} src={event.courseLogo} alt="logo" >
+            {event.eventName.charAt(0)}
+          </Avatar>
         </div>
       )}
 
@@ -190,7 +193,7 @@ export default function PaymentSummary({ data, orderInfo, currency, fetchedEvent
           <Skeleton height={30} width={60} />
         </div>
       ) : (
-        <div className={styles.total}>
+        <div className={styles.total} style={{fontWeight:"bold"}}>
           <div>Total</div>
           <div>{priceDetails.currencyName} {priceDetails.currencyLogo}{priceDetails.totalAmount}</div>
         </div>

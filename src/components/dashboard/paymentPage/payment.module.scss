@@ -2,6 +2,7 @@
     width: 100%;
     background: #F2F2F2;
     min-height: 100vh;
+    color:"black";
 
     @media (max-width: 900px) {
         background: #fff;
@@ -59,7 +60,7 @@
     bottom: 0;
     width: 100%;
     right: 0;
-    z-index: 1;
+    z-index:1000000000;
 
     .price {
         border-radius: 8px 8px 0px 0px;

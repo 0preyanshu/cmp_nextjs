@@ -3,7 +3,7 @@ import { useStripe, useElements, CardNumberElement, CardCvcElement, CardExpiryEl
 
 const chargeApi = async (token, paymentDetails) => {
   try {
-    const response = await fetch('https://4zg88ggiaa.execute-api.ap-south-1.amazonaws.com/stg/payment-service/stripe/charge', {
+    const response = await fetch('https://zl15dvruoa.execute-api.us-east-1.amazonaws.com/prod/payment-service/stripe/charge', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

@@ -58,6 +58,13 @@ export function InstructorsTable({ rows }) {
       name: 'Email',
       width: '200px',
     },
+    {
+      formatter(row) {
+        return row.ephone || '-';
+      },
+      name: 'Phone',
+      width: '200px',
+    },
     
     {
       formatter: (row) => {

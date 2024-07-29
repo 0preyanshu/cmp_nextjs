@@ -14,7 +14,7 @@ import { Minus as MinusIcon } from '@phosphor-icons/react/dist/ssr/Minus';
 import { PencilSimple as PencilSimpleIcon } from '@phosphor-icons/react/dist/ssr/PencilSimple';
 import { TrashSimple as TrashSimpleIcon } from '@phosphor-icons/react/dist/ssr/TrashSimple';
 import { Clipboard as ClipboardIcon } from '@phosphor-icons/react/dist/ssr/Clipboard';
-
+import Button from '@mui/material/Button';
 import { paths } from '@/paths';
 
 import { DataTable } from '@/components/core/data-table';
@@ -43,6 +43,11 @@ export function EventTable({ rows }) {
     return `${formattedDate} ${formattedTime}`;
   }
 
+  const handleCopy = (text) => {
+    navigator.clipboard.writeText(text);
+    toast.success('Copied to clipboard!');
+  };
+
   const { updateEvents } = EventsActions;
 
   const columns = [
@@ -65,6 +70,26 @@ export function EventTable({ rows }) {
             <Link>{row.eventName}</Link><br />
             {`${formatDateTime(row.eventStartDate)} - ${formatDateTime(row.eventEndDate)}`}<br />
             <b>Sale Validity</b>: {formatDateTime(row.salesDescription.saleEndDate)}<br />
+            <Button
+              variant="outlined"
+              size="small"
+              sx={{my:1}}
+              startIcon={<ClipboardIcon />}
+              onClick={() => {
+                const { id } = row;
+                const { taxable, taxID,currencyID } = row.eventPrice[0];
+                const baseUrl = `${window.location.origin}/payment?eventID=${id}&currencyID=${currencyID}`;
+                const url = taxable ? `${baseUrl}&taxID=${taxID}` : baseUrl;
+            
+                navigator.clipboard.writeText(url).then(() => {
+                  toast.success('URL copied to clipboard');
+                }).catch(err => {
+                  toast.error('Failed to copy URL');
+                });
+              }}
+            >
+              Copy
+            </Button>
           </div>
         </Stack>
       ),

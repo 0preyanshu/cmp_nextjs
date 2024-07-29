@@ -3,8 +3,8 @@ import { Typography } from '@mui/material';
 import Styles from './styles/footer.module.scss';
 
 // Hardcoded image paths for Next.js
-const paymentImageSrc = '/path/to/payment.png';
-const paymentImage1Src = '/path/to/payment1.png';
+const paymentImageSrc = '/assets/payment.png';
+const paymentImage1Src = '/assets/payment1.png';
 
 // ----------------------------------------------------------------------
 

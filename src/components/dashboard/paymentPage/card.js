@@ -30,7 +30,7 @@ function CardInput() {
             <span className={Styles.cardLabelText}>Card number</span>
             <div className={Styles.cardNumberWrapper}>
               <CardNumberElement className={Styles.cardInput} options={CARD_ELEMENT_OPTIONS} />
-              <img src="/path/to/mastercard-logo.png" alt="MasterCard" className={Styles.cardLogo} />
+              {/* <img src="/path/to/mastercard-logo.png" alt="MasterCard" className={Styles.cardLogo} /> */}
             </div>
           </label>
         </Grid>
@@ -58,8 +58,8 @@ function CardInput() {
           </label>
         </Grid>
         <Grid item xs={12} className={Styles.sslSecured}>
-          <img src="/path/to/ssl-secured-logo.png" alt="SSL Secured" />
-          <span>SSL Secured</span>
+          {/* <img src="/path/to/ssl-secured-logo.png" alt="SSL Secured" /> */}
+          {/* <span>SSL Secured</span> */}
         </Grid>
       </Grid>
     </div>

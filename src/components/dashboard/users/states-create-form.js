@@ -13,6 +13,7 @@ import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import Divider from '@mui/material/Divider';
 import FormControl from '@mui/material/FormControl';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import FormHelperText from '@mui/material/FormHelperText';
 import InputLabel from '@mui/material/InputLabel';
 import OutlinedInput from '@mui/material/OutlinedInput';
@@ -20,6 +21,7 @@ import Stack from '@mui/material/Stack';
 import Grid from '@mui/material/Unstable_Grid2';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
+import Checkbox from '@mui/material/Checkbox';
 
 import { paths } from '@/paths';
 import { logger } from '@/lib/default-logger';
@@ -27,6 +29,7 @@ import { toast } from '@/components/core/toaster';
 import { useDispatch, useSelector } from 'react-redux';
 import { UserActions } from '@/redux/slices';
 import PrivilegesForm from '@/components/core/privilegesAccordian';
+import { Typography } from '@mui/material';
 
 const getSchema = (isEdit) => zod.object({
   firstname: zod.string().min(1, 'First Name is required'),
@@ -35,6 +38,10 @@ const getSchema = (isEdit) => zod.object({
   userTypeID: zod.string().min(1, 'User Type is required'),
   defaultPrivileges: zod.array(zod.string()).min(1, 'Please select at least one privilege'),
   password: !isEdit ? zod.string().min(4, 'Password must be at least 4 characters long') : zod.string().min(0, '0'),
+  'Welcome-Email': zod.boolean(),
+  'Pre-requisite-Email': zod.boolean(),
+  'Order-Email': zod.boolean(),
+  'Transfer-Email': zod.boolean(),
 });
 
 export function StatesCreateForm() {
@@ -58,7 +65,11 @@ export function StatesCreateForm() {
     email: currentUser?.email || "",
     userTypeID: currentUser?.userTypeID || "",
     defaultPrivileges: currentUser?.defaultPrivileges || [],
-    password: "",
+    password: "test123",
+    'Welcome-Email': currentUser?.['Welcome-Email'] || false,
+    'Pre-requisite-Email': currentUser?.['Pre-requisite-Email'] || false,
+    'Order-Email': currentUser?.['Order-Email'] || false,
+    'Transfer-Email': currentUser?.['Transfer-Email'] || false,
   }), [currentUser]);
 
   const {
@@ -92,14 +103,28 @@ export function StatesCreateForm() {
     return changedFields;
   };
 
+  const transformEmails = (data) => {
+    const emails = [];
+    if (data['Welcome-Email']) emails.push('WELCOME');
+    if (data['Pre-requisite-Email']) emails.push('PRE_REQUISTE');
+    if (data['Order-Email']) emails.push('ORDER');
+    if (data['Transfer-Email']) emails.push('TRANSFER');
+    return emails;
+  };
+
   const onSubmit = React.useCallback(
     async (data) => {
       try {
         const changedData = getChangedFields(data);
         console.log(changedData, "cd");
 
+        const payload = {
+          ...changedData,
+          emailToBeSend: transformEmails(data),
+        };
+
         if (isEdit) {
-          await dispatch(updateUser(changedData)).then((res) => {
+          await dispatch(updateUser(payload)).then((res) => {
             if (res?.payload?.data?.data) {
               toast.success('Update success!');
               router.push(paths.dashboard.users.list);
@@ -108,7 +133,7 @@ export function StatesCreateForm() {
             }
           });
         } else {
-          await dispatch(createUser(data)).then((res) => {
+          await dispatch(createUser(payload)).then((res) => {
             if (res?.payload?.data?.data) {
               toast.success('Create success!');
               router.push(paths.dashboard.users.list);
@@ -192,8 +217,8 @@ export function StatesCreateForm() {
                           }}
                         >
                           <MenuItem key="" value="">
-                              Select User Type
-                            </MenuItem>
+                            Select User Type
+                          </MenuItem>
                           {userTypes.map((type) => (
                             <MenuItem key={type.id} value={type.id}>
                               {type.userTypeName}
@@ -204,23 +229,8 @@ export function StatesCreateForm() {
                       </FormControl>
                     )}
                   />
-                  
                 </Grid>
-                {!isEdit && (
-                  <Grid md={6} xs={12}>
-                    <Controller
-                      control={control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormControl error={Boolean(errors.password)} fullWidth>
-                          <InputLabel required>Password</InputLabel>
-                          <OutlinedInput {...field} type="password" />
-                          {errors.password ? <FormHelperText>{errors.password.message}</FormHelperText> : null}
-                        </FormControl>
-                      )}
-                    />
-                  </Grid>
-                )}
+
                 <Grid md={12} xs={12}>
                   <Controller
                     control={control}
@@ -233,7 +243,56 @@ export function StatesCreateForm() {
                     )}
                   />
                 </Grid>
-               
+                
+                <Grid md={12} xs={12}>
+                  <Typography variant="h6" mb={3}>Emails To Be Send</Typography>
+                  <Controller
+                    control={control}
+                    name="Welcome-Email"
+                    render={({ field }) => (
+                      <FormControlLabel
+                        control={<Checkbox {...field} checked={field.value} />}
+                        label="Welcome Email"
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid md={12} xs={12}>
+                  <Controller
+                    control={control}
+                    name="Pre-requisite-Email"
+                    render={({ field }) => (
+                      <FormControlLabel
+                        control={<Checkbox {...field} checked={field.value} />}
+                        label="Pre-requisite Email"
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid md={12} xs={12}>
+                  <Controller
+                    control={control}
+                    name="Order-Email"
+                    render={({ field }) => (
+                      <FormControlLabel
+                        control={<Checkbox {...field} checked={field.value} />}
+                        label="Order Email"
+                      />
+                    )}
+                  />
+                </Grid>
+                <Grid md={12} xs={12}>
+                  <Controller
+                    control={control}
+                    name="Transfer-Email"
+                    render={({ field }) => (
+                      <FormControlLabel
+                        control={<Checkbox {...field} checked={field.value} />}
+                        label="Transfer Email"
+                      />
+                    )}
+                  />
+                </Grid>
               </Grid>
             </Stack>
           </Stack>

@@ -71,10 +71,11 @@
                 padding-left: 20px;
 
                 @media (max-width: 900px) {
-                    background: #FB614C;
+                    background: #d68276;
                     padding: 4px 12px;
                     margin: 0 16px;
                     margin-top: 16px;
+                   
                 }
 
                 h3 {
@@ -152,10 +153,13 @@
 
                 @media (max-width: 900px) {
                     margin: 0 16px;
-                    padding: 16px 12px;
+                    padding: 16px 22px;
                     gap: 16px;
                     border-radius: 8px;
                     background: #FFEEDA;
+                    overflow-x: auto;
+                    padding-right: 10px;
+                    padding-left: 10px;
                 }
 
                 .attendee {
@@ -266,7 +270,7 @@
                 text-align: center;
 
                 h1 {
-                    color: #FB5741;
+                    color: #ca877e;
                     font-feature-settings: 'salt' on;
                     font-family: Inter;
                     font-size: 26px;

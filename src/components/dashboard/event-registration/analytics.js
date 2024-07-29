@@ -16,6 +16,15 @@ import { toast } from '@/components/core/toaster';
 import { paths } from '@/paths';
 import { Chart } from 'react-apexcharts';
 import {HOST_API} from '@/config'
+import { Pagination } from '@/components/core/pagination';
+import { CitiesTable } from '@/components/dashboard/emaillogs/cities-table';
+// import { EmailLogsActions } from '@/redux/slices';
+import { useRouter } from 'next/navigation';
+import { EmailLogsActions, EventsActions } from '@/redux/slices';
+import { TableSkeleton } from '@/components/core/Skeletion';
+import { useDispatch } from 'react-redux';
+
+
 
 
 // const HOST_API = "https://zfwppq9jk2.execute-api.us-east-1.amazonaws.com/stg";
@@ -30,13 +39,78 @@ const handleCopy = (id) => {
 };
 
 
-const Analytics = () => {
+const Analytics = ({searchParams}) => {
+  const router = useRouter();
   const { id } = useParams();
-  const { allEvents, loading: isLoading } = useSelector((state) => state?.event?.events);
+  const {   page = 1, limit = 10 } = searchParams;
+
+  const [currentPage, setCurrentPage] = React.useState(parseInt(page));
+  const [rowsPerPage, setRowsPerPage] = React.useState(parseInt(limit));
+  const { allEvents } = useSelector((state) => state?.event?.events);
   const [currentEvent, setCurrentEvent] = useState({});
   const [analyticsData, setAnalyticsData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const { isLoading, toast, emailLogs, totalElements } = useSelector((state) => state.emailLogs);
+  const {getEmailLogsData} = EmailLogsActions;
+  const dispatch = useDispatch();
+
+  React.useEffect(() => {
+   
+    const data = {
+      page: currentPage,
+      limit: rowsPerPage,
+      name:  '',
+      startDate:  '',
+      eventID: id || '',
+      endDate:  '',
+    
+      
+
+    };
+
+    
+      dispatch(getEmailLogsData(data));
+    
+
+    // updateSearchParams({  page: currentPage, limit: rowsPerPage});
+   
+  
+ 
+}, [ currentPage, rowsPerPage,id]);
+
+
+
+const handlePageChange = (event, newPage) => {
+  setCurrentPage(newPage);
+  updateSearchParams({ ...searchParams, page: newPage });
+};
+
+const handleRowsPerPageChange = (event) => {
+  setRowsPerPage(parseInt(event.target.value, 10));
+  setCurrentPage(1);
+  updateSearchParams({ ...searchParams, limit: parseInt(event.target.value, 10), page: 1 });
+};
+
+const updateSearchParams = (newFilters, newSortDir) => {
+  const searchParams = new URLSearchParams();
+
+
+
+  if (newFilters.page) {
+    searchParams.set('page', newFilters.page);
+  }
+
+  if (newFilters.limit) {
+    searchParams.set('limit', newFilters.limit);
+  }
+
+  
+
+
+  router.push(`${paths.dashboard.eventregistration.analytics(id)}?${searchParams.toString()}`);
+};
 
   useEffect(() => {
     if (allEvents?.length && id) {
@@ -136,13 +210,30 @@ const Analytics = () => {
             </Card>
           </Grid>
         ))}
-        <Grid item md={12}>
+        <Grid item md={12} xs={12} sm={12}>
           <Typography sx={{ mb: 2, ml: 2 ,fontWeight:"bold"}}>Participants</Typography>
           <Card sx={{ boxShadow: 6 }}>
-            <Box sx={{ overflowX: 'auto' }}>
+            <Box sx={{ overflowX: 'auto' ,maxWidth:"100%"}}>
               <ParticipantsTable rows={analyticsData?.participantDetails||[]} />
             </Box>
           </Card>
+          
+        </Grid>
+        <Grid item md={12} xs={12} sm={12}>
+          <Typography sx={{ mb: 2, ml: 2 ,fontWeight:"bold"}}>Email Logs</Typography>
+          <Card>
+         
+          <Box sx={{ overflowX: 'auto' }}>
+            {isLoading ? (
+              <TableSkeleton />
+            ) : (
+              <CitiesTable rows={emailLogs} />
+            )}
+          </Box>
+          {/* <Divider />
+          <Pagination page={currentPage-1} rowsPerPage={rowsPerPage} onPageChange={handlePageChange} onRowsPerPageChange={handleRowsPerPageChange} /> */}
+        </Card>
+
         </Grid>
       </Grid>
     </Box>

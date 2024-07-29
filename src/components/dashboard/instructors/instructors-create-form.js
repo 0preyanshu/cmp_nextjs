@@ -38,6 +38,7 @@ const schema = zod.object({
   firstname: zod.string().min(1, 'First Name is required').max(255),
   lastname: zod.string().min(1, 'Last Name is required').max(255),
   email: zod.string().email('Invalid email').min(1, 'Email is required').max(255),
+  phone: zod.string().regex(/^((\+[1-9]{1,4}[ -]?)|(\([0-9]{2,3}\)[ -]?)|([0-9]{2,4})[ -]?)*?[0-9]{3,4}[ -]?[0-9]{3,4}$/, 'Phone number is not valid').min(1, 'Phone number is required'),
 });
 
 export function InstructorsCreateForm() {
@@ -59,6 +60,7 @@ export function InstructorsCreateForm() {
     firstname: currentInstructor?.firstname || '',
     lastname: currentInstructor?.lastname || '',
     email: currentInstructor?.email || '',
+    phone : currentInstructor?.phone || '',
   }), [currentInstructor]);
 
   const {
@@ -86,6 +88,7 @@ export function InstructorsCreateForm() {
     firstname: "firstname",
     lastname: "lastname",
     email: "email",
+    phone: "phone",
   };
 
   const getChangedFields = (data) => {
@@ -258,6 +261,19 @@ export function InstructorsCreateForm() {
                         <InputLabel required>Email</InputLabel>
                         <OutlinedInput {...field} type='email' />
                         {errors.email ? <FormHelperText>{errors.email.message}</FormHelperText> : null}
+                      </FormControl>
+                    )}
+                  />
+                </Grid>
+                <Grid md={6} xs={12}>
+                  <Controller
+                    control={control}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormControl error={Boolean(errors.phone)} fullWidth>
+                        <InputLabel required>Phone</InputLabel>
+                        <OutlinedInput {...field} />
+                        {errors.phone ? <FormHelperText>{errors.phone.message}</FormHelperText> : null}
                       </FormControl>
                     )}
                   />
