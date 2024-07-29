@@ -58,8 +58,8 @@ const schema = zod.object({
   couponAmount: zod.preprocess((val) => Number(val), zod.number().min(1, 'Coupon amount must be at least 1')),
   
   usageLimit: zod.preprocess((val) => Number(val), zod.number().min(1, 'Usage limit must be at least 1')),
-  courseID: zod.array(zod.string()).min(1, 'At least one course is required'),
-  eventID: zod.array(zod.string()).min(1, 'At least one event is required'),
+  courseID: zod.array(zod.string()).min(0, 'At least one course is required'),
+  eventID: zod.array(zod.string()).min(0, 'At least one event is required'),
   couponType: zod.string().min(1, 'Coupon type is required'),
   status_: zod.boolean(),
 });
