@@ -22,6 +22,7 @@ import { toast } from '@/components/core/toaster';
 import { maxWidth } from '@mui/system';
 import { CircularProgress } from '@mui/material';
 import { LoadingButton } from '@mui/lab';
+import { HOST_API } from '@/config';
 
 
 
@@ -175,9 +176,9 @@ export default function Payment({searchParams}) {
       setLoadingData(true);
       try {
         const [event, currency, tax, coupon] = await Promise.all([
-          fetch(`https://zl15dvruoa.execute-api.us-east-1.amazonaws.com/prod/event/${eventID}`).then(res => res.json()),
-          fetch(`https://zl15dvruoa.execute-api.us-east-1.amazonaws.com/prod/currency/${currencyID}`).then(res => res.json()),
-          taxID ? fetch(`https://zl15dvruoa.execute-api.us-east-1.amazonaws.com/prod/tax/${taxID}`).then(res => res.json()) : Promise.resolve(undefined)
+          fetch(`${HOST_API}/event/${eventID}`).then(res => res.json()),
+          fetch(`${HOST_API}/currency/${currencyID}`).then(res => res.json()),
+          taxID ? fetch(`${HOST_API}/tax/${taxID}`).then(res => res.json()) : Promise.resolve(undefined)
           
         ]);
 
@@ -197,7 +198,7 @@ export default function Payment({searchParams}) {
   React.useEffect(() => {
     const fetchStripeConfig = async () => {
       setLoadingStripe(true);
-      const response = await fetch("https://zl15dvruoa.execute-api.us-east-1.amazonaws.com/prod/payment-service/stripe/config");
+      const response = await fetch(`${HOST_API}/payment-service/stripe/config`);
 
       if (response.ok) {
         const data = await response.json();
@@ -219,7 +220,7 @@ export default function Payment({searchParams}) {
   const fetchCoupon = async (couponCode) => {
     try {
       setLoadingCoupon(true);
-      const response = await fetch(`https://zl15dvruoa.execute-api.us-east-1.amazonaws.com/prod/coupon/with-code/${couponCode}`);
+      const response = await fetch(`${HOST_API}/coupon/with-code/${couponCode}`);
       const data = await response.json();
       console.log("data", data);
       setLoadingCoupon(false);

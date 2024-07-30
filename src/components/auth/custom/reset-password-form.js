@@ -18,6 +18,7 @@ import { z as zod } from 'zod';
 import { paths } from '@/paths';
 import { authClient } from '@/lib/auth/custom/client';
 import { DynamicLogo } from '@/components/core/logo';
+import { toast } from '@/components/core/toaster';
 
 const schema = zod.object({ email: zod.string().min(1, { message: 'Email is required' }).email() });
 
@@ -37,13 +38,20 @@ export function ResetPasswordForm() {
     async (values) => {
       setIsPending(true);
 
-      const { error } = await authClient.resetPassword(values);
+      const { error,message } = await authClient.resetPassword(values);
 
       if (error) {
         setError('root', { type: 'server', message: error });
         setIsPending(false);
         return;
       }
+
+      console.log(message,"message");
+   if(message){
+    toast.success(message);
+   }
+   
+      
 
       setIsPending(false);
 

@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { useStripe, useElements, CardNumberElement, CardCvcElement, CardExpiryElement } from "@stripe/react-stripe-js";
+import {HOST_API} from "@/config";
 
 const chargeApi = async (token, paymentDetails) => {
   try {
-    const response = await fetch('https://zl15dvruoa.execute-api.us-east-1.amazonaws.com/prod/payment-service/stripe/charge', {
+    const response = await fetch(`${HOST_API}/payment-service/stripe/charge`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

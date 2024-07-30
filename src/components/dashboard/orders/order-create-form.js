@@ -42,46 +42,60 @@ const participantSchema = zod.object({
   participantLastName: zod.string().min(1, 'Last Name is required').max(255),
   participantEmail: zod.string().email('Invalid email').min(1, 'Email is required').max(255),
   participantPhone: zod.string().min(1, 'Phone Number is required').max(20),
+  // createdAt : zod.string().min(0,""),
 });
+
+
+
+export function OrdersCreateForm() {
+  const [currentOrder, setCurrentOrder] = React.useState({
+});
+  // const { allOrders } = useSelector((state) => state?.orders?.orders);
+  const { Id } = useParams();
+  const pathname = usePathname();
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const {allCourses}=useSelector((state)=>state?.courses?.courses);
+  const { allEvents } = useSelector((state) => state?.event?.events);
+  const { allOrders, loading: isLoading, totalData } = useSelector((state) => state?.orders?.orders);
+  const { allVendors } = useSelector((state) => state?.vendors?.vendors);
+  const { fetchOrder, createOrder, updateorder } = OrderActions;
+const isEdit =pathname.includes("edit");
+
+const startDateSchema = (isEdit) => {
+  if (isEdit) {
+    return zod.string();
+  } else {
+    return zod.string().refine((val) => dateIsValid(new Date(val)), {
+      message: 'Invalid date format',
+    }).refine((val) => dateIsInFuture(new Date(val)), {
+      message: 'Date must be in the future',
+    });
+  }
+};
 
 const schema = zod.object({
   orderSource: zod.string().min(1, 'Order Source is required'),
   orderType: zod.string().min(1, 'Order Type is required'),
 //   orderStatus: zod.string().min(1, 'Order Status is required'),
-  startDate: zod.string().refine((val) => dateIsValid(new Date(val)), {
-    message: 'Invalid date format',
-  }).refine((val) => dateIsInFuture(new Date(val)), {
-    message: 'Date must be in the future',
-  }),
+startDate: startDateSchema(isEdit),
   numberOfParticipants: zod.number().min(1, 'At least one participant is required'),
   participants: zod.array(participantSchema).min(1, 'At least one participant is required'),
   eventID: zod.string().min(1, 'Event ID is required'),
   courseID: zod.string().min(1, 'Course ID is required'),
-  // vendorID: zod.string().optional(),
+  vendorID: zod.string().min(0,""),
 });
-
-export function OrdersCreateForm() {
-  const [currentOrder, setCurrentOrder] = React.useState({
-});
-  const { allOrders } = useSelector((state) => state?.orders?.orders);
-  const { id } = useParams();
-  const pathname = usePathname();
-  const dispatch = useDispatch();
-  const router = useRouter();
-  const { fetchOrder, createOrder, updateOrder } = OrderActions;
-//   const isEdit = pathname.includes('edit');
-const isEdit =0;
 
   const defaultValues = React.useMemo(() => ({
-    orderSource: currentOrder?.orderSource || '',
-    orderType: currentOrder?.orderType || '',
-    // orderStatus: currentOrder?.orderStatus || '',
+    orderSource: 'INTERNAL',
+    orderType: currentOrder?.orderType || 'INDIVIDUAL',
     startDate: dateIsValid(currentOrder?.startDate) && dateIsInFuture(currentOrder?.startDate) ? new Date(currentOrder?.startDate).toISOString() : new Date().toISOString(),
     numberOfParticipants: currentOrder?.participants ? currentOrder?.participants.length : 1,
     participants: currentOrder?.participants || [{ participantID: uuidv4(), participantFirstName: '', participantLastName: '', participantEmail: '', participantPhone: '' }],
     eventID: currentOrder?.eventID || '',
     courseID: currentOrder?.courseID || '',
-    // vendorID: currentOrder?.vendorID || '',
+    vendorID: currentOrder?.vendorID || '',
+    
   }), [currentOrder]);
 
   const { control, handleSubmit, formState: { errors, isSubmitting }, setValue, watch, reset } = useForm({ defaultValues, resolver: zodResolver(schema) });
@@ -91,15 +105,15 @@ const isEdit =0;
     reset(defaultValues);
   }, [currentOrder, reset, defaultValues]);
 
-//   React.useEffect(() => {
-//     // if (allOrders?.length && id) {
-//     //   const data = allOrders.find((order) => String(order?.id) === String(id));
-//     //   setCurrentOrder(data);
-//     // }
-//   }, [allOrders, id]);
-// React.useEffect(() => {
-//     console.log("Zod Schema:", schema.safeParse(data));
-//   }, [schema]);
+  React.useEffect(() => {
+    if (allOrders?.length && Id) {
+      const data = allOrders.find((e) => String(e?.id) === String(Id));
+      setCurrentOrder(data);
+      console.log("data", data);
+    }
+  }, [allOrders, Id]);
+
+
 const formData = watch();
 React.useEffect(() => {
   console.log("Current Form Data:", formData);
@@ -107,19 +121,20 @@ React.useEffect(() => {
   const fieldMapping = {
     orderSource: 'orderSource',
     orderType: 'orderType',
-    orderStatus: 'orderStatus',
+
     startDate: 'startDate',
     numberOfParticipants: 'numberOfParticipants',
     participants: 'participants',
     eventID: 'eventID',
-    courseID: 'courseID'
+    courseID: 'courseID',
+    vendorID: 'vendorID',
   };
 
   const getChangedFields = (data) => {
     const changedFields = {};
     for (const key in data) {
       const mappedKey = fieldMapping[key];
-      if (data[key] !== currentOrder[mappedKey]) {
+      if (data[key] !== currentOrder[mappedKey] && key === 'participants') {
         changedFields[mappedKey] = data[key];
       }
     }
@@ -133,14 +148,17 @@ React.useEffect(() => {
       try {
         const changedData = getChangedFields(data);
         console.log("data", data);
+        if(data.vendorID===""){
+          delete data.vendorID;
+        }
 
         if (isEdit) {
-          await dispatch(updateOrder(changedData)).then((res) => {
-            if (res?.payload?.data?.data?.data) {
+          await dispatch(updateorder(changedData)).then((res) => {
+            if (res?.payload?.data?.data) {
               toast.success('Update success!');
               router.push(paths.dashboard.orders.list);
             } else {
-              toast.error(res?.payload?.data?.data?.error?.message || 'Internal Server Error');
+              toast.error(res?.payload?.data?.error?.message || 'Internal Server Error');
             }
           });
         } else {
@@ -157,10 +175,11 @@ React.useEffect(() => {
         logger.error(err);
       }
     },
-    [isEdit, currentOrder.id, dispatch, router, fetchOrder, updateOrder, createOrder]
+    [isEdit, currentOrder?.id, dispatch, router, fetchOrder, updateorder, createOrder]
   );
 
   const numberOfParticipants = watch('numberOfParticipants');
+  
 
   React.useEffect(() => {
     const currentParticipants = watch('participants') || [];
@@ -184,7 +203,7 @@ React.useEffect(() => {
               <Grid container spacing={3}>
                 {!isEdit && <>
                    
-                    <Grid md={4} xs={12} mb={3} mt={5}>
+                    <Grid md={6} xs={12} mb={3} mt={5}>
                     
                   <Controller
                     control={control}
@@ -193,46 +212,52 @@ React.useEffect(() => {
                       <FormControl error={Boolean(errors.orderSource)} fullWidth>
                         <InputLabel required>Order  Source</InputLabel>
                         <Select {...field}>
-                          <MenuItem value="Internal">Internal</MenuItem>
-                          <MenuItem value="External">External</MenuItem>
+                          <MenuItem value="INTERNAL">Internal</MenuItem>
+                          <MenuItem value="EXTERNAL">External</MenuItem>
                         </Select>
                         {errors.orderSource ? <FormHelperText>{errors.orderSource.message}</FormHelperText> : null}
                       </FormControl>
                     )}
                   />
                 </Grid>
-                <Grid md={4} xs={12} mb={3} mt={5}>
+               {
+                watch('orderSource') === 'INTERNAL' &&  <Grid md={6} xs={12} mb={3} mt={5}>
+                <Controller
+                  control={control}
+                  name="orderType"
+                  render={({ field }) => (
+                    <FormControl error={Boolean(errors.orderType)} fullWidth>
+                      <InputLabel required>Order Type</InputLabel>
+                      <Select {...field} disabled>
+                        <MenuItem value="INDIVIDUAL">Individual</MenuItem>
+                        <MenuItem value="CORPORATE">Corporate</MenuItem>
+                      </Select>
+                      {errors.orderType ? <FormHelperText>{errors.orderType.message}</FormHelperText> : null}
+                    </FormControl>
+                  )}
+                />
+              </Grid>
+               }
+               {watch('orderSource') === 'EXTERNAL' &&   <Grid md={6} xs={12} mb={3} mt={5}>
                   <Controller
                     control={control}
-                    name="orderType"
-                    render={({ field }) => (
-                      <FormControl error={Boolean(errors.orderType)} fullWidth>
-                        <InputLabel required>Order Type</InputLabel>
-                        <Select {...field}>
-                          <MenuItem value="Select">Select</MenuItem>
-                          <MenuItem value="Other">Other</MenuItem>
-                        </Select>
-                        {errors.orderType ? <FormHelperText>{errors.orderType.message}</FormHelperText> : null}
-                      </FormControl>
-                    )}
-                  />
-                </Grid>
-                <Grid md={4} xs={12} mb={3} mt={5}>
-                  <Controller
-                    control={control}
-                    name="orderType"
+                    name="vendorID"
                     render={({ field }) => (
                       <FormControl error={Boolean(errors.orderType)} fullWidth>
                         <InputLabel required>Vendor</InputLabel>
                         <Select {...field}>
-                          <MenuItem value="Select">Select</MenuItem>
-                          <MenuItem value="Other">Other</MenuItem>
+                          <MenuItem value="">Select Vendor</MenuItem>
+                          {allVendors.filter((e)=>e.status_==="ACTIVE").map((vendor) => (
+                            <MenuItem key={vendor.id} value={vendor.id}>{vendor.firstname + "" + vendor.lastname}</MenuItem>
+                          ))}
+                          
                         </Select>
                         {errors.orderType ? <FormHelperText>{errors.orderType.message}</FormHelperText> : null}
                       </FormControl>
                     )}
                   />
                 </Grid>
+                }
                 <Grid md={4} xs={12} mb={3}>
                   <Controller
                     control={control}
@@ -241,8 +266,10 @@ React.useEffect(() => {
                       <FormControl error={Boolean(errors.courseID)} fullWidth>
                         <InputLabel required>Course</InputLabel>
                         <Select {...field}>
-                          <MenuItem value="Course1">Course1</MenuItem>
-                          <MenuItem value="Course2">Course2</MenuItem>
+                          <MenuItem value="">Select Course</MenuItem>
+                          {allCourses.filter(e=>e.status_==="ACTIVE").map((course) => (
+                            <MenuItem key={course.id} value={course.id}>{course.courseName}</MenuItem>
+                          ))}
                         </Select>
                         {errors.courseID ? <FormHelperText>{errors.courseID.message}</FormHelperText> : null}
                       </FormControl>
@@ -278,9 +305,13 @@ React.useEffect(() => {
                     render={({ field }) => (
                       <FormControl error={Boolean(errors.eventID)} fullWidth>
                         <InputLabel required>Event</InputLabel>
-                        <Select {...field}>
-                          <MenuItem value="Event1">Event1</MenuItem>
-                          <MenuItem value="Event2">Event2</MenuItem>
+                        <Select {...field} disabled={(watch("courseID")==="")}>
+                          <MenuItem value="">Select Event</MenuItem>
+                          {
+                            allEvents.filter(e=>e.courseID===watch("courseID")).map((event) => (
+                              <MenuItem key={event.id} value={event.id}>{event.eventName}</MenuItem>
+                            ))
+                          }
                         </Select>
                         {errors.eventID ? <FormHelperText>{errors.eventID.message}</FormHelperText> : null}
                       </FormControl>
@@ -318,43 +349,134 @@ React.useEffect(() => {
               </Grid>
 
               {isEdit && fields.length > 0 && (
-                <React.Fragment>
-                  <Typography variant="h6" mt={4} mb={1}>Buyer Details : </Typography>
-                  <Grid container spacing={3}>
-                    <Grid md={3} xs={12}>
-                      <FormControl fullWidth>
-                        <InputLabel>First Name</InputLabel>
-                        <OutlinedInput value={fields[0].participantFirstName} readOnly />
-                      </FormControl>
-                    </Grid>
-                    <Grid md={3} xs={12}>
-                      <FormControl fullWidth>
-                        <InputLabel>Last Name</InputLabel>
-                        <OutlinedInput value={fields[0].participantLastName} readOnly />
-                      </FormControl>
-                    </Grid>
-                    <Grid md={3} xs={12}>
-                      <FormControl fullWidth>
-                        <InputLabel>Email</InputLabel>
-                        <OutlinedInput value={fields[0].participantEmail} readOnly />
-                      </FormControl>
-                    </Grid>
-                    <Grid md={3} xs={12}>
-                      <FormControl fullWidth>
-                        <InputLabel>Phone Number</InputLabel>
-                        <OutlinedInput value={fields[0].participantPhone} readOnly />
-                      </FormControl>
-                    </Grid>
-                  </Grid>
-                </React.Fragment>
-              )}
+  <React.Fragment>
+    <Typography variant="h6" mt={4} mb={1}>Buyer Details :</Typography>
+    <Grid container spacing={3}>
+      <Grid md={3} xs={12}>
+        <Controller
+          control={control}
+          name={`participants[0].participantFirstName`}
+          render={({ field }) => (
+            <FormControl error={Boolean(errors.participants?.[0]?.participantFirstName)} fullWidth>
+              <InputLabel required>First Name</InputLabel>
+              <OutlinedInput {...field} />
+              {errors.participants?.[0]?.participantFirstName ? <FormHelperText>{errors.participants?.[0]?.participantFirstName.message}</FormHelperText> : null}
+            </FormControl>
+          )}
+        />
+      </Grid>
+      <Grid md={3} xs={12}>
+        <Controller
+          control={control}
+          name={`participants[0].participantLastName`}
+          render={({ field }) => (
+            <FormControl error={Boolean(errors.participants?.[0]?.participantLastName)} fullWidth>
+              <InputLabel required>Last Name</InputLabel>
+              <OutlinedInput {...field} />
+              {errors.participants?.[0]?.participantLastName ? <FormHelperText>{errors.participants?.[0]?.participantLastName.message}</FormHelperText> : null}
+            </FormControl>
+          )}
+        />
+      </Grid>
+      <Grid md={3} xs={12}>
+        <Controller
+          control={control}
+          name={`participants[0].participantEmail`}
+          render={({ field }) => (
+            <FormControl error={Boolean(errors.participants?.[0]?.participantEmail)} fullWidth>
+              <InputLabel required>Email</InputLabel>
+              <OutlinedInput {...field} type="email" />
+              {errors.participants?.[0]?.participantEmail ? <FormHelperText>{errors.participants?.[0]?.participantEmail.message}</FormHelperText> : null}
+            </FormControl>
+          )}
+        />
+      </Grid>
+      <Grid md={3} xs={12}>
+        <Controller
+          control={control}
+          name={`participants[0].participantPhone`}
+          render={({ field }) => (
+            <FormControl error={Boolean(errors.participants?.[0]?.participantPhone)} fullWidth>
+              <InputLabel required>Phone Number</InputLabel>
+              <OutlinedInput {...field} />
+              {errors.participants?.[0]?.participantPhone ? <FormHelperText>{errors.participants?.[0]?.participantPhone.message}</FormHelperText> : null}
+            </FormControl>
+          )}
+        />
+      </Grid>
+    </Grid>
+  </React.Fragment>
+)}
 
-              <Typography variant="h6" mt={4} mb={1}>Participants :</Typography>
+
+              {isEdit && currentOrder?.participants?.length > 1 && <>
+                <Typography variant="h6" mt={4} mb={1}>Participants :</Typography>
+              </>}
               <Grid container spacing={3}>
-                {(isEdit ? fields.slice(1) : fields).map((field, index) => (
+                {isEdit && (fields.slice(1)).map((field, index) => (
                   <React.Fragment key={field.participantID}>
                     <Grid xs={12}>
-                      <Typography variant="subtitle1">Participant {isEdit ? index + 2 : index+1}</Typography>
+                      <Typography variant="subtitle1">Participant { index + 2}</Typography>
+                    </Grid>
+                    <Grid md={3} xs={12}>
+                      <Controller
+                        control={control}
+                        name={`participants.${index+1}.participantFirstName`}
+                        render={({ field }) => (
+                          <FormControl error={Boolean(errors.participants?.[index+1 ]?.participantFirstName)} fullWidth>
+                            <InputLabel required>First Name</InputLabel>
+                            <OutlinedInput {...field} />
+                            {errors.participants?.[index+1]?.participantFirstName ? <FormHelperText>{errors.participants?.[index +1]?.participantFirstName.message}</FormHelperText> : null}
+                          </FormControl>
+                        )}
+                      />
+                    </Grid>
+                    <Grid md={3} xs={12}>
+                      <Controller
+                        control={control}
+                        name={`participants.${index+1 }.participantLastName`}
+                        render={({ field }) => (
+                          <FormControl error={Boolean(errors.participants?.[index +1]?.participantLastName)} fullWidth>
+                            <InputLabel required>Last Name</InputLabel>
+                            <OutlinedInput {...field} />
+                            {errors.participants?.[index+1 ]?.participantLastName ? <FormHelperText>{errors.participants?.[index+1 ]?.participantLastName.message}</FormHelperText> : null}
+                          </FormControl>
+                        )}
+                      />
+                    </Grid>
+                    <Grid md={3} xs={12}>
+                      <Controller
+                        control={control}
+                        name={`participants.${index+1}.participantEmail`}
+                        render={({ field }) => (
+                          <FormControl error={Boolean(errors.participants?.[index+1]?.participantEmail)} fullWidth>
+                            <InputLabel required>Email</InputLabel>
+                            <OutlinedInput {...field} type='email' />
+                            {errors.participants?.[index+1 ]?.participantEmail ? <FormHelperText>{errors.participants?.[index +1]?.participantEmail.message}</FormHelperText> : null}
+                          </FormControl>
+                        )}
+                      />
+                    </Grid>
+                    <Grid md={3} xs={12}>
+                      <Controller
+                        control={control}
+                        name={`participants.${index+1 }.participantPhone`}
+                        render={({ field }) => (
+                          <FormControl error={Boolean(errors.participants?.[index+1 ]?.participantPhone)} fullWidth>
+                            <InputLabel required>Phone Number</InputLabel>
+                            <OutlinedInput {...field} />
+                            {errors.participants?.[index +1]?.participantPhone ? <FormHelperText>{errors.participants?.[index+1]?.participantPhone.message}</FormHelperText> : null}
+                          </FormControl>
+                        )}
+                      />
+                    </Grid>
+                  </React.Fragment>
+                ))}
+
+{!isEdit&&(fields).map((field, index) => (
+                  <React.Fragment key={field.participantID}>
+                    <Grid xs={12}>
+                      <Typography variant="subtitle1">Participant {index+1}</Typography>
                     </Grid>
                     <Grid md={3} xs={12}>
                       <Controller

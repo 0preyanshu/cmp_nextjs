@@ -54,7 +54,7 @@ function createExtraActions() {
 function createOrder() {
   return createAsyncThunk(`${name}/createOrder`, async (obj) => {
     try {
-      const response = await axios.post(HOST_API.concat(`/order/create/admin`), obj, {
+      const response = await axios.post(HOST_API.concat(`/order`), obj, {
         headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
     });
       return response;
@@ -194,13 +194,20 @@ function createExtraReducers() {
         state.orders = { loading: true, allOrders: state.orders.allOrders || [], totalData: state.orders.totalData };
       },
       [fulfilled]: (state, action) => {
-        console.log(action.payload);
+        console.log(action?.payload?.data?.data,"done");
+        state.orders.loading = false;
+        if(action?.payload?.data?.data?.order){
+
+           
         state.orders = {
-          allOrders: [...state.orders.allOrders, action?.payload?.data?.orderDTO],
-          loading: false,
+          allOrders: [...state.orders.allOrders, action?.payload?.data?.data?.order ] || [],
+         
           totalData: state.orders.totalData + 1,
           toast: { message: 'orders Added Successfully', variant: 'success' },
         };
+        }
+
+       
       },
       [rejected]: (state, action) => {
         state.orders = {
@@ -330,14 +337,19 @@ function createExtraReducers() {
         state.orders = { loading: true, allOrders: state.orders.allOrders || [] };
       },
       [fulfilled]: (state, action) => {
-        state.orders = {
-          allOrders: state?.orders?.allOrders?.map((item) =>
-            item.id === action.payload?.data?.orderDTO?.id ? { ...item, ...action.payload?.data?.orderDTO } : item
-          ),
-          loading: false,
-          totalData: state.orders.totalData,
-          toast: { message: 'orders Updated Successfully', variant: 'success' },
-        };
+        state.orders.loading=false
+        if(action?.payload?.data?.data?.data?.id){
+          state.orders = {
+            allOrders: state?.orders?.allOrders?.map((item) =>
+              item.id === action.payload?.data?.data?.data?.id ? { ...item, ...action.payload?.data?.data?.data } : item
+            ),
+            loading: false,
+            totalData: state.orders.totalData,
+            toast: { message: 'orders Updated Successfully', variant: 'success' },
+          };
+
+        }
+        
       },
       [rejected]: (state, action) => {
         state.orders = {

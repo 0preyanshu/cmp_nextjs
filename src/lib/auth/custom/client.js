@@ -21,16 +21,30 @@ const user = {
 };
 
 class AuthClient {
-  async signUp(_) {
-    // Make API request
+  async updatePassword(obj) {
+    try {
+      // Make the API request to change the password
+      const response = await axios.post(`${HOST_API}/auth/change-password`, obj);
+  
+     console.log(response.data,"response");  
 
-    // We do not handle the API, so we'll just generate a token and store it in localStorage.
-    const token = generateToken();
-    localStorage.setItem('custom-auth-token', token);
+     if(!response.data?.data){
+      return { error: response?.data?.error[0] ||response?.data?.error?.message || 'Reset password failed' };
 
-    return {};
+     }
+
+  
+      // Store the token in localStorage
+      // localStorage.setItem('custom-auth-token', token);
+  
+      // Return the response or an empty object if not needed
+      return response.data.data;
+    } catch (error) {
+      // Handle errors (log, rethrow, or return an error object)
+      console.error('Error changing password:', error);
+      return { error: error.response ? error.response.data.message : error.message };
+    }
   }
-
   async signInWithOAuth(_) {
     return { error: 'Social authentication not implemented' };
   }
@@ -53,13 +67,21 @@ class AuthClient {
     }
   }
 
-  async resetPassword(_) {
-    return { error: 'Password reset not implemented' };
+  async resetPassword(email) {
+    try {
+      const response = await axios.post(`${HOST_API}/auth/send-password-email`, 
+        email
+      );
+  if(!response?.data?.data?.message){
+    return { error: response?.data?.error[0] ||response?.data?.error?.message || 'Reset password failed' };
+  }
+      return { message: response?.data?.data?.message };
+    } catch (error) {
+      return { error: response?.data?.error[0] ||response?.data?.error?.message || 'Reset password failed' };
+    }
   }
 
-  async updatePassword(_) {
-    return { error: 'Update reset not implemented' };
-  }
+ 
 
   async getUser() {
 

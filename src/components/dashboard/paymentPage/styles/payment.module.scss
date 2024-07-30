@@ -185,5 +185,24 @@
         }
     }
 
+    .paypalContainer {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 20px; /* Adjust the margin as needed */
+
+        @media screen and (max-width: 900px) {
+            justify-content: center;
+            
+        }
+
+      }
+      
+      .paypalButton {
+        border-radius: 30px; /* Adjust the border-radius as needed for rounded corners */
+        max-width: 200px; /* Adjust the max-width as needed */
+        width: 100%;
+      }
+
 
 }
+

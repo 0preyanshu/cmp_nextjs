@@ -22,6 +22,9 @@ import Tab from '@mui/material/Tab';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TableSkeleton from '@/components/core/Skeletion';
+import { Button } from '@mui/material';
+import { Plus as PlusIcon } from '@phosphor-icons/react';
+
 
 export default function Page({ searchParams }) {
   const {  searchTerm, page = 1, limit = 10,startDate,vendorID,courseID,endDate } = searchParams;
@@ -44,6 +47,7 @@ export default function Page({ searchParams }) {
   const {fetchCourses} = CoursesActions;
   const {fetchOrder} = OrderActions;
   const { fetchVendors } = VendorActions;
+  const {fetchEvents} = EventsActions;
 
 
 
@@ -70,10 +74,13 @@ export default function Page({ searchParams }) {
   
       };
       if(allCourses.length === 0 ){
-        dispatch(fetchCourses({ limit: "", page: "", search: "" }));
+        dispatch(fetchCourses({ limit: "", page: "", name: "" }));
       }
       if(allVendors.length === 0){
-        dispatch(fetchVendors({ limit: "", page: "", search: "" }));
+        dispatch(fetchVendors({ limit: "", page: "", name: "" }));
+      }
+      if(allEvents.length === 0){
+        dispatch(fetchEvents({ limit: "", page: "", name: "" }));
       }
      
         dispatch(fetchOrder(data));
@@ -154,6 +161,13 @@ export default function Page({ searchParams }) {
         <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} sx={{ alignItems: 'flex-start' }}>
           <Box sx={{ flex: '1 1 auto' }}>
             <Typography variant="h4">Orders</Typography>
+          </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Button startIcon={<PlusIcon />} variant="contained" onClick={() => {
+              router.push(paths.dashboard.orders.create);
+            }}>
+              Add
+            </Button>
           </Box>
         </Stack>
 

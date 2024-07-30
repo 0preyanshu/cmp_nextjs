@@ -10,6 +10,7 @@ export const paths = {
       signIn: '/auth/custom/sign-in',
       signUp: '/auth/custom/sign-up',
       resetPassword: '/auth/custom/reset-password',
+      sendResetPassword: '/auth/custom/send-reset-password',
     },
     auth0: {
       callback: '/auth/auth0/callback',
@@ -228,7 +229,7 @@ export const paths = {
     list: '/dashboard/orders',
     create: '/dashboard/orders/create',
     details : (orderId) => `/dashboard/orders/${orderId}`,
-    edit : (orderId) => `/dashboard/orders/edit/${orderId}`,
+    edit : (orderId) => `/dashboard/orders/${orderId}/edit`,
     transfer : (orderId) => `/dashboard/orders/${orderId}/transfer`,
     cancel : (orderId) => `/dashboard/orders/${orderId}/cancel`,
     invoice : (orderId) => `/dashboard/orders/${orderId}/invoice`,
