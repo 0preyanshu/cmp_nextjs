@@ -37,6 +37,8 @@ export function CitiesTable({ rows }) {
 
   const { deleteCities, fetchCities, createCity, updateCity } = cityActions;
 
+ console.log(rows, "rows"); 
+
   const columns = [
     {
       formatter: (row) => (

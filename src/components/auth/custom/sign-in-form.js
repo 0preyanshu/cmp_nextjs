@@ -170,7 +170,7 @@ export function SignInForm() {
             </Stack>
           </form>
           <div>
-            <Link component={RouterLink} href={paths.auth.custom.resetPassword} variant="subtitle2">
+            <Link component={RouterLink} href={paths.auth.custom.sendResetPassword} variant="subtitle2">
               Forgot password?
             </Link>
           </div>
