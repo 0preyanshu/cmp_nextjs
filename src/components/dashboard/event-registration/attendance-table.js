@@ -50,13 +50,19 @@ export const AttendanceTable = React.forwardRef(({ eventData, attendance, setPar
   const { control, handleSubmit, setValue, watch, formState: { isSubmitting } } = useForm({
     resolver: zodResolver(attendanceSchema),
     defaultValues: {
-      attendanceData: attendance && attendance.length > 0 ? attendance : eventData.participants.map(participant => ({
-        eventID: eventData.id || "",
-        participantID: participant.participantID,
-        attendance: []
-      }))
+      attendanceData: eventData.participants.map(participant => {
+        const existingAttendance = attendance.find(att => att.participantID === participant.participantID);
+        return existingAttendance || {
+          eventID: eventData.id || "",
+          participantID: participant.participantID,
+          attendance: []
+        }})
     }
   });
+
+  React.useEffect(() => {
+    console.log('bbbbb', watch());
+  }, [watch()]);
 
   const downloadCSV = useCallback(() => {
     attendance = watch('attendanceData') || [];
@@ -330,7 +336,7 @@ export const AttendanceTable = React.forwardRef(({ eventData, attendance, setPar
                           return(
                           
                           <Checkbox
-                            checked={watch(`attendanceData[${(currentPage-1) * currentLimit + rowIndex}].attendance`).includes((dayIndex + 1).toString())}
+                            checked={watch(`attendanceData[${(currentPage-1) * currentLimit + rowIndex}].attendance`)?.includes((dayIndex + 1).toString())||false}
                             onChange={(e) => {
                               handleIndividualCheckboxChange(e.target.checked, dayIndex, rowIndex);
                             }}

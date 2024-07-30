@@ -46,7 +46,7 @@ export function SmtpForm() {
     () => ({
       HOST: smtpStoreData?.HOST || '',
       USERNAME: smtpStoreData?.USERNAME || '',
-      PASSWORD: smtpStoreData?.PASSWORD || '',
+      Password: smtpStoreData?.PASSWORD || '',
       PORT: smtpStoreData?.PORT || '',
       Secure: smtpStoreData?.Secure || '',
       TestingEmail: smtpStoreData?.TestingEmail || '',
