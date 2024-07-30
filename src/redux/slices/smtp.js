@@ -34,7 +34,7 @@ const slice = createSlice({
 function getSmtpDetails() {
   return createAsyncThunk(`${name}/getSmtpData`, async () => {
     try {
-      const response = await axios.get(HOST_API.concat(`/credentials/01HZZ3TZQQP5Q337WHXY4WHHAT`), {
+      const response = await axios.get(HOST_API.concat(`/credentials/single?type=MAIL&title=SMTP`), {
         headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
       });
       console.log(response);
@@ -51,7 +51,7 @@ function updateSmtpDetails() {
     console.log(updatedSmtpData,"updatedSmtpData");
 
     try {
-      const response = await axios.put(HOST_API.concat('/credentials/01HZZ3TZQQP5Q337WHXY4WHHAT'),updatedSmtpData,{
+      const response = await axios.put(HOST_API.concat('/credentials/single?type=MAIL&title=SMTP'),updatedSmtpData,{
         headers: { Authorization: `Bearer ${localStorage.getItem('custom-auth-token')}` },
       });
       return response;

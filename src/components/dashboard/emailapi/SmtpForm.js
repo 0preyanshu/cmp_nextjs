@@ -15,12 +15,12 @@ import { toast } from '@/components/core/toaster';
 
 // Define the validation schema using Zod
 const schema = z.object({
-  HostAddress: z.string().min(1, 'Host Address is required').max(255, 'Host Address must be at most 255 characters'),
-  UserName: z.string().min(1, 'User Name is required').max(255, 'User Name must be at most 255 characters'),
-  Password: z.string().min(1, 'Password is required').max(255, 'Password must be at most 255 characters'),
-  Port: z.preprocess(
+  HOST: z.string().min(1, 'Host Address is required').max(255, 'Host Address must be at most 255 characters'),
+  USERNAME: z.string().min(1, 'User Name is required').max(255, 'User Name must be at most 255 characters'),
+  PASSWORD: z.string().min(1, 'PASSWORD is required').max(255, 'PASSWORD must be at most 255 characters'),
+  PORT: z.preprocess(
     (input) => Number(input),
-    z.number().min(1, 'Port must be a positive number').nonnegative()
+    z.number().min(1, 'PORT must be a positive number').nonnegative()
   ),
   Secure: z.string().min(1, 'Secure is required').max(255, 'Secure must be at most 255 characters'),
   TestingEmail: z.string().optional(),
@@ -44,10 +44,10 @@ export function SmtpForm() {
 
   const defaultValues = React.useMemo(
     () => ({
-      HostAddress: smtpStoreData?.HostAddress || '',
-      UserName: smtpStoreData?.UserName || '',
-      Password: smtpStoreData?.Password || '',
-      Port: smtpStoreData?.Port || '',
+      HOST: smtpStoreData?.HOST || '',
+      USERNAME: smtpStoreData?.USERNAME || '',
+      PASSWORD: smtpStoreData?.PASSWORD || '',
+      PORT: smtpStoreData?.PORT || '',
       Secure: smtpStoreData?.Secure || '',
       TestingEmail: smtpStoreData?.TestingEmail || '',
       enabled: smtpStoreData?.enabled || false,
@@ -104,52 +104,52 @@ export function SmtpForm() {
             >
               <Controller
                 control={control}
-                name="HostAddress"
+                name="HOST"
                 render={({ field }) => (
-                  <FormControl error={Boolean(errors.HostAddress)} fullWidth>
+                  <FormControl error={Boolean(errors.HOST)} fullWidth>
                     <InputLabel required>Host Address</InputLabel>
                     <OutlinedInput {...field} />
-                    {errors.HostAddress && (
-                      <FormHelperText>{errors.HostAddress.message}</FormHelperText>
+                    {errors.HOST && (
+                      <FormHelperText>{errors.HOST.message}</FormHelperText>
                     )}
                   </FormControl>
                 )}
               />
               <Controller
                 control={control}
-                name="UserName"
+                name="USERNAME"
                 render={({ field }) => (
-                  <FormControl error={Boolean(errors.UserName)} fullWidth>
+                  <FormControl error={Boolean(errors.USERNAME)} fullWidth>
                     <InputLabel required>User Name</InputLabel>
                     <OutlinedInput {...field} />
-                    {errors.UserName && (
-                      <FormHelperText>{errors.UserName.message}</FormHelperText>
+                    {errors.USERNAME && (
+                      <FormHelperText>{errors.USERNAME.message}</FormHelperText>
                     )}
                   </FormControl>
                 )}
               />
               <Controller
                 control={control}
-                name="Password"
+                name="PASSWORD"
                 render={({ field }) => (
-                  <FormControl error={Boolean(errors.Password)} fullWidth>
-                    <InputLabel required>Password</InputLabel>
+                  <FormControl error={Boolean(errors.PASSWORD)} fullWidth>
+                    <InputLabel required>PASSWORD</InputLabel>
                     <OutlinedInput {...field} type="password" />
-                    {errors.Password && (
-                      <FormHelperText>{errors.Password.message}</FormHelperText>
+                    {errors.PASSWORD && (
+                      <FormHelperText>{errors.PASSWORD.message}</FormHelperText>
                     )}
                   </FormControl>
                 )}
               />
               <Controller
                 control={control}
-                name="Port"
+                name="PORT"
                 render={({ field }) => (
-                  <FormControl error={Boolean(errors.Port)} fullWidth>
-                    <InputLabel required>Port</InputLabel>
+                  <FormControl error={Boolean(errors.PORT)} fullWidth>
+                    <InputLabel required>PORT</InputLabel>
                     <OutlinedInput {...field} type="number" />
-                    {errors.Port && (
-                      <FormHelperText>{errors.Port.message}</FormHelperText>
+                    {errors.PORT && (
+                      <FormHelperText>{errors.PORT.message}</FormHelperText>
                     )}
                   </FormControl>
                 )}

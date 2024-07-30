@@ -15,9 +15,9 @@ import { toast } from '@/components/core/toaster';
 
 // Define the validation schema using Zod
 const schema = z.object({
-  ApiKey: z.string().min(1, 'API Key is required').max(255, 'API Key must be at most 255 characters'),
+  SENDGRID_API_KEY: z.string().min(1, 'API Key is required').max(255, 'API Key must be at most 255 characters'),
   TestingEmail: z.string().optional(),
-  enabled: z.boolean()
+  status_: z.boolean()
 });
 
 export function SendGrid() {
@@ -38,9 +38,9 @@ export function SendGrid() {
 
   const defaultValues = React.useMemo(
     () => ({
-      ApiKey: sendgridStoreData?.ApiKey || '',
-      TestingEmail: sendgridStoreData?.TestingEmail || '',
-      enabled: sendgridStoreData?.enabled || false,
+      SENDGRID_API_KEY: sendgridStoreData?.SENDGRID_API_KEY || '',
+      TestingEmail:  '',
+      status_: (sendgridStoreData?.status_ ==="ACTIVE")|| false,
     }),
     [sendgridStoreData]
   );
@@ -94,13 +94,13 @@ export function SendGrid() {
             >
               <Controller
                 control={control}
-                name="ApiKey"
+                name="SENDGRID_API_KEY"
                 render={({ field }) => (
-                  <FormControl error={Boolean(errors.ApiKey)} fullWidth>
+                  <FormControl error={Boolean(errors.SENDGRID_API_KEY)} fullWidth>
                     <InputLabel required>API Key </InputLabel>
                     <OutlinedInput {...field} />
-                    {errors.ApiKey && (
-                      <FormHelperText>{errors.ApiKey.message}</FormHelperText>
+                    {errors.SENDGRID_API_KEY && (
+                      <FormHelperText>{errors.SENDGRID_API_KEY.message}</FormHelperText>
                     )}
                   </FormControl>
                 )}
@@ -111,7 +111,7 @@ export function SendGrid() {
                 labelPlacement="start"
                 control={
                   <Controller
-                    name="enabled"
+                    name="status_"
                     control={control}
                     render={({ field }) => (
                       <Switch
